@@ -112,8 +112,9 @@ export interface TransferValuation {
 	readonly effectIds: readonly string[];
 	readonly date: string;
 	readonly internal: boolean;
+	/** Nonnegative funding value after same-day cent allocation. */
 	readonly value: number;
-	/** Cent allocation against the independently rounded transfer amount. */
+	/** Value minus its independently rounded magnitude, including for outflows. */
 	readonly roundingAdjustment: number;
 	readonly quoteCurrency: string;
 	readonly price: number;
