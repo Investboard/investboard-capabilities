@@ -3,7 +3,7 @@ import type {
 	AllocationPosition,
 	AllocationRow,
 } from "../types.js";
-import { toCents } from "./money.js";
+import type { CalculationContext } from "../configuration.js";
 
 export function largestAllocationFirst(
 	a: { assetClass: string; amount: number },
@@ -17,12 +17,16 @@ export function largestAllocationFirst(
 
 export function classValues(
 	positions: readonly AllocationPosition[],
+	ctx: CalculationContext,
 ): Map<string, number> {
 	const values = new Map<string, number>();
 	for (const position of positions)
 		values.set(
 			position.assetClass,
-			(values.get(position.assetClass) ?? 0) + toCents(position.value),
+			ctx.money.sum([
+				values.get(position.assetClass) ?? 0,
+				ctx.money.units(position.value),
+			]),
 		);
 	return values;
 }
@@ -30,9 +34,10 @@ export function classValues(
 export function allocationRows(
 	positions: readonly AllocationPosition[],
 	policy: AllocationPolicy,
+	ctx: CalculationContext,
 ): AllocationRow[] {
-	const values = classValues(positions);
-	const total = [...values.values()].reduce((sum, value) => sum + value, 0);
+	const values = classValues(positions, ctx);
+	const total = ctx.money.sum(values.values());
 	return [...new Set([...values.keys(), ...Object.keys(policy)])]
 		.sort()
 		.map((assetClass) => {
@@ -43,7 +48,7 @@ export function allocationRows(
 			const current = total > 0 ? value / total : null;
 			return {
 				assetClass,
-				value: value / 100,
+				value: ctx.money.amount(value),
 				current,
 				target: band?.target ?? 0,
 				minimum: band?.min ?? 0,

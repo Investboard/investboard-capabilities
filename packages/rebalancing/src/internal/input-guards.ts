@@ -1,4 +1,4 @@
-import { MAX_SUPPORTED_WEALTH } from "./money.js";
+import type { RebalancingConfiguration } from "../types.js";
 
 export class RebalanceInputError extends Error {
 	constructor(message: string) {
@@ -32,41 +32,40 @@ export function requireShape(
 		),
 		`${label} contains an unsupported field`,
 	);
+	for (const d of Object.values(Object.getOwnPropertyDescriptors(value)))
+		requireInput(
+			Object.hasOwn(d, "value") && d.enumerable,
+			`${label} must contain enumerable data properties`,
+		);
 }
 export function requireText(
 	value: unknown,
 	label: string,
+	maximumLength: number,
 ): asserts value is string {
 	requireInput(
-		typeof value === "string" && value.trim().length > 0 && value.length <= 128,
-		`${label} must be a nonempty string of at most 128 characters`,
-	);
-}
-export function requireMoney(
-	value: unknown,
-	label: string,
-): asserts value is number {
-	requireInput(
-		typeof value === "number" &&
-			Number.isFinite(value) &&
-			value >= 0 &&
-			value <= MAX_SUPPORTED_WEALTH &&
-			Number(value.toFixed(2)) === value,
-		`${label} must be nonnegative, cent-rounded money within the supported limit`,
+		typeof value === "string" &&
+			value.trim().length > 0 &&
+			value.length <= maximumLength,
+		`${label} must be a nonempty string within the configured text limit`,
 	);
 }
 /** Reject lossy snapshots and accessors before a calculation reads their values. */
 export function requireJson(
 	value: unknown,
+	limits: RebalancingConfiguration["limits"],
 	ancestors = new Set<object>(),
 	depth = 0,
 	budget = { nodes: 0 },
 ): void {
 	requireInput(
-		++budget.nodes <= 10000,
+		++budget.nodes <= limits.jsonNodes,
 		"Snapshot exceeds the supported data size",
 	);
-	requireInput(depth <= 16, "Snapshot nesting exceeds the supported depth");
+	requireInput(
+		depth <= limits.jsonDepth,
+		"Snapshot nesting exceeds the supported depth",
+	);
 	if (value === null || typeof value === "string" || typeof value === "boolean")
 		return;
 	if (typeof value === "number") {
@@ -80,11 +79,11 @@ export function requireJson(
 	const array = Array.isArray(value);
 	if (array)
 		requireInput(
-			value.length <= 2000,
+			value.length <= limits.collectionEntries,
 			"Snapshot arrays exceed the supported size",
 		);
 	requireInput(
-		Object.keys(value).length <= 2000,
+		Object.keys(value).length <= limits.collectionEntries,
 		"Snapshot objects exceed the supported size",
 	);
 	const prototype = Object.getPrototypeOf(value);
@@ -118,6 +117,6 @@ export function requireJson(
 		);
 	ancestors.add(value);
 	for (const child of Object.values(value))
-		requireJson(child, ancestors, depth + 1, budget);
+		requireJson(child, limits, ancestors, depth + 1, budget);
 	ancestors.delete(value);
 }

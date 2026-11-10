@@ -1,4 +1,77 @@
-import type { AllocationPolicy, RebalanceRequest } from "../src/index.js";
+import {
+	compareRebalance as compare,
+	allocateContribution as allocate,
+	projectContributions as project,
+} from "../src/index.js";
+import type {
+	AllocationPolicy,
+	AllocationRequest,
+	ProjectionRequest,
+	RebalanceRequest as PublicRequest,
+	RebalancingConfiguration,
+	SalePlan,
+} from "../src/index.js";
+import { requireInput, requireJson } from "../src/internal/input-guards.js";
+
+// Explicit historical test assumptions preserve 0.2 regression parity. This is
+// neither an exported library preset nor an app configuration dependency.
+export const configuration: RebalancingConfiguration = {
+	money: { decimalPlaces: 2, maximumAmount: 1_000_000_000 },
+	limits: {
+		holdings: 200,
+		assetClasses: 32,
+		accounts: 100,
+		orders: 100,
+		projectionMonths: 600,
+		scenarios: 100,
+		jsonNodes: 10_000,
+		jsonDepth: 16,
+		collectionEntries: 2_000,
+		textLength: 128,
+	},
+	cashAssetClass: "cash",
+	allowedCurrencies: ["EUR", "USD"],
+	annualReturnRange: { minimum: -1, maximum: 10 },
+};
+export type RebalanceRequest = Omit<
+	PublicRequest,
+	"configuration" | "scenarios"
+> & {
+	contribution: number;
+	cashLimit: number;
+	salePlan?: SalePlan;
+};
+export const MAX_SUPPORTED_WEALTH = configuration.money.maximumAmount;
+export function compareRebalance(input: RebalanceRequest) {
+	requireJson(input, configuration.limits);
+	const { contribution, cashLimit, salePlan, ...rest } = input;
+	requireInput(
+		cashLimit <= contribution,
+		"cashLimit cannot exceed contribution",
+	);
+	return compare({
+		...rest,
+		configuration,
+		scenarios: [
+			{ kind: "keep", mode: "keep" },
+			{ kind: "fresh_cash", mode: "contribution", externalCash: contribution },
+			{ kind: "partial_cash", mode: "contribution", externalCash: cashLimit },
+			salePlan
+				? { kind: "sales", mode: "plan", externalCash: 0, plan: salePlan }
+				: {
+						kind: "sales",
+						mode: "unavailable",
+						reasonCodes: ["sale_plan_required"],
+					},
+		],
+	});
+}
+export const allocateContribution = (
+	input: Omit<AllocationRequest, "configuration">,
+) => allocate({ configuration, ...input });
+export const projectContributions = (
+	input: Omit<ProjectionRequest, "configuration">,
+) => project({ configuration, ...input });
 
 export const policy: AllocationPolicy = {
 	equities: { min: 0.55, target: 0.6, max: 0.65 },

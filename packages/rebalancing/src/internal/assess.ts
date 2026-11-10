@@ -8,7 +8,7 @@ import type {
 } from "../types.js";
 import { allocationRows, classValues } from "./allocation.js";
 import { fundingEvidence } from "./funding.js";
-import { toCents } from "./money.js";
+import type { CalculationContext } from "../configuration.js";
 
 const UNAVAILABLE = new Set<ReasonCode>([
 	"sale_constraints_not_met",
@@ -23,10 +23,15 @@ function admissionReasons(
 	request: RebalanceRequest,
 	sales: Sale[],
 	purchases: Purchase[],
+	ctx: CalculationContext,
 ): ReasonCode[] {
+	const { money, configuration } = ctx;
 	const reasons = new Set<ReasonCode>();
 	const byId = new Map(request.holdings.map((h) => [h.holdingId, h]));
-	if (sales.length + purchases.length > (request.maxTrades ?? 100))
+	if (
+		sales.length + purchases.length >
+		(request.maxTrades ?? configuration.limits.orders)
+	)
 		reasons.add("trade_limit_exceeded");
 	for (const operation of [
 		...sales.map((s) => ({
@@ -36,17 +41,20 @@ function admissionReasons(
 		})),
 		...purchases.map((p) => ({ ...p, type: "purchase" })),
 	]) {
-		if (toCents(operation.amount) < toCents(request.minTradeSize ?? 0.01))
+		if (
+			money.units(operation.amount) <
+			money.units(request.minTradeSize ?? money.quantum)
+		)
 			reasons.add("minimum_trade_not_met");
 		const rules = request.accounts?.find(
 			(a) => a.depotId === operation.depotId,
 		);
 		if (
 			rules &&
-			(toCents(operation.amount) < toCents(rules.minimum) ||
+			(money.units(operation.amount) < money.units(rules.minimum) ||
 				(rules.maximum > 0 &&
-					toCents(operation.amount) > toCents(rules.maximum)) ||
-				toCents(operation.amount) % toCents(rules.increment) !== 0)
+					money.units(operation.amount) > money.units(rules.maximum)) ||
+				money.units(operation.amount) % money.units(rules.increment) !== 0)
 		)
 			reasons.add(
 				operation.type === "sale"
@@ -63,58 +71,78 @@ export function assess(
 	externalCash: number,
 	sales: Sale[],
 	purchases: Purchase[],
+	ctx: CalculationContext,
 ): RebalanceAlternative {
-	const evidence = fundingEvidence(request, externalCash, sales, purchases);
+	const { money, configuration } = ctx;
+	const evidence = fundingEvidence(
+		request,
+		externalCash,
+		sales,
+		purchases,
+		ctx,
+	);
 	const reasons = [
-		...admissionReasons(request, sales, purchases),
+		...admissionReasons(request, sales, purchases, ctx),
 		...evidence.reasons,
 	];
 	const feeCost = evidence.funding.some((f) => f.fees === null)
 		? null
-		: evidence.knownFeeCents / 100;
+		: money.amount(evidence.knownFeeUnits);
 	const taxCost = evidence.funding.some((f) => f.taxCost === null)
 		? null
-		: evidence.knownTaxCents / 100;
-	const gross = sales.reduce((sum, s) => sum + toCents(s.amount), 0);
-	const invested = purchases.reduce((sum, p) => sum + toCents(p.amount), 0);
+		: money.amount(evidence.knownTaxUnits);
+	const gross = money.sum(sales.map((s) => money.units(s.amount)));
+	const invested = money.sum(purchases.map((p) => money.units(p.amount)));
 	// All unknown costs are nonnegative. This upper bound can prove a deficit
 	// without presenting a partial cost sum as the actual fee or tax total.
-	const maximumRetainedCents =
-		toCents(externalCash) +
-		gross -
-		invested -
-		evidence.knownFeeCents -
-		evidence.knownTaxCents;
+	const maximumRetainedUnits = money.sum([
+		money.units(externalCash),
+		gross,
+		-invested,
+		-evidence.knownFeeUnits,
+		-evidence.knownTaxUnits,
+	]);
 	const retained =
-		feeCost === null || taxCost === null ? null : maximumRetainedCents;
-	if (maximumRetainedCents < 0) reasons.push("insufficient_funding");
+		feeCost === null || taxCost === null ? null : maximumRetainedUnits;
+	if (maximumRetainedUnits < 0) reasons.push("insufficient_funding");
 	const values = classValues(
 		request.holdings.map((h) => ({
 			assetClass: h.assetClass,
 			value: h.value ?? 0,
 		})),
+		ctx,
 	);
 	const byId = new Map(request.holdings.map((h) => [h.holdingId, h]));
 	for (const sale of sales) {
 		const assetClass = byId.get(sale.holdingId)!.assetClass;
 		values.set(
 			assetClass,
-			(values.get(assetClass) ?? 0) - toCents(sale.amount),
+			money.sum([values.get(assetClass) ?? 0, -money.units(sale.amount)]),
 		);
 	}
 	for (const purchase of purchases)
 		values.set(
 			purchase.assetClass,
-			(values.get(purchase.assetClass) ?? 0) + toCents(purchase.amount),
+			money.sum([
+				values.get(purchase.assetClass) ?? 0,
+				money.units(purchase.amount),
+			]),
 		);
-	const maximumReserveCents =
-		(values.get("cash") ?? 0) + Math.max(0, maximumRetainedCents);
-	if (maximumReserveCents < toCents(request.cashFloor ?? 0))
+	const maximumReserveUnits = money.sum([
+		values.get(configuration.cashAssetClass) ?? 0,
+		Math.max(0, maximumRetainedUnits),
+	]);
+	if (maximumReserveUnits < money.units(request.cashFloor ?? 0))
 		reasons.push("reserve_shortfall");
 	if (retained !== null && retained >= 0)
-		values.set("cash", (values.get("cash") ?? 0) + retained);
+		values.set(
+			configuration.cashAssetClass,
+			money.sum([values.get(configuration.cashAssetClass) ?? 0, retained]),
+		);
 	const reserve =
-		retained === null || retained < 0 ? null : (values.get("cash") ?? 0) / 100;
+		retained === null || retained < 0
+			? null
+			: money.amount(values.get(configuration.cashAssetClass) ?? 0);
 	const available =
 		retained !== null &&
 		retained >= 0 &&
@@ -123,15 +151,16 @@ export function assess(
 		? allocationRows(
 				[...values].map(([assetClass, value]) => ({
 					assetClass,
-					value: value / 100,
+					value: money.amount(value),
 				})),
 				request.policy,
+				ctx,
 			)
 		: null;
 	const valueAfter =
 		rows === null
 			? null
-			: rows.reduce((sum, r) => sum + toCents(r.value), 0) / 100;
+			: money.amount(money.sum(rows.map((r) => money.units(r.value))));
 	return {
 		kind,
 		feasibility: reasons.some((r) => UNAVAILABLE.has(r))
@@ -141,7 +170,7 @@ export function assess(
 				: "feasible",
 		reasonCodes: [...new Set(reasons)],
 		externalCash,
-		invested: invested / 100,
+		invested: money.amount(invested),
 		feeCost,
 		taxCost,
 		taxCoverage:
@@ -150,7 +179,7 @@ export function assess(
 				: taxCost === null
 					? "unknown"
 					: "supplied",
-		cashRetained: available ? retained / 100 : null,
+		cashRetained: available ? money.amount(retained) : null,
 		valueAfter,
 		reserveAfter: available ? reserve : null,
 		residualDrift:
