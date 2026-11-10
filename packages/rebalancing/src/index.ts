@@ -20,7 +20,7 @@ export { MAX_SUPPORTED_WEALTH } from "./internal/money.js";
 export { RebalanceInputError } from "./validation.js";
 export { allocateContribution } from "./contribution.js";
 export { projectContributions } from "./projection.js";
-export const METHODOLOGY_VERSION = "rebalance-comparison-v1" as const;
+export const METHODOLOGY_VERSION = "rebalance-comparison-v2" as const;
 
 /** Compare one reporting-currency book without providers, storage or order execution. */
 export function compareRebalance(input: RebalanceRequest): RebalanceComparison {

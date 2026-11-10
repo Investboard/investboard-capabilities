@@ -5,6 +5,16 @@ import type {
 } from "../types.js";
 import { toCents } from "./money.js";
 
+export function largestAllocationFirst(
+	a: { assetClass: string; amount: number },
+	b: { assetClass: string; amount: number },
+): number {
+	return (
+		b.amount - a.amount ||
+		(a.assetClass < b.assetClass ? -1 : a.assetClass > b.assetClass ? 1 : 0)
+	);
+}
+
 export function classValues(
 	positions: readonly AllocationPosition[],
 ): Map<string, number> {
