@@ -24,6 +24,8 @@ importers:
         specifier: 4.6.7
         version: 4.6.7
 
+  packages/rebalancing: {}
+
   packages/stress-test: {}
 
 packages:

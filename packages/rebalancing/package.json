@@ -1,0 +1,34 @@
+{
+	"name": "@investboard/rebalancing",
+	"version": "0.1.0",
+	"description": "Contribution-aware portfolio allocation, scenario funding and reproducible rebalancing comparisons",
+	"type": "module",
+	"license": "Apache-2.0",
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE",
+		"NOTICE"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Investboard/investboard-capabilities.git",
+		"directory": "packages/rebalancing"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

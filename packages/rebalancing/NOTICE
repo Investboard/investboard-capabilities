@@ -1,0 +1,6 @@
+Investboard capabilities
+Copyright 2026 Investboard GmbH
+
+Includes contribution-allocation and scenario-funding logic developed by
+Investboard GmbH. The standalone public API and snapshot format belong to this
+package. Caller-supplied sale and tax assumptions are not verified by the module.
