@@ -1,6 +1,7 @@
 // Copyright 2026 Investboard GmbH. SPDX-License-Identifier: Apache-2.0
 import type { HoldingValueSeries } from "./performance/holding-attribution.js";
 import type { Snapshot } from "./performance/types.js";
+import { roundMoney } from "./money/cents.js";
 
 /** Integrate the positions actually held at each opening valuation. Rates are
  * today's recorded fund rates, so this is explanatory, never an observed cost. */
@@ -36,9 +37,8 @@ export function estimateHistoricalFundCosts(
 		if (!start || !end) continue;
 		const days = (Date.parse(end) - Date.parse(start)) / 86_400_000;
 		const values = valuesByHolding.map((holding) => holding.values.get(start));
-		const knownValue = values.reduce<number>(
-			(sum, value) => sum + Math.max(0, value ?? 0),
-			0,
+		const knownValue = roundMoney(
+			values.reduce<number>((sum, value) => sum + Math.max(0, value ?? 0), 0),
 		);
 		const unknownCapital =
 			(unknownCapitalFrom != null && start >= unknownCapitalFrom) ||
@@ -54,15 +54,17 @@ export function estimateHistoricalFundCosts(
 		if (unknownCapital && knownValue >= denominator * (1 - 1e-10))
 			coverageKnown = false;
 		totalCapitalDays += Math.max(denominator, knownValue) * days;
+		let ratedValue = 0;
 		for (const holding of valuesByHolding) {
 			const value = holding.values.get(start);
 			const rate = terByHolding.get(holding.id);
 			if (value == null || value <= 0 || rate == null) continue;
 			// A sparse valuation cannot justify weeks of historical expense.
 			if (days > 7) continue;
-			coveredCapitalDays += value * days;
+			ratedValue += value;
 			fundCosts += (value * rate * days) / 365;
 		}
+		coveredCapitalDays += roundMoney(ratedValue) * days;
 	}
 	const coverage =
 		coverageKnown && totalCapitalDays > 0

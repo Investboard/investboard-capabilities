@@ -1,5 +1,6 @@
 // Copyright 2026 Investboard GmbH. SPDX-License-Identifier: Apache-2.0
 import type { CashFlow, XirrResult } from "./types.js";
+import { fromEuros, sumCents, toEuros, type Cents } from "../money/cents.js";
 const MAX_ITERATIONS = 100;
 const TOLERANCE = 1e-7;
 const RATE_LOWER_BOUND = -0.999;
@@ -29,18 +30,30 @@ export function calculateXirr(
 			isAnnualized: false,
 		};
 	}
-	const internalFlows: Array<{
-		date: string;
-		amount: number;
-	}> = sorted.map((cf) => ({
-		date: cf.date,
-		amount: cf.type === "buy" ? -Math.abs(cf.amount) : Math.abs(cf.amount),
-	}));
-	internalFlows.push({ date: valuationDate, amount: currentValue });
-	const dayFractions = internalFlows.map((cf) => ({
-		amount: cf.amount,
-		fraction: daysBetween(firstDate, cf.date) / DAYS_PER_YEAR,
-	}));
+	// Same-day turnover is economically neutral. Net in exact cents before it
+	// can affect either the solver or the scale used to certify convergence.
+	const netByDate = new Map<string, Cents>();
+	for (const flow of sorted) {
+		const amount =
+			flow.type === "buy" ? -Math.abs(flow.amount) : Math.abs(flow.amount);
+		netByDate.set(
+			flow.date,
+			sumCents([netByDate.get(flow.date) ?? fromEuros(0), fromEuros(amount)]),
+		);
+	}
+	netByDate.set(
+		valuationDate,
+		sumCents([
+			netByDate.get(valuationDate) ?? fromEuros(0),
+			fromEuros(currentValue),
+		]),
+	);
+	const dayFractions = [...netByDate]
+		.filter(([, amount]) => amount !== 0)
+		.map(([date, amount]) => ({
+			amount: toEuros(amount),
+			fraction: daysBetween(firstDate, date) / DAYS_PER_YEAR,
+		}));
 	const totalDays = daysBetween(firstDate, valuationDate);
 	if (totalDays < DAYS_PER_YEAR) {
 		const totalBuyAmount = sorted
@@ -69,16 +82,22 @@ export function calculateXirr(
 			iterations = i + 1;
 			const npvVal = npv(rate, dayFractions);
 			const npvDeriv = npvDerivative(rate, dayFractions);
-			if (Math.abs(npvDeriv) < 1e-12) {
+			if (
+				!Number.isFinite(npvVal) ||
+				!Number.isFinite(npvDeriv) ||
+				Math.abs(npvDeriv) < 1e-12
+			) {
 				break;
 			}
 			const rateNext = rate - npvVal / npvDeriv;
+			if (!Number.isFinite(rateNext)) break;
 			const clampedRate = Math.max(
 				RATE_LOWER_BOUND,
 				Math.min(RATE_UPPER_BOUND, rateNext),
 			);
 			if (Math.abs(clampedRate - rate) < TOLERANCE) {
-				converged = true;
+				// A blocked step at a bound is not a converged Newton step.
+				converged = rateNext === clampedRate;
 				rate = clampedRate;
 				break;
 			}

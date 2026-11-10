@@ -30,7 +30,7 @@ npm pack
 Install the generated tarball in your application:
 
 ```sh
-npm install /path/to/investboard-capabilities/packages/performance/investboard-performance-0.1.0.tgz
+npm install /path/to/investboard-capabilities/packages/performance/investboard-performance-0.2.0.tgz
 ```
 
 The package provides ESM JavaScript and TypeScript declarations through its root export. Its two calculation functions are `evaluatePerformance(request)` and `replayPerformance(snapshot)`. It also exports `PerformanceInputError`, `METHODOLOGY_VERSION`, `LIMITS`, and the public [types](src/types.ts).
@@ -111,6 +111,8 @@ An unpaired signed `transfer` effect crosses the book's boundary. The engine val
 
 Every in-window transfer after the opening date requires an **observed NAV boundary** on its date. Missing boundaries or valuation evidence produce `transfer_valuation_missing` with no calculation. The engine does not insert carried NAV to make a transfer look supported. Transfer funding is generated automatically; do not also supply it in `cashFlows`. Selecting one side of a pair makes the movement external to the selected basket.
 
+Monetary boundaries use symmetric half-away-from-zero cent rounding, including correction of floating-point noise around half-cent ties. Scoped NAV and coverage round aggregated reporting-currency values; original prices, FX rates and expense estimates retain their precision. External transfers on one date are rounded as one signed funding total. Cent grain is allocated by largest fractional remainder, with effect IDs resolving ties deterministically. Each transfer's `roundingAdjustment` records its difference from independently rounded funding. Internal pairs retain equal, opposite funding. Book rounding can remain in the wealth bridge and return attribution residuals.
+
 ## Read the result
 
 `status: "available"` means the supplied evidence supports the calculation under this methodology. `partial` retains calculable returns alongside explicit limitations. `unavailable` has `calculation: null`, for example for incomplete ledgers, unsupported scope history, missing transfer evidence, insufficient observations or undefined return subperiods. Invalid inputs throw `PerformanceInputError`.
@@ -130,6 +132,8 @@ Returns and coverage fractions use decimal units: `0.10` means 10%. Named fields
 
 Modified Dietz is an approximation when capital arrives between observed valuations. Sparse snapshot history remains flagged. TWR annualization uses 365.25 days and is absent below a year. XIRR uses Act/365F, withholds annualization below 365 days, searches rates between -99.9% and 1000%, and reports failure rather than inventing a rate. Irregular cash flows may have multiple mathematical roots; the selected root is not guaranteed unique.
 
+XIRR nets same-day flows and terminal wealth in exact cents before solving. Neutral turnover cannot inflate the convergence tolerance. A Newton step blocked by a rate bound does not establish convergence; a successful rate must pass the net-flow NPV check.
+
 Expense coverage integrates actual positions across dated changes. Intervals longer than seven days do not justify an expense estimate. Unknown rates, unknown capital and excluded holdings remain visible. A known rate of `0` is different from an unknown rate. Estimate confidence is capped at medium because rates are current recorded rates, not observed historical charges. Fund expenses are already embedded in NAV returns. The wealth bridge does not subtract the estimate. Its monetary price and FX effects use opening units and independent symmetric products; split intervals, missing evidence, execution differences and other unsupported effects remain residual.
 
 ## Limits and replay compatibility
@@ -138,7 +142,9 @@ Inputs must be plain JSON data. Unknown fields, explicit `undefined`, accessors,
 
 `LIMITS` caps each request at 200 positions, 5,000 snapshots, 10,000 combined effects/flows/cost rows, 100,000 combined price/FX points and one million position/date cells. Supplied and calculated wealth is capped at one billion reporting-currency units; quantities at one billion; FX rates at one million. This version assumes two-decimal accounting units, including for currencies whose native minor-unit conventions differ. It is not arbitrary-precision accounting.
 
-`result.snapshot` defensively copies the complete request, including basket selection, and pins `actual-position-performance-v1`. `replayPerformance` validates that version and recalculates only those inputs. It refuses unknown methodology versions. Snapshots are unsigned and may contain sensitive caller-supplied history; storage, access control and retention belong to your application. No provider, authentication, database, account, app UI or hosted-service implementation is included.
+`result.snapshot` defensively copies the complete request, including basket selection, and pins `actual-position-performance-v2`. `replayPerformance` validates that version and recalculates only those inputs. It refuses unsupported methodology versions. Snapshots are unsigned and may contain sensitive caller-supplied history; storage, access control and retention belong to your application. No provider, authentication, database, account, app UI or hosted-service implementation is included.
+
+Package 0.2.0 introduces methodology v2 for corrected XIRR convergence and cent normalization. It explicitly refuses v1 snapshots with `PerformanceInputError`. To recalculate their original inputs under the corrected methodology, call `evaluatePerformance(savedV1Snapshot.request)` and retain the new v2 snapshot. This produces a new analysis; it does not reproduce a historical v1 result.
 
 The pure return, position-replay and attribution algorithms are adapted from Investboard's performance engine. The public request validation, evidence assembly and package boundary are independently maintained here. Future calculation changes require a compatibility decision for saved methodology versions.
 

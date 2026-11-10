@@ -92,7 +92,7 @@ export interface PerformanceRequest {
 }
 
 export interface PerformanceSnapshot {
-	readonly methodologyVersion: "actual-position-performance-v1";
+	readonly methodologyVersion: "actual-position-performance-v2";
 	readonly request: PerformanceRequest;
 }
 
@@ -113,6 +113,8 @@ export interface TransferValuation {
 	readonly date: string;
 	readonly internal: boolean;
 	readonly value: number;
+	/** Cent allocation against the independently rounded transfer amount. */
+	readonly roundingAdjustment: number;
 	readonly quoteCurrency: string;
 	readonly price: number;
 	readonly fxRate: number;

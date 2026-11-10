@@ -1,5 +1,6 @@
 import { prepareHistory } from "./history.js";
 import type { PerformanceRequest } from "./types.js";
+import { roundMoney } from "./internal/money/cents.js";
 
 /** A fixed basket, including closed positions, supplies NAV and every flow. */
 export function projectScope(
@@ -33,7 +34,9 @@ export function projectScope(
 		.map((p) => new Map(p.values.map((v) => [v.date, v.value])));
 	const snapshots = input.snapshots.map((point) => ({
 		date: point.date,
-		value: maps.reduce((sum, map) => sum + (map.get(point.date) ?? 0), 0),
+		value: roundMoney(
+			maps.reduce((sum, map) => sum + (map.get(point.date) ?? 0), 0),
+		),
 	}));
 	// A projected scope crossing changes custody into external security funding.
 	const effects = input.effects

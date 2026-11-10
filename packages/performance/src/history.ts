@@ -10,8 +10,11 @@ import type {
 	PositionEvidence,
 	DatedValue,
 	TransferValuation,
+	PerformanceEffect,
 } from "./types.js";
 import { requireInput } from "./validation.js";
+import { roundMoney } from "./internal/money/cents.js";
+import { allocateTransferRounding } from "./internal/transfer-rounding.js";
 
 /** Positive dated evidence only; no forward lookups or spot-rate fallback. */
 export function datedValue(
@@ -170,6 +173,11 @@ export function valueTransfers(
 	const last = request.snapshots.at(-1)!.date;
 	const flows: AttributedCashFlow[] = [];
 	const valuations: TransferValuation[] = [];
+	const rows: {
+		effects: readonly PerformanceEffect[];
+		rawAmount: number;
+		evidence: TransferValuation;
+	}[] = [];
 	const processed = new Set<string>();
 	for (const effect of request.effects) {
 		if (
@@ -187,6 +195,7 @@ export function valueTransfers(
 		let sourcePrice = 0;
 		let sourceFx = 0;
 		let quoteCurrency = "";
+		let sourceAmount = 0;
 		for (const leg of group) {
 			if (
 				!history.evidence.some(
@@ -198,38 +207,74 @@ export function valueTransfers(
 			const price = datedValue(input.prices, leg.date);
 			const fx = rate(input, leg.date, request.reportingCurrency);
 			if (price === null || fx === null) return null;
-			const amount =
-				Math.round(Math.abs(leg.quantity) * price * fx * 100) / 100;
+			const rawAmount = Math.abs(leg.quantity) * price * fx;
 			requireInput(
-				Number.isFinite(amount) && amount <= LIMITS.wealth,
+				Number.isFinite(rawAmount) && rawAmount <= LIMITS.wealth,
 				"Transfer valuation exceeds supported wealth",
 			);
+			const amount = roundMoney(rawAmount);
 			if (value !== undefined && value !== amount) return null;
 			value = amount;
 			if (leg.quantity < 0 || group.length === 1) {
 				sourcePrice = price;
 				sourceFx = fx;
 				quoteCurrency = input.quoteCurrency;
+				sourceAmount = rawAmount;
 			}
 			processed.add(leg.id);
 		}
 		if (value === undefined) return null;
-		for (const leg of group)
+		rows.push({
+			effects: group,
+			rawAmount: sourceAmount,
+			evidence: {
+				effectIds: group.map((e) => e.id),
+				date: effect.date,
+				internal: group.length === 2,
+				value,
+				roundingAdjustment: 0,
+				price: sourcePrice,
+				fxRate: sourceFx,
+				quoteCurrency,
+			},
+		});
+	}
+	const externalByDate = new Map<string, typeof rows>();
+	for (const row of rows) {
+		if (row.evidence.internal) continue;
+		const day = externalByDate.get(row.evidence.date) ?? [];
+		day.push(row);
+		externalByDate.set(row.evidence.date, day);
+	}
+	for (const day of externalByDate.values()) {
+		day.sort((a, b) =>
+			a.effects[0]!.id < b.effects[0]!.id
+				? -1
+				: a.effects[0]!.id > b.effects[0]!.id
+					? 1
+					: 0,
+		);
+		const amounts = allocateTransferRounding(
+			day.map((row) => row.rawAmount * Math.sign(row.effects[0]!.quantity)),
+		);
+		day.forEach((row, index) => {
+			const value = Math.abs(amounts[index]!);
+			row.evidence = {
+				...row.evidence,
+				value,
+				roundingAdjustment: roundMoney(value - row.evidence.value),
+			};
+		});
+	}
+	for (const row of rows) {
+		for (const leg of row.effects)
 			flows.push({
 				date: leg.date,
 				holdingId: leg.holdingId,
 				type: leg.quantity < 0 ? "sell" : "buy",
-				amount: leg.quantity < 0 ? -value : value,
+				amount: leg.quantity < 0 ? -row.evidence.value : row.evidence.value,
 			});
-		valuations.push({
-			effectIds: group.map((e) => e.id),
-			date: effect.date,
-			internal: group.length === 2,
-			value,
-			price: sourcePrice,
-			fxRate: sourceFx,
-			quoteCurrency,
-		});
+		valuations.push(row.evidence);
 	}
 	return { flows, valuations };
 }
