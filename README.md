@@ -2,9 +2,9 @@
 
 ## Build your own investing engine
 
-Bring [Investboard](https://investboard.com) portfolio analysis into your own code. Use reusable TypeScript modules to explore market crises, compare ways to rebalance with new cash, and make the assumptions visible in your own investing tools.
+Bring [Investboard](https://investboard.com) portfolio analysis into your own code. Use reusable TypeScript modules to explore market crises, explain historical performance, compare ways to rebalance with new cash, and make the assumptions visible in your own investing tools.
 
-Start with the **[portfolio stress-testing engine](packages/stress-test)** or **[contribution-aware rebalancing](packages/rebalancing)**. Run either module locally, connect your own data, and build the experience you want around it.
+Start with **[portfolio stress testing](packages/stress-test)**, **[contribution-aware rebalancing](packages/rebalancing)** or **[historical performance](packages/performance)**. Run the modules locally, connect your own data, and build the experience you want around them.
 
 **[Run the examples](#try-it-with-your-own-code)** · **[Explore the modules](#available-modules)**
 
@@ -18,6 +18,7 @@ A holdings list tells you what you own. Scenario analysis helps you explore how 
 | Portfolio comparison tool | Run different mixes through the same scenario and compare the drivers of the change |
 | Investing research script | Supply your own price and FX history, inspect coverage, and save inputs for a reproducible replay |
 | Contribution planner | Compare fresh-cash and cash-limited allocations with a sale plan you supply, including reserves and depot funding |
+| Historical performance dashboard | Separate funding from gains, explain holding contributions and quote FX, and estimate embedded fund expenses |
 
 ## Start with portfolio stress testing
 
@@ -41,6 +42,12 @@ Inspect allocation corridors, retained cash, flat fees and any transfers needed 
 
 **[Run the rebalancing example](packages/rebalancing/README.md#run-the-example)** · **[Explore its API and assumptions](packages/rebalancing/README.md)**
 
+## Explain historical performance
+
+The [performance engine](packages/performance) reconstructs the positions actually held, calculates cash-flow-adjusted returns, and preserves unexplained effects as an explicit residual. Supply your own NAV, ledger, prices and dated FX evidence. It supports historical basket selection, custody transfer valuation, capital-weighted coverage and JSON replay. Current recorded fund rates produce a labeled expense estimate without a second deduction from observed returns.
+
+Run its synthetic price/FX example with `pnpm example:performance`. See the [API and accounting conventions](packages/performance/README.md) before connecting real history.
+
 ## Try it with your own code
 
 Use Node 22 or newer and pnpm 9.15.0:
@@ -52,9 +59,9 @@ pnpm install --frozen-lockfile
 pnpm example
 ```
 
-The examples use synthetic holdings. Stress testing shows why two quote currencies do not automatically imply two economic exposures. Rebalancing shows how new cash can reach a target allocation, how per-depot tax changes funding, and why contributions below a trade minimum remain cash. Both examples replay the original comparison inputs.
+The examples use synthetic holdings. Stress testing shows why two quote currencies do not automatically imply two economic exposures. Rebalancing shows how new cash can reach a target allocation, how per-depot tax changes funding, and why contributions below a trade minimum remain cash. Performance separates historical price and quote-FX effects. All three examples replay their original inputs.
 
-Ready to add a capability to your own engine? **[Build the stress-testing module](packages/stress-test/README.md#use-it-in-your-project)** or **[build the rebalancing module](packages/rebalancing/README.md#use-it-in-your-project)**, then supply the data and assumptions that fit your workflow.
+Ready to add a capability to your own engine? **[Build the stress-testing module](packages/stress-test/README.md#use-it-in-your-project)**, **[build the rebalancing module](packages/rebalancing/README.md#use-it-in-your-project)** or **[build the performance module](packages/performance/README.md#use-it-in-your-project)**, then supply the data and assumptions that fit your workflow.
 
 ## Available modules
 
@@ -62,6 +69,7 @@ Ready to add a capability to your own engine? **[Build the stress-testing module
 | --- | --- | --- |
 | Portfolio stress testing | `@investboard/stress-test` | [API, examples and assumptions](packages/stress-test/README.md) |
 | Contribution-aware rebalancing | `@investboard/rebalancing` | [API, examples and assumptions](packages/rebalancing/README.md) |
+| Historical portfolio performance | `@investboard/performance` | [API, accounting conventions and replay](packages/performance/README.md) |
 
 [Browse the module catalogue](capabilities.json) · [Contribute a capability or improvement](CONTRIBUTING.md)
 

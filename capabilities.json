@@ -23,6 +23,17 @@
 			"methodologyVersion": "rebalance-comparison-v1",
 			"description": "Compare fresh-cash allocation and caller-supplied sale plans, inspect reserve and depot funding, project contributions and replay saved inputs.",
 			"documentation": "packages/rebalancing/README.md"
+		},
+		{
+			"id": "performance",
+			"name": "Historical portfolio performance",
+			"version": "0.1.0",
+			"package": "@investboard/performance",
+			"path": "packages/performance",
+			"license": "Apache-2.0",
+			"methodologyVersion": "actual-position-performance-v1",
+			"description": "Explain historical returns, actual-position contributions, quote FX and estimated embedded fund costs with caller-supplied evidence and reproducible replay.",
+			"documentation": "packages/performance/README.md"
 		}
 	]
 }
