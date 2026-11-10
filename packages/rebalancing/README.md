@@ -107,7 +107,7 @@ Funded scenarios may override `fundingDepotId`. A plan may have zero sales or co
 
 ### Source completeness and allocation
 
-Every monetary value is already in `baseCurrency`. The engine performs no FX conversion. Any holding with another currency or `value: null` withholds the whole comparison denominator and all calculated alternatives. Measured zero is valid. Holding IDs must be unique; the host supplies the complete book and classifications.
+Every monetary value is already in `baseCurrency`. The engine performs no FX conversion. Any holding with another currency or `value: null` withholds the whole comparison denominator and all calculated alternatives. Measured zero and a complete empty book are valid, including an initial contribution. Holding IDs must be unique; the host supplies the complete book and classifications.
 
 Policy targets are fractions summing to one within `1e-9`, with `0 <= min <= target <= max <= 1`. Unlisted classes have zero target/corridor. Zero total wealth has unknown percentages, represented by `null`.
 

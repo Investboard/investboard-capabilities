@@ -41,7 +41,7 @@ export function calculationContext(value: unknown): CalculationContext {
 	requireInput(
 		typeof value.money.maximumAmount === "number" &&
 			Number.isFinite(value.money.maximumAmount) &&
-			value.money.maximumAmount > 0 &&
+			value.money.maximumAmount >= 0 &&
 			value.money.maximumAmount <= MAX_SAFE_MINOR_UNITS / 10 ** digits,
 		"Configured maximum amount exceeds exact minor-unit precision",
 	);

@@ -101,9 +101,8 @@ export function validateHoldings(
 ): asserts holdings is Holding[] {
 	requireInput(
 		Array.isArray(holdings) &&
-			holdings.length > 0 &&
 			holdings.length <= ctx.configuration.limits.holdings,
-		"Holdings exceed the configured capacity or are empty",
+		"Holdings exceed the configured capacity",
 	);
 	const ids = new Set<string>();
 	for (const h of holdings) {

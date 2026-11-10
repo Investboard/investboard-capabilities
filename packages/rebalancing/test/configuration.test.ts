@@ -94,6 +94,20 @@ function first(r: RebalanceRequest) {
 }
 
 describe("caller-owned configuration", () => {
+	it("allows a complete empty book and a zero host wealth limit", () => {
+		const r = request();
+		r.holdings = [];
+		const result = compareRebalance(r);
+		expect(result.valueBefore).toBe(0);
+		expect(result.alternatives[0]!.feasibility).toBe("feasible");
+		expect(result.alternatives[0]!.purchases[0]!.holdingId).toBeNull();
+		r.configuration.money.maximumAmount = 0;
+		r.accounts = [];
+		r.configuration.limits.accounts = 0;
+		r.configuration.limits.orders = 0;
+		r.scenarios = [{ kind: "empty baseline", mode: "keep" }];
+		expect(first(r).valueAfter).toBe(0);
+	});
 	it.each([
 		["JPY", 0, 3],
 		["KWD", 3, 0.003],
