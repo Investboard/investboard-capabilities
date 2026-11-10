@@ -36,7 +36,7 @@ Historical scenarios use sourced, rounded assumptions. The outputs are hypotheti
 
 ## Add contribution-aware rebalancing
 
-The [rebalancing module](packages/rebalancing) allocates new money against the portfolio's value after the contribution. Choose your own scenarios: keep current, invest new cash, or assess an explicit plan with sales and contributions. Configure currency precision and calculation limits for your application.
+The [rebalancing module](packages/rebalancing) allocates new money against the portfolio's value after the contribution. Choose your own scenarios: keep current, invest new cash, or assess an explicit plan with sales and contributions. Choose purchase routes, existing-cash deployment, projection cash sweeps, currency precision and calculation limits for your application.
 
 Inspect allocation corridors, retained cash, declared fee schedules and any transfers needed between depots. Supply exact per-sale tax assumptions or keep tax unknown. Project recurring contributions with explicit return assumptions and trade limits, then save and replay the original comparison inputs. The module has no runtime dependencies or network calls.
 

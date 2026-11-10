@@ -1,4 +1,5 @@
 import type {
+	CashRelease,
 	AlternativeKind,
 	Purchase,
 	ReasonCode,
@@ -72,6 +73,7 @@ export function assess(
 	sales: Sale[],
 	purchases: Purchase[],
 	ctx: CalculationContext,
+	cashReleases: CashRelease[],
 ): RebalanceAlternative {
 	const { money, configuration } = ctx;
 	const evidence = fundingEvidence(
@@ -80,6 +82,7 @@ export function assess(
 		sales,
 		purchases,
 		ctx,
+		cashReleases,
 	);
 	const reasons = [
 		...admissionReasons(request, sales, purchases, ctx),
@@ -95,7 +98,9 @@ export function assess(
 	const invested = money.sum(purchases.map((p) => money.units(p.amount)));
 	// All unknown costs are nonnegative. This upper bound can prove a deficit
 	// without presenting a partial cost sum as the actual fee or tax total.
+	const released = money.sum(cashReleases.map((c) => money.units(c.amount)));
 	const maximumRetainedUnits = money.sum([
+		released,
 		money.units(externalCash),
 		gross,
 		-invested,
@@ -113,6 +118,14 @@ export function assess(
 		ctx,
 	);
 	const byId = new Map(request.holdings.map((h) => [h.holdingId, h]));
+	for (const cash of cashReleases)
+		values.set(
+			configuration.cashAssetClass,
+			money.sum([
+				values.get(configuration.cashAssetClass) ?? 0,
+				-money.units(cash.amount),
+			]),
+		);
 	for (const sale of sales) {
 		const assetClass = byId.get(sale.holdingId)!.assetClass;
 		values.set(
@@ -162,6 +175,8 @@ export function assess(
 			? null
 			: money.amount(money.sum(rows.map((r) => money.units(r.value))));
 	return {
+		existingCashReleased: money.amount(released),
+		cashReleases,
 		kind,
 		feasibility: reasons.some((r) => UNAVAILABLE.has(r))
 			? "unavailable"
@@ -199,6 +214,8 @@ export function unavailable(
 	reasons: ReasonCode[],
 ): RebalanceAlternative {
 	return {
+		existingCashReleased: 0,
+		cashReleases: [],
 		kind,
 		feasibility: "unavailable",
 		reasonCodes: [...reasons],

@@ -50,7 +50,7 @@ export function calculationContext(value: unknown): CalculationContext {
 		"assetClasses",
 		"accounts",
 		"orders",
-		"projectionMonths",
+		"projectionPeriods",
 		"scenarios",
 		"jsonNodes",
 		"jsonDepth",

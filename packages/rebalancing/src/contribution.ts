@@ -1,3 +1,4 @@
+import { pooledCashRelease } from "./internal/cash-funding.js";
 import type { AllocationRequest, ContributionResult } from "./types.js";
 import type { CalculationContext } from "./configuration.js";
 import { validateAllocation } from "./validation.js";
@@ -15,13 +16,25 @@ export function planContribution(
 ): ContributionResult {
 	const { money, configuration } = ctx;
 	const rows = allocationRows(input.positions, input.policy, ctx);
+	const released =
+		input.cashDeployment === "deploy_excess"
+			? pooledCashRelease(input.positions, input.cashFloor ?? 0, ctx)
+			: 0;
+	const adjusted = rows.map((row) => ({
+		...row,
+		value: money.amount(
+			money.units(row.value) -
+				(row.assetClass === configuration.cashAssetClass ? released : 0),
+		),
+	}));
+	const budget = money.sum([money.units(input.contribution), released]);
 	const candidates = allocate(
-		rows.map((row) => ({
+		adjusted.map((row) => ({
 			assetClass: row.assetClass,
 			value: money.units(row.value),
 			targetPercent: row.target,
 		})),
-		money.units(input.contribution),
+		budget,
 		money.units(input.minTradeSize ?? money.quantum),
 		money.units(input.cashFloor ?? 0),
 		configuration.cashAssetClass,
@@ -33,11 +46,12 @@ export function planContribution(
 		: candidates;
 	const allocated = money.sum(selected.map((a) => a.amount));
 	return {
+		existingCashReleased: money.amount(released),
 		allocations: selected.map((a) => ({
 			...a,
 			amount: money.amount(a.amount),
 		})),
-		retainedCash: money.amount(money.units(input.contribution) - allocated),
+		retainedCash: money.amount(budget - allocated),
 		postContributionValue: money.amount(
 			money.sum([
 				...rows.map((row) => money.units(row.value)),

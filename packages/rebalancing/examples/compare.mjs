@@ -13,7 +13,7 @@ const configuration = {
 		assetClasses: 128,
 		accounts: 256,
 		orders: 256,
-		projectionMonths: 1200,
+		projectionPeriods: 1200,
 		scenarios: 20,
 		jsonNodes: 100_000,
 		jsonDepth: 32,
@@ -29,6 +29,8 @@ const policy = {
 	bonds: { min: 0.35, target: 0.4, max: 0.45 },
 };
 const result = compareRebalance({
+	purchasePlacement: { mode: "largest_holding" },
+	cashDeployment: { mode: "preserve" },
 	configuration,
 	baseCurrency: "EUR",
 	holdings: [
@@ -74,6 +76,8 @@ assert.deepEqual(
 );
 
 const funding = compareRebalance({
+	purchasePlacement: { mode: "largest_holding" },
+	cashDeployment: { mode: "preserve" },
 	configuration,
 	baseCurrency: "EUR",
 	fundingDepotId: "A",
@@ -163,14 +167,16 @@ assert.equal(
 );
 
 const projection = projectContributions({
+	cashSweep: "retain",
+	periodsPerYear: 12,
 	configuration,
 	positions: [
 		{ assetClass: "equities", value: 70000 },
 		{ assetClass: "bonds", value: 30000 },
 	],
 	policy,
-	monthlyContribution: 100,
-	months: 12,
+	contributions: 100,
+	periods: 12,
 	minTradeSize: 1000,
 	annualReturns: { equities: 0, bonds: 0, cash: 0 },
 });
@@ -191,7 +197,7 @@ console.log(
 				funding: funding.funding,
 			},
 			belowMinimumProjection: {
-				months: 12,
+				periods: 12,
 				finalValue: projection.timeline.at(-1).value,
 				newContributionsRetained: 1200,
 			},
@@ -200,4 +206,57 @@ console.log(
 		null,
 		2,
 	),
+);
+
+// Host-selected routes and cash funding never manufacture sales or new wealth.
+const cashFunding = compareRebalance({
+	configuration,
+	baseCurrency: "GBP",
+	fundingDepotId: "B",
+	policy: { equities: { min: 0, target: 1, max: 1 } },
+	holdings: [
+		{
+			holdingId: "wallet",
+			assetClass: "cash",
+			depotId: "A",
+			currency: "GBP",
+			value: 300,
+		},
+	],
+	cashDeployment: { mode: "deploy_excess", holdingIds: ["wallet"] },
+	cashFloor: 100,
+	purchasePlacement: {
+		mode: "ordered_routes",
+		routes: [{ assetClass: "equities", holdingId: null, depotId: "B" }],
+	},
+	accounts: [
+		{ depotId: "B", feePerTrade: 0, minimum: 0, maximum: 0, increment: 0.01 },
+	],
+	transfersConfirmed: true,
+	scenarios: [{ kind: "existing cash", mode: "contribution", externalCash: 0 }],
+}).alternatives[0];
+assert.equal(cashFunding.invested, 200);
+assert.equal(cashFunding.valueAfter, 300);
+assert.equal(cashFunding.reserveAfter, 100);
+assert.deepEqual(cashFunding.sales, []);
+const swept = projectContributions({
+	configuration,
+	positions: [],
+	policy: { equities: { min: 0, target: 1, max: 1 } },
+	cashSweep: "reinvest_excess",
+	periods: 2,
+	periodsPerYear: 4,
+	contributions: [100, 100],
+	annualReturns: [
+		{ equities: 0, cash: 0 },
+		{ equities: 0, cash: 0 },
+	],
+	minTradeSize: 150,
+});
+assert.equal(swept.timeline[1].allocations[0].amount, 200);
+console.log(
+	JSON.stringify({
+		hostCashFunding: cashFunding.existingCashReleased,
+		quarterlySweep: swept.timeline[1].value,
+	}),
 );

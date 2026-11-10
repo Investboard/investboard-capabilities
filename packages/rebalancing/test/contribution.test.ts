@@ -26,6 +26,7 @@ describe("standalone contribution allocation", () => {
 		expect(
 			allocateContribution({ positions, policy, contribution: 100000 }),
 		).toEqual({
+			existingCashReleased: 0,
 			allocations: [
 				{ assetClass: "bonds", amount: 50000, proportion: 0.5 },
 				{ assetClass: "equities", amount: 50000, proportion: 0.5 },
@@ -43,6 +44,7 @@ describe("standalone contribution allocation", () => {
 			minTradeSize: 6000,
 		});
 		expect(result).toEqual({
+			existingCashReleased: 0,
 			allocations: [],
 			retainedCash: 10000,
 			postContributionValue: 110000,

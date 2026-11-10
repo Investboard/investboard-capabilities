@@ -251,7 +251,7 @@ describe("comparison methodology compatibility", () => {
 	it("replays the corrected broker and incomplete-cost cases through JSON", () => {
 		for (const input of [constrainedCash(), salesRequest()]) {
 			const comparison = compareRebalance(input);
-			expect(comparison.methodologyVersion).toBe("rebalance-comparison-v3");
+			expect(comparison.methodologyVersion).toBe("rebalance-comparison-v4");
 			expect(
 				replayRebalanceComparison(
 					JSON.parse(JSON.stringify(comparison.snapshot)),

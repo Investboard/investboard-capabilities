@@ -26,7 +26,7 @@ npm pack
 Install the generated tarball in your project:
 
 ```sh
-npm install /path/to/investboard-capabilities/packages/rebalancing/investboard-rebalancing-0.3.0.tgz
+npm install /path/to/investboard-capabilities/packages/rebalancing/investboard-rebalancing-0.4.0.tgz
 ```
 
 This is a source distribution and buildable package, not a published npm release or an Investboard hosted API. Normal `npm pack` rebuilds JavaScript and declarations from source.
@@ -42,7 +42,7 @@ const configuration: RebalancingConfiguration = {
   money: { decimalPlaces: 2, maximumAmount: 10_000_000_000 },
   limits: {
     holdings: 500, assetClasses: 128, accounts: 256, orders: 256,
-    projectionMonths: 1200, scenarios: 20,
+    projectionPeriods: 1200, scenarios: 20,
     jsonNodes: 100_000, jsonDepth: 32, collectionEntries: 5000, textLength: 256,
   },
   cashAssetClass: "cash",
@@ -58,7 +58,7 @@ const configuration: RebalancingConfiguration = {
 | `money.maximumAmount` | Maximum input amount and total portfolio plus contribution; projected wealth uses the same bound |
 | `limits.holdings`, `assetClasses`, `accounts` | Maximum source rows, distinct held/target/planned classes and account declarations |
 | `limits.orders` | Maximum explicit plan orders and default generated order cap |
-| `limits.projectionMonths`, `scenarios` | Maximum projection horizon and comparison alternatives |
+| `limits.projectionPeriods`, `scenarios` | Maximum projection period count and comparison alternatives |
 | `limits.jsonNodes`, `jsonDepth`, `collectionEntries`, `textLength` | Resource budgets for JSON values, nesting, array/object entries and identifiers; include the configuration itself |
 | `cashAssetClass` | Class that represents retained funding and reserves |
 | `allowedCurrencies` | Optional reporting-currency allow-list; any nonempty identifier is otherwise accepted |
@@ -75,6 +75,8 @@ import { compareRebalance } from "@investboard/rebalancing";
 
 const result = compareRebalance({
   configuration,
+  purchasePlacement: { mode: "largest_holding" },
+  cashDeployment: { mode: "preserve" },
   baseCurrency: "EUR",
   holdings: [
     { holdingId: "equity", depotId: "A", assetClass: "equities", value: 70000, currency: "EUR" },
@@ -111,9 +113,38 @@ Every monetary value is already in `baseCurrency`. The engine performs no FX con
 
 Policy targets are fractions summing to one within `1e-9`, with `0 <= min <= target <= max <= 1`. Unlisted classes have zero target/corridor. Zero total wealth has unknown percentages, represented by `null`.
 
-Positive shortfalls use `target × (current wealth + new net cash) − current class value`. A constrained budget shares them proportionally; largest remainders reconcile minor units. The configured cash class, reserve gaps, skipped minimums and rounding remainders stay in cash. Existing cash belongs to the book and reserve; reallocating it requires an explicit sale of that cash holding.
+Positive shortfalls use `target × (current wealth + new net cash) − current class value`. A constrained budget shares them proportionally; largest remainders reconcile minor units. The configured cash class, reserve gaps, skipped minimums and rounding remainders stay in cash. The host chooses whether existing cash remains in the reserve book or is available to fund allocations, as described below.
 
-`cashFloor` defaults to zero, `minTradeSize` to one configured minor unit and `maxTrades` to `configuration.limits.orders`. Account caps and increments are applied before surviving purchases are ranked largest first and capped by order count. Class-name ties are deterministic. The selected existing holding is the largest in its class, then the smallest holding ID; unheld classes use `holdingId: null`. No ticker, price or share quantity is invented.
+`cashFloor` defaults to zero, `minTradeSize` to one configured minor unit and `maxTrades` to `configuration.limits.orders`. Account caps and increments are applied before the selected placement policy orders surviving purchases and applies the order-count cap. Largest-holding mode uses largest-amount admission with deterministic class-name ties. With `purchasePlacement: { mode: "largest_holding" }`, the selected holding is the largest in its class, then the smallest holding ID. Unheld classes use `holdingId: null`. No ticker, price or share quantity is invented.
+
+### Choose purchase placement
+
+Placement is required; the package has no implicit placement preset. Use largest-holding mode as above or supply ordered routes:
+
+```ts
+purchasePlacement: {
+  mode: "ordered_routes",
+  routes: [
+    { assetClass: "equities", holdingId: "preferred", depotId: "B" },
+    { assetClass: "equities", holdingId: "overflow", depotId: "C" },
+    { assetClass: "bonds", holdingId: null, depotId: "B" },
+  ],
+}
+```
+
+Routes bind to matching held class/depot identities, or use `null` for a class allocation. For each class, rejected, capped and rounded amounts spill to its next route. Across classes, route order controls admission under `maxTrades`. Unrouted classes and amounts beyond all route capacities stay cash. Largest-holding mode keeps largest-amount order admission. Account `maximum` remains a per-order cap; routing can create multiple orders in one class, each with its own fee.
+
+### Choose existing-cash funding
+
+Every comparison declares `cashDeployment`. `{ mode: "preserve" }` keeps existing cash outside the funding budget. Alternatively:
+
+```ts
+cashDeployment: { mode: "deploy_excess", holdingIds: ["cash-B", "cash-A"] }
+```
+
+The ordered, unique source IDs must name cash holdings. Only these sources can release cash, and aggregate releases cannot reduce the whole book's cash below `cashFloor`. Unlisted cash still counts toward that pooled reserve. Explicit cash sales reduce the amount releasable from the same holding, preventing double use. A `keep` scenario never releases cash.
+
+`cashReleases` records each source amount and `existingCashReleased` reports its sum, separately from `externalCash` and gross sales. Released cash enters the scenario's funding budget without a security order, sale tax or withdrawal fee. Unspent released amounts remain cash. The ledger records budget availability, not executed withdrawals. Sources declare spendable cash balances; model securities that need liquidation and their costs as explicit sales. Depot funding and required transfers include these amounts; cross-depot funding still requires transfer confirmation.
 
 Corridors are descriptive: affordable partial progress may be feasible while outside a corridor. The cash floor is a hard funding constraint.
 
@@ -160,7 +191,7 @@ Each sale names one source holding, appears at most once and cannot exceed its v
 
 Tax and per-order fees follow the holding's depot. `funding` exposes external cash, gross sales, attributed taxes/fees, purchases, net inflow and required transfers per depot. `transfersConfirmed: true` acknowledges that assumption without moving money. Unknown local costs withhold the corresponding transfer amount.
 
-Only the scenario's external cash and explicit sale proceeds fund purchases. Omitted purchases leave proceeds in cash. With known costs:
+The scenario's external cash, explicit sale proceeds and selected existing-cash releases fund purchases. Existing cash is an internal funding source and never increases modeled wealth. Omitted purchases leave proceeds in cash. With known costs:
 
 ```text
 valueAfter = valueBefore + externalCash - feeCost - taxCost
@@ -172,7 +203,7 @@ Explicit orders are never silently rounded or resized after tax/fee estimates ha
 
 ## Allocate and project directly
 
-`allocateContribution({ configuration, positions, policy, contribution, cashFloor?, minTradeSize?, maxTrades? })` returns pooled class allocations, retained cash and post-contribution wealth, without account rules or fees. `proportion` is each allocation's share of the contribution; admitted shares need not sum to one.
+`allocateContribution({ configuration, positions, policy, contribution, cashDeployment, cashFloor?, minTradeSize?, maxTrades? })` returns pooled class allocations, retained cash and post-contribution wealth, without account rules or fees. `cashDeployment` is required: `preserve` or `deploy_excess`. The latter releases pooled cash above `cashFloor`. `existingCashReleased` reports that amount; `proportion` is each allocation's share of the contribution plus released cash. `retainedCash` is the unspent funding budget, including unspent released cash. Post-contribution wealth adds only new contributions; admitted shares need not sum to one.
 
 ```ts
 import { projectContributions } from "@investboard/rebalancing";
@@ -181,15 +212,20 @@ const projection = projectContributions({
   configuration,
   positions: [{ assetClass: "equities", value: 70000 }, { assetClass: "bonds", value: 30000 }],
   policy: result.snapshot.request.policy,
-  monthlyContribution: 100, months: 12, minTradeSize: 1000,
+  cashSweep: "retain",
+  contributions: 100, periods: 12, periodsPerYear: 12, minTradeSize: 1000,
   annualReturns: { equities: 0, bonds: 0, cash: 0 },
 });
 // All 12 contributions remain cash below the minimum.
 ```
 
-Supply explicit annual effective fractions for every held/target class and the configured cash class. There are no default returns. Each month applies `(1 + annualReturn) ** (1/12)`, rounds each class to configured minor units, adds one contribution and re-solves shortfalls. Retained cash accumulates but is not automatically swept into subsequent purchases.
+`cashSweep` is required: `retain` keeps skipped cash outside future deployment budgets; `reinvest_excess` makes accumulated cash above the floor available each period. For example, contributions of 100 under a 150 minimum remain cash in period one and can fund a 200 allocation in period two when sweeping is selected. Existing cash is subtracted from its original position before allocations/retained budget are added back, so it is never counted twice.
 
-Projections omit broker fees, transfers and taxes, use no wall clock and predict no returns. Horizon, wealth and optional return bounds come from your configuration; returns must always be finite and at least -1. `retainedCash` is new cash retained that month. `projectContributions(projection.request)` reproduces the result.
+`periodsPerYear` chooses cadence (12 monthly, 4 quarterly, 52 weekly, or another positive integer). `periods` is bounded by `configuration.limits.projectionPeriods`. `contributions` is one constant amount or an array with exactly one amount per period. `annualReturns` is one class map or an equally long array of class maps. Supply annual-effective fractions for every held/target class and the configured cash class in every map. Each period applies `(1 + annualReturn) ** (1 / periodsPerYear)` before adding its contribution. No return or cadence is inferred.
+
+For changing assumptions, use inputs such as `contributions: [100, 200]` and `annualReturns: [{ equities: 0.04, bonds: 0.02, cash: 0 }, { equities: -0.1, bonds: 0.01, cash: 0 }]` with `periods: 2`. Dates and market paths belong to the host. Each timeline entry records its `period`, `contribution`, `existingCashReleased`, total value and positions.
+
+Projections omit broker fees, transfers and taxes and use no wall clock. Horizon, wealth and optional return bounds come from your configuration; returns must remain finite and at least -1. `retainedCash` is the unspent period funding budget, which can include swept cash. `projectContributions(projection.request)` reproduces the result.
 
 ## Save, replay and upgrade
 
@@ -199,13 +235,15 @@ const saved = JSON.stringify(result.snapshot);
 const reproduced = replayRebalanceComparison(JSON.parse(saved));
 ```
 
-Comparisons use `rebalance-comparison-v3`; projections use `contribution-projection-v2`. Snapshots defensively copy all inputs, including host configuration, fee declarations and scenario choices. They are not signed or independently verified. Your host owns access, storage and review workflows.
+Comparisons use `rebalance-comparison-v4`; projections use `contribution-projection-v3`. Snapshots defensively copy all inputs, including host configuration, fee declarations and scenario choices. They are not signed or independently verified. Your host owns access, storage and review workflows.
 
 Inputs must be plain JSON data: no functions, accessors, symbols, dates, cycles, sparse arrays or non-finite numbers. Omit optional fields instead of passing `undefined`. Invalid inputs raise `RebalanceInputError`. Incomplete supported evidence produces conditional/unavailable results.
 
-**0.3.0 is a breaking API change.** Add `configuration` to allocation/projection requests. For comparison requests, remove root `contribution`, `cashLimit` and `salePlan`, and map them to explicit contribution/plan scenarios as shown above. If you want the former four kinds, declare those four IDs yourself and use an unavailable scenario when no sale plan exists.
+**0.4.0 is a breaking API change.** From 0.3.0, add `purchasePlacement` and `cashDeployment` to comparisons and `cashDeployment` to direct allocations. To preserve the prior public behavior, explicitly choose largest-holding placement and preserved cash. Add `cashSweep: "retain"` to preserve the prior projection policy. No product defaults are supplied by the library.
 
-Comparison v1/v2 replay is refused. Explicitly migrate the stored request, choose the host policy, calculate and review a new v3 result, and store it separately. Keep the original result and exact prior package for historical reproduction. Projection requests also need explicit configuration to be recalculated under v2. See [CHANGELOG.md](CHANGELOG.md).
+Rename configured `limits.projectionMonths` to `limits.projectionPeriods`. Map projection `months` to `periods`, `monthlyContribution` to `contributions`, and set `periodsPerYear: 12` to preserve monthly cadence. Rename timeline `month` to `period`. Single return maps remain supported, alongside period paths.
+
+Comparison v1/v2/v3 replay is refused. Explicitly migrate the stored request, choose policies, calculate and review a new v4 result, and store it separately. Keep original results and the exact prior package for historical reproduction. For 0.1/0.2 requests, also supply a host configuration and map old root contribution/cashLimit/salePlan fields to explicit scenarios. See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

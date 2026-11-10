@@ -10,7 +10,7 @@ export interface RebalancingConfiguration {
 		assetClasses: number;
 		accounts: number;
 		orders: number;
-		projectionMonths: number;
+		projectionPeriods: number;
 		scenarios: number;
 		jsonNodes: number;
 		jsonDepth: number;
@@ -54,7 +54,25 @@ export interface AllocationPreferences {
 	/** Default: the caller's configured order limit. */
 	maxTrades?: number;
 }
+export type CashDeployment = "preserve" | "deploy_excess";
+export type PurchasePlacement =
+	| { mode: "largest_holding" }
+	| { mode: "ordered_routes"; routes: PurchaseRoute[] };
+export interface PurchaseRoute {
+	assetClass: string;
+	holdingId: string | null;
+	depotId: string;
+}
+export type CashFundingPolicy =
+	| { mode: "preserve" }
+	| { mode: "deploy_excess"; holdingIds: string[] };
+/** Cash released to a scenario's funding budget; this is not a security sale. */
+export interface CashRelease {
+	holdingId: string;
+	amount: number;
+}
 export interface AllocationRequest extends AllocationPreferences {
+	cashDeployment: CashDeployment;
 	configuration: RebalancingConfiguration;
 	positions: AllocationPosition[];
 	policy: AllocationPolicy;
@@ -67,6 +85,7 @@ export interface ContributionAllocation {
 	proportion: number;
 }
 export interface ContributionResult {
+	existingCashReleased: number;
 	allocations: ContributionAllocation[];
 	retainedCash: number;
 	postContributionValue: number;
@@ -103,6 +122,8 @@ export interface SalePlan {
 	purchases: Purchase[];
 }
 export interface RebalanceRequest extends AllocationPreferences {
+	purchasePlacement: PurchasePlacement;
+	cashDeployment: CashFundingPolicy;
 	configuration: RebalancingConfiguration;
 	baseCurrency: ReportingCurrency;
 	holdings: Holding[];
@@ -141,6 +162,7 @@ export interface AllocationRow {
 	inRange: boolean | null;
 }
 export interface FundingRow {
+	existingCashReleased: number;
 	depotId: string;
 	externalCash: number;
 	grossSales: number;
@@ -168,6 +190,8 @@ export type BuiltinReasonCode =
 	| "reserve_shortfall"
 	| "funding_transfer_required";
 export interface RebalanceAlternative {
+	existingCashReleased: number;
+	cashReleases: CashRelease[];
 	kind: AlternativeKind;
 	feasibility: Feasibility;
 	reasonCodes: ReasonCode[];
@@ -186,11 +210,11 @@ export interface RebalanceAlternative {
 	sales: Sale[];
 }
 export interface RebalanceSnapshot {
-	methodologyVersion: "rebalance-comparison-v3";
+	methodologyVersion: "rebalance-comparison-v4";
 	request: RebalanceRequest;
 }
 export interface RebalanceComparison {
-	methodologyVersion: "rebalance-comparison-v3";
+	methodologyVersion: "rebalance-comparison-v4";
 	baseCurrency: ReportingCurrency;
 	priority: Priority;
 	valueBefore: number | null;
@@ -203,14 +227,18 @@ export interface ProjectionRequest extends AllocationPreferences {
 	positions: AllocationPosition[];
 	policy: AllocationPolicy;
 	cashFloor?: number;
-	monthlyContribution: number;
-	/** Caller-bounded horizon; first month includes one contribution after returns. */
-	months: number;
-	/** Explicit annual effective fractions for every class, including cash. No default returns. */
-	annualReturns: Record<string, number>;
+	cashSweep: "retain" | "reinvest_excess";
+	periods: number;
+	periodsPerYear: number;
+	/** Constant contribution or one explicit amount per period. */
+	contributions: number | number[];
+	/** Constant assumptions or one annual-effective class map per period. */
+	annualReturns: Record<string, number> | Record<string, number>[];
 }
-export interface ProjectionMonth {
-	month: number;
+export interface ProjectionPeriod {
+	period: number;
+	contribution: number;
+	existingCashReleased: number;
 	value: number;
 	retainedCash: number;
 	allocations: ContributionAllocation[];
@@ -218,8 +246,8 @@ export interface ProjectionMonth {
 	rows: AllocationRow[];
 }
 export interface ContributionProjection {
-	methodologyVersion: "contribution-projection-v2";
+	methodologyVersion: "contribution-projection-v3";
 	/** Defensive copy of the complete assumptions, suitable for JSON storage. */
 	request: ProjectionRequest;
-	timeline: ProjectionMonth[];
+	timeline: ProjectionPeriod[];
 }

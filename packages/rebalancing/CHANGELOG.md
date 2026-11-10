@@ -1,6 +1,14 @@
 # Changelog
 
-## 0.3.0 (unreleased)
+## 0.4.0 (unreleased)
+
+- Require host-selected purchase placement and existing-cash funding policies. Ordered routes spill broker-capped/rounded amounts to subsequent destinations and determine order admission priority. Largest-holding placement remains an explicit option.
+- Release host-selected existing cash above the pooled reserve without a security sale, tax estimate, extra fee or wealth inflation. Report cash releases separately from external cash and sales in alternatives and depot funding.
+- Require projection cash handling: retain skipped cash or reinvest excess cash in later periods. Direct pooled allocations also require an existing-cash deployment choice.
+- Generalize projections to explicit periods/cadence, constant or per-period contributions, and constant or per-period annual-effective return paths. Rename the configured horizon to projectionPeriods.
+- Use comparison v4 and projection v3. Older comparison replay is refused; migration requires explicit policies and projection field mapping. No Investboard policy preset is exported.
+
+## 0.3.0
 
 - Require a caller-supplied configuration for monetary precision, maximum wealth, capacities, cash class, optional currency allow-list and optional return bounds. Remove the public EUR/USD, cent, 200-holding, 32-class, 100-order/account, 600-month and billion-unit product limits.
 - Accept caller-defined scenario IDs and lists: keep, contribution, explicit plan (including contributions with sales), and explicitly unavailable scenarios. Default ordering preserves the input list.

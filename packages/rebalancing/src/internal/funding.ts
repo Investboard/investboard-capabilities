@@ -1,4 +1,5 @@
 import type {
+	CashRelease,
 	FundingRow,
 	Purchase,
 	ReasonCode,
@@ -14,6 +15,7 @@ export function fundingEvidence(
 	sales: Sale[],
 	purchases: Purchase[],
 	ctx: CalculationContext,
+	cashReleases: CashRelease[],
 ): {
 	funding: FundingRow[];
 	reasons: ReasonCode[];
@@ -29,10 +31,15 @@ export function fundingEvidence(
 		...sale,
 		depotId: byId.get(sale.holdingId)!.depotId,
 	}));
+	const placedCash = cashReleases.map((c) => ({
+		...c,
+		depotId: byId.get(c.holdingId)!.depotId,
+	}));
 	const ids = [
 		...new Set([
 			request.fundingDepotId,
 			...placedSales.map((s) => s.depotId),
+			...placedCash.map((c) => c.depotId),
 			...purchases.map((p) => p.depotId),
 		]),
 	].sort();
@@ -61,9 +68,15 @@ export function fundingEvidence(
 		if (tax === null) reasons.add("sale_tax_unknown");
 		const cash =
 			depotId === request.fundingDepotId ? money.units(externalCash) : 0;
+		const existingCash = money.sum(
+			placedCash
+				.filter((c) => c.depotId === depotId)
+				.map((c) => money.units(c.amount)),
+		);
 		const gross = money.sum(localSales.map((s) => money.units(s.amount)));
 		const spent = money.sum(localBuys.map((p) => money.units(p.amount)));
-		const inflow = tax === null ? null : money.sum([cash, gross, -tax]);
+		const inflow =
+			tax === null ? null : money.sum([cash, existingCash, gross, -tax]);
 		const transfer =
 			inflow === null || fees === null
 				? null
@@ -72,6 +85,7 @@ export function fundingEvidence(
 			reasons.add("funding_transfer_required");
 		return {
 			depotId,
+			existingCashReleased: money.amount(existingCash),
 			externalCash: money.amount(cash),
 			grossSales: money.amount(gross),
 			taxCost: tax === null ? null : money.amount(tax),
