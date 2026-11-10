@@ -12,6 +12,10 @@ export function fromEuros(value: number): Cents {
 export function toEuros(value: Cents): number {
 	return value / 100;
 }
+/** Normalize a reporting-currency total at a monetary boundary. */
+export function roundMoney(value: number): number {
+	return toEuros(fromEuros(value));
+}
 export function sumCents(values: Cents[]): Cents {
 	return asCents(values.reduce((sum, value) => sum + value, 0));
 }
