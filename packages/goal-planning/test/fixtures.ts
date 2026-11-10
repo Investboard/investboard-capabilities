@@ -1,6 +1,8 @@
 import type { GoalCashRequest } from "../src/index.js";
 
-export function request(overrides: Partial<GoalCashRequest> = {}): GoalCashRequest {
+export function request(
+	overrides: Partial<GoalCashRequest> = {},
+): GoalCashRequest {
 	return {
 		reportingCurrency: "EUR",
 		asOfDate: "2026-01-01",
@@ -11,10 +13,15 @@ export function request(overrides: Partial<GoalCashRequest> = {}): GoalCashReque
 		paymentsTreatment: "already_netted",
 		recurringPayments: [],
 		liquidityNeeds: [{ id: "expense", dueDate: "2027-01-01", amount: 1000 }],
-		goals: [{
-			id: "goal", deadline: "2027-01-01", monthlyContribution: 500,
-			targetAmount: 10000, startingCapital: { amount: 0, asOfDate: "2026-01-01", sourceIds: [] },
-		}],
+		goals: [
+			{
+				id: "goal",
+				deadline: "2027-01-01",
+				monthlyContribution: 500,
+				targetAmount: 10000,
+				startingCapital: { amount: 0, asOfDate: "2026-01-01", sourceIds: [] },
+			},
+		],
 		...overrides,
 	};
 }

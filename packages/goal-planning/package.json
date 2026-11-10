@@ -4,7 +4,12 @@
 	"description": "Deadline-aware cash feasibility for competing goals, protected reserves and dated obligations with reproducible inputs",
 	"type": "module",
 	"license": "Apache-2.0",
-	"files": ["dist", "README.md", "LICENSE", "NOTICE"],
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE",
+		"NOTICE"
+	],
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
@@ -16,11 +21,15 @@
 		"build": "tsc -p tsconfig.json",
 		"typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json"
 	},
-	"engines": { "node": ">=22" },
+	"engines": {
+		"node": ">=22"
+	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/Investboard/investboard-capabilities.git",
 		"directory": "packages/goal-planning"
 	},
-	"publishConfig": { "access": "public" }
+	"publishConfig": {
+		"access": "public"
+	}
 }
