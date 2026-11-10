@@ -1,4 +1,4 @@
-# Stress testing v0.1.0 — release review
+# Stress testing v0.1.0: release review
 
 Reviewer: independent coding agent, separate from the implementation agent. This is an engineering review of the documented calculation scope.
 
