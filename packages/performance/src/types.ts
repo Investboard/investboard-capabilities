@@ -92,7 +92,7 @@ export interface PerformanceRequest {
 }
 
 export interface PerformanceSnapshot {
-	readonly methodologyVersion: "actual-position-performance-v2";
+	readonly methodologyVersion: "actual-position-performance-v3";
 	readonly request: PerformanceRequest;
 }
 

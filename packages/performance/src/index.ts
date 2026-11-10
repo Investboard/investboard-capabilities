@@ -27,7 +27,7 @@ import type {
 export type * from "./types.js";
 export { PerformanceInputError } from "./validation.js";
 export { LIMITS } from "./limits.js";
-export const METHODOLOGY_VERSION = "actual-position-performance-v2" as const;
+export const METHODOLOGY_VERSION = "actual-position-performance-v3" as const;
 
 /** Pure, deterministic calculation. All monetary inputs share reporting currency. */
 export function evaluatePerformance(

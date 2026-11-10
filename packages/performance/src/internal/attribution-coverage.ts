@@ -4,7 +4,7 @@ import type {
 	HoldingValueSeries,
 } from "./performance/holding-attribution.js";
 import type { Snapshot } from "./performance/types.js";
-import { roundMoney } from "./money/cents.js";
+import { sumMoney } from "./money/cents.js";
 
 export function firstUnlinkedCapitalDate(
 	flows: readonly AttributedCashFlow[],
@@ -51,8 +51,8 @@ export function attributionCoverage(
 		if (!start || !end) continue;
 		const days = (Date.parse(end) - Date.parse(start)) / 86_400_000;
 		const values = maps.map((map) => map.get(start));
-		const knownCapital = roundMoney(
-			values.reduce<number>((sum, value) => sum + Math.max(0, value ?? 0), 0),
+		const knownCapital = sumMoney(
+			values.map((value) => Math.max(0, value ?? 0)),
 		);
 		const unknownCapital =
 			unknownExposureDates.has(start) ||
@@ -65,13 +65,11 @@ export function attributionCoverage(
 			continue;
 		}
 		if (days <= 0 || denominator <= 0) continue;
-		const valued = roundMoney(
-			maps.reduce(
-				(sum, map) =>
-					map.get(start) != null && map.get(end) != null
-						? sum + Math.max(0, map.get(start) ?? 0)
-						: sum,
-				0,
+		const valued = sumMoney(
+			maps.map((map) =>
+				map.get(start) != null && map.get(end) != null
+					? Math.max(0, map.get(start) ?? 0)
+					: 0,
 			),
 		);
 		if (unknownCapital && valued >= denominator * (1 - 1e-10))

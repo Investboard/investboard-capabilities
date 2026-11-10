@@ -289,14 +289,17 @@ describe("public audit regressions", () => {
 			).toBe(true);
 		}
 	});
-	it("versions corrected results and requires explicit recalculation of v1 inputs", () => {
+	it.each([
+		"actual-position-performance-v1",
+		"actual-position-performance-v2",
+	])("requires explicit recalculation of %s inputs", (methodologyVersion) => {
 		const result = evaluatePerformance(incoming(1.005, 1.01));
 		expect(result.snapshot.methodologyVersion).toBe(
-			"actual-position-performance-v2",
+			"actual-position-performance-v3",
 		);
 		const legacy = {
 			...result.snapshot,
-			methodologyVersion: "actual-position-performance-v1",
+			methodologyVersion,
 		};
 		expect(() => replayPerformance(legacy as never)).toThrow(
 			PerformanceInputError,

@@ -27,11 +27,11 @@
 		{
 			"id": "performance",
 			"name": "Historical portfolio performance",
-			"version": "0.2.0",
+			"version": "0.3.0",
 			"package": "@investboard/performance",
 			"path": "packages/performance",
 			"license": "Apache-2.0",
-			"methodologyVersion": "actual-position-performance-v2",
+			"methodologyVersion": "actual-position-performance-v3",
 			"description": "Explain historical returns, actual-position contributions, quote FX and estimated embedded fund costs with caller-supplied evidence and reproducible replay.",
 			"documentation": "packages/performance/README.md"
 		}
