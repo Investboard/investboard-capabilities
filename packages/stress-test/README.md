@@ -4,6 +4,8 @@ Explore how your current portfolio responds to market-crisis scenarios, see whic
 
 `@investboard/stress-test` is a standalone TypeScript module from [Investboard](https://investboard.com). It combines named historical scenarios, optional price and FX inputs, holding-level explanations, and reproducible JSON snapshots. It has **no runtime dependencies** and makes no network calls.
 
+See the platform's [stress-test methodology and evidence limits](https://investboard.com/knowledge/methodology#stress-scenarios) for the wider product context. This module's documentation defines its own scenario inputs, configurable assumptions and replay contract.
+
 ## What you can build
 
 - A crisis view in your personal portfolio dashboard.
