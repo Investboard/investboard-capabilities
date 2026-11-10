@@ -2,9 +2,9 @@
 
 ## Build your own investing engine
 
-Bring [Investboard](https://investboard.com) portfolio analysis into your own code. Use reusable TypeScript modules to explore how your current holdings respond to market crises, understand what drives the change, and make the assumptions visible in your own investing tools.
+Bring [Investboard](https://investboard.com) portfolio analysis into your own code. Use reusable TypeScript modules to explore market crises, explain historical performance, and make the assumptions visible in your own investing tools.
 
-Start with the **[portfolio stress-testing engine](packages/stress-test)**. Run it locally, connect your own data, and build the experience you want around it.
+Start with the **[portfolio stress-testing engine](packages/stress-test)** or **[performance engine](packages/performance)**. Run them locally, connect your own data, and build the experience you want around them.
 
 **[Run the example](#try-it-with-your-own-code)** · **[Explore the API](packages/stress-test/README.md)**
 
@@ -17,6 +17,7 @@ A holdings list tells you what you own. Scenario analysis helps you explore how 
 | Personal portfolio dashboard | Show how today's holdings respond to a financial crisis, a pandemic crash or a rate shock |
 | Portfolio comparison tool | Run different mixes through the same scenario and compare the drivers of the change |
 | Investing research script | Supply your own price and FX history, inspect coverage, and save inputs for a reproducible replay |
+| Historical performance dashboard | Separate funding from gains, explain holding contributions and quote FX, and estimate embedded fund expenses |
 
 ## Start with portfolio stress testing
 
@@ -32,6 +33,12 @@ The engine runs without an Investboard account, API key or runtime dependencies.
 
 Historical scenarios use sourced, rounded assumptions. The outputs are hypothetical illustrations of today's holdings, with explicit coverage and limitations.
 
+## Explain historical performance
+
+The [performance engine](packages/performance) reconstructs the positions actually held, calculates cash-flow-adjusted returns, and preserves unexplained effects as an explicit residual. Supply your own NAV, ledger, prices and dated FX evidence. It supports historical basket selection, custody transfer valuation, capital-weighted coverage and JSON replay. Current recorded fund rates produce a labeled expense estimate without a second deduction from observed returns.
+
+Run its synthetic price/FX example with `pnpm example:performance`. See the [API and accounting conventions](packages/performance/README.md) before connecting real history.
+
 ## Try it with your own code
 
 Use Node 22 or newer and pnpm 9.15.0:
@@ -43,7 +50,7 @@ pnpm install --frozen-lockfile
 pnpm example
 ```
 
-The example uses synthetic holdings to show why two quote currencies do not automatically imply two different economic exposures. It also saves and replays the original inputs.
+The examples use synthetic holdings to demonstrate stress assumptions, separate historical price/FX effects, and replay original inputs.
 
 Ready to add it to your own engine? **[Build and use the module](packages/stress-test/README.md#use-it-in-your-project)**, then choose the scenarios and data sources that fit your workflow.
 
@@ -52,6 +59,7 @@ Ready to add it to your own engine? **[Build and use the module](packages/stress
 | Module | Package | Documentation |
 | --- | --- | --- |
 | Portfolio stress testing | `@investboard/stress-test` | [API, examples and assumptions](packages/stress-test/README.md) |
+| Historical portfolio performance | `@investboard/performance` | [API, accounting conventions and replay](packages/performance/README.md) |
 
 [Browse the module catalogue](capabilities.json) · [Contribute a capability or improvement](CONTRIBUTING.md)
 

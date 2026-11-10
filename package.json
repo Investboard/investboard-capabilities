@@ -9,7 +9,8 @@
 		"build": "pnpm -r build",
 		"typecheck": "pnpm -r typecheck",
 		"test": "vitest run",
-		"example": "pnpm build && node packages/stress-test/examples/replay.mjs",
+		"example": "pnpm build && node packages/stress-test/examples/replay.mjs && node packages/performance/examples/replay.mjs",
+		"example:performance": "pnpm --filter @investboard/performance build && node packages/performance/examples/replay.mjs",
 		"format": "biome format --write .",
 		"format:check": "biome format ."
 	},

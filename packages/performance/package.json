@@ -1,0 +1,35 @@
+{
+	"name": "@investboard/performance",
+	"version": "0.1.0",
+	"description": "Explain portfolio performance with actual-position replay, cash-flow-adjusted returns, price and FX attribution, historical expense estimates and reproducible inputs",
+	"type": "module",
+	"license": "Apache-2.0",
+	"files": [
+		"dist",
+		"README.md",
+		"LICENSE",
+		"NOTICE"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"prepack": "pnpm --silent build",
+		"build": "tsc -p tsconfig.json",
+		"typecheck": "tsc -p tsconfig.json --noEmit"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Investboard/investboard-capabilities.git",
+		"directory": "packages/performance"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}
