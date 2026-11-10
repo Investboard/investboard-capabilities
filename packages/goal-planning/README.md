@@ -4,6 +4,8 @@ Explore whether a shared cash balance can fund competing goals while protecting 
 
 The TypeScript module has no runtime dependencies, network calls, account access or wall clock. Your application supplies dated cash, obligations, goal requests and any starting-capital evidence. It returns a shared exact-cent ledger, each goal's funded contribution stream and a no-growth target gap.
 
+The platform's [projection methodology](https://investboard.com/knowledge/methodology#projektionen) explains how investment returns and purchasing power are modeled separately. This cash-scheduling module does not supply that return model; its timing and funding rules are documented below.
+
 ## Run the synthetic example
 
 From the repository root, use Node 22 or newer and pnpm 9.15.0:

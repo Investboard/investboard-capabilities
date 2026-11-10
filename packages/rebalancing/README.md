@@ -4,6 +4,8 @@
 
 The TypeScript module has **no runtime dependencies** and makes no network calls. Account access, providers, valuation freshness, tax calculation, execution and persistence belong to the hosting application. It does not select sales or invent instruments.
 
+Read the platform's [rebalancing methodology](https://investboard.com/knowledge/methodology#rebalancing) for the distinction between allocation drift, target ranges and modeled comparisons. The configurable standalone behavior is documented below; this library exports no product preset.
+
 ## Run the example
 
 From the repository root, use Node 22 or newer and pnpm 9.15.0:

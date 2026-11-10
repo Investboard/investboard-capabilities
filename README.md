@@ -8,6 +8,14 @@ Start with **[portfolio stress testing](packages/stress-test)**, **[contribution
 
 **[Run the examples](#try-it-with-your-own-code)** · **[Explore the modules](#available-modules)**
 
+## Methodology and evidence
+
+Read [how Investboard measures portfolios](https://investboard.com/knowledge/methodology): valuation scope, returns, concentration, risk, mandate scores, costs, German tax assumptions, projections, stress scenarios and the boundary between calculations and AI explanations. The reference includes formulas, labeled examples, data limitations and primary sources.
+
+The website explains the platform's approach. Each module's own documentation below defines the inputs, units, configurable assumptions and behavior of that standalone library. A product default is not automatically a default of an exported module.
+
+Choose your reading language: [English](https://investboard.com/knowledge/methodology) · [Deutsch](https://investboard.com/de/wissen/methodik) · [Español](https://investboard.com/es/knowledge/methodology) · [Italiano](https://investboard.com/it/knowledge/methodology) · [Français](https://investboard.com/fr/knowledge/methodology) · [Nederlands](https://investboard.com/nl/knowledge/methodology) · [Čeština](https://investboard.com/cs/knowledge/methodology) · [Polski](https://investboard.com/pl/knowledge/methodology) · [Русский](https://investboard.com/ru/knowledge/methodology) · [Українська](https://investboard.com/uk/knowledge/methodology).
+
 ## Turn portfolio data into useful questions
 
 A holdings list tells you what you own. Scenario analysis helps you explore how that mix responds when markets change.

@@ -4,6 +4,8 @@
 
 The module is standalone TypeScript from [Investboard](https://investboard.com), under Apache License 2.0. It has no runtime dependencies, makes no network calls, and needs no account or API key. All examples and test data are synthetic.
 
+For the platform's related measurement conventions, see [return measurement](https://investboard.com/knowledge/methodology#rendite-messung) and [costs and after-tax performance](https://investboard.com/knowledge/methodology#costs-and-tax-returns). This module's API and accounting rules below remain the reference for caller-supplied history.
+
 ## Run it locally
 
 Use Node 22 or newer and pnpm 9.15.0 from the repository root:
