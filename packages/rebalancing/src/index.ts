@@ -1,3 +1,4 @@
+import { releaseCash } from "./internal/cash-funding.js";
 import type {
 	RebalanceComparison,
 	RebalanceRequest,
@@ -15,7 +16,7 @@ export { MAX_SAFE_MINOR_UNITS } from "./internal/money.js";
 export { RebalanceInputError } from "./validation.js";
 export { allocateContribution } from "./contribution.js";
 export { projectContributions } from "./projection.js";
-export const METHODOLOGY_VERSION = "rebalance-comparison-v3" as const;
+export const METHODOLOGY_VERSION = "rebalance-comparison-v4" as const;
 
 /** Compare caller-selected scenarios for one reporting-currency book. */
 export function compareRebalance(input: RebalanceRequest): RebalanceComparison {
@@ -41,16 +42,19 @@ export function compareRebalance(input: RebalanceRequest): RebalanceComparison {
 				: request;
 		switch (scenario.mode) {
 			case "keep":
-				return assess(scope, scenario.kind, 0, [], [], ctx);
-			case "contribution":
+				return assess(scope, scenario.kind, 0, [], [], ctx, []);
+			case "contribution": {
+				const cash = releaseCash(scope, [], ctx);
 				return assess(
 					scope,
 					scenario.kind,
 					externalCash,
 					[],
-					cashPurchases(scope, externalCash, ctx),
+					cashPurchases(scope, externalCash, ctx, cash),
 					ctx,
+					cash,
 				);
+			}
 			case "plan":
 				return assess(
 					scope,
@@ -59,6 +63,7 @@ export function compareRebalance(input: RebalanceRequest): RebalanceComparison {
 					scenario.plan.sales,
 					scenario.plan.purchases,
 					ctx,
+					releaseCash(scope, scenario.plan.sales, ctx),
 				);
 		}
 	});

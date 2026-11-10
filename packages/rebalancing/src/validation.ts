@@ -1,3 +1,8 @@
+import {
+	validateCashDeployment,
+	validateCashFunding,
+	validatePlacement,
+} from "./internal/validate-policies.js";
 import type { CalculationContext } from "./configuration.js";
 import { calculationContext } from "./configuration.js";
 import {
@@ -37,6 +42,7 @@ export function validateAllocation(input: unknown): CalculationContext {
 			"positions",
 			"policy",
 			"contribution",
+			"cashDeployment",
 			"cashFloor",
 			"minTradeSize",
 			"maxTrades",
@@ -45,6 +51,7 @@ export function validateAllocation(input: unknown): CalculationContext {
 	);
 	const ctx: CalculationContext = parsed.ctx;
 	const data = parsed.data;
+	validateCashDeployment(data.cashDeployment);
 	validatePolicy(data.policy, ctx);
 	validatePositions(data.positions, ctx);
 	ctx.money.requireMoney(data.contribution, "Contribution");
@@ -58,6 +65,8 @@ export function validateRequest(input: unknown): CalculationContext {
 		input,
 		[
 			"baseCurrency",
+			"purchasePlacement",
+			"cashDeployment",
 			"holdings",
 			"policy",
 			"scenarios",
@@ -80,6 +89,8 @@ export function validateRequest(input: unknown): CalculationContext {
 		"Reporting currency is outside the configured currency policy",
 	);
 	validateHoldings(data.holdings, ctx);
+	validateCashFunding(data.cashDeployment, data.holdings, ctx);
+	validatePlacement(data.purchasePlacement, data.holdings, ctx);
 	validatePolicy(data.policy, ctx);
 	checkClasses(data.holdings, data.policy, ctx);
 	preferences(data, ctx);
@@ -167,9 +178,11 @@ export function validateProjection(input: unknown): CalculationContext {
 			"positions",
 			"policy",
 			"cashFloor",
-			"monthlyContribution",
-			"months",
+			"contributions",
+			"periods",
+			"periodsPerYear",
 			"annualReturns",
+			"cashSweep",
 			"minTradeSize",
 			"maxTrades",
 		],
@@ -181,46 +194,68 @@ export function validateProjection(input: unknown): CalculationContext {
 	validatePolicy(data.policy, ctx);
 	checkClasses(data.positions, data.policy, ctx);
 	preferences(data, ctx);
-	ctx.money.requireMoney(data.monthlyContribution, "Monthly contribution");
 	requireInput(
-		typeof data.months === "number" &&
-			Number.isSafeInteger(data.months) &&
-			data.months >= 1 &&
-			data.months <= ctx.configuration.limits.projectionMonths,
+		data.cashSweep === "retain" || data.cashSweep === "reinvest_excess",
+		"Choose retain or reinvest_excess projection cash handling",
+	);
+	requireInput(
+		typeof data.periods === "number" &&
+			Number.isSafeInteger(data.periods) &&
+			data.periods >= 1 &&
+			data.periods <= ctx.configuration.limits.projectionPeriods,
 		"Projection exceeds the configured horizon",
 	);
 	requireInput(
-		data.annualReturns !== null &&
-			typeof data.annualReturns === "object" &&
-			!Array.isArray(data.annualReturns),
-		"Annual return assumptions are required",
+		typeof data.periodsPerYear === "number" &&
+			Number.isSafeInteger(data.periodsPerYear) &&
+			data.periodsPerYear > 0,
+		"Periods per year must be a positive safe integer",
 	);
-	requireShape(
-		data.annualReturns,
-		Object.keys(data.annualReturns),
-		"Annual returns",
+	if (Array.isArray(data.contributions)) {
+		requireInput(
+			data.contributions.length === data.periods,
+			"Contribution schedule must match the period count",
+		);
+		for (const amount of data.contributions)
+			ctx.money.requireMoney(amount, "Period contribution");
+	} else ctx.money.requireMoney(data.contributions, "Period contribution");
+	const assumptions = Array.isArray(data.annualReturns)
+		? data.annualReturns
+		: [data.annualReturns];
+	requireInput(
+		!Array.isArray(data.annualReturns) || assumptions.length === data.periods,
+		"Return schedule must match the period count",
 	);
 	const classes = new Set([
 		ctx.configuration.cashAssetClass,
 		...data.positions.map((p) => p.assetClass),
 		...Object.keys(data.policy),
 	]);
-	for (const key of classes)
+	for (const returns of assumptions) {
 		requireInput(
-			Object.hasOwn(data.annualReturns, key),
-			`Annual return assumption required for ${key}`,
+			returns !== null &&
+				typeof returns === "object" &&
+				!Array.isArray(returns),
+			"Annual return assumptions are required",
 		);
-	for (const rate of Object.values(data.annualReturns)) {
-		requireInput(
-			typeof rate === "number" && Number.isFinite(rate) && rate >= -1,
-			"Annual returns must be finite fractions at least -1",
-		);
-		const range = ctx.configuration.annualReturnRange;
-		if (range)
+		requireShape(returns, Object.keys(returns), "Annual returns");
+		for (const key of classes)
 			requireInput(
-				rate >= range.minimum && rate <= range.maximum,
-				"Annual return is outside the configured range",
+				Object.hasOwn(returns, key),
+				"Annual return assumption required for " + key,
 			);
+		for (const rate of Object.values(returns)) {
+			requireInput(
+				typeof rate === "number" && Number.isFinite(rate) && rate >= -1,
+				"Annual returns must be finite fractions at least -1",
+			);
+			const range = ctx.configuration.annualReturnRange;
+			if (range)
+				requireInput(
+					rate >= range.minimum && rate <= range.maximum,
+					"Annual return is outside the configured range",
+				);
+		}
 	}
 	return ctx;
 }

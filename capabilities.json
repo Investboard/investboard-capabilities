@@ -27,12 +27,12 @@
 		{
 			"id": "rebalancing",
 			"name": "Contribution-aware portfolio rebalancing",
-			"version": "0.3.0",
+			"version": "0.4.0",
 			"package": "@investboard/rebalancing",
 			"path": "packages/rebalancing",
 			"license": "Apache-2.0",
-			"methodologyVersion": "rebalance-comparison-v3",
-			"description": "Configure currency precision, capacities, fee models and scenarios; inspect reserve and depot funding, project contributions and replay recorded assumptions.",
+			"methodologyVersion": "rebalance-comparison-v4",
+			"description": "Choose placement routes and cash funding, configure precision and limits, project contribution and return paths with optional cash sweeps, and replay recorded assumptions.",
 			"documentation": "packages/rebalancing/README.md"
 		},
 		{

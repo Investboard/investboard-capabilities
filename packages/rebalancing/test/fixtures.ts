@@ -22,7 +22,7 @@ export const configuration: RebalancingConfiguration = {
 		assetClasses: 32,
 		accounts: 100,
 		orders: 100,
-		projectionMonths: 600,
+		projectionPeriods: 600,
 		scenarios: 100,
 		jsonNodes: 10_000,
 		jsonDepth: 16,
@@ -35,7 +35,7 @@ export const configuration: RebalancingConfiguration = {
 };
 export type RebalanceRequest = Omit<
 	PublicRequest,
-	"configuration" | "scenarios"
+	"configuration" | "scenarios" | "purchasePlacement" | "cashDeployment"
 > & {
 	contribution: number;
 	cashLimit: number;
@@ -52,6 +52,8 @@ export function compareRebalance(input: RebalanceRequest) {
 	return compare({
 		...rest,
 		configuration,
+		purchasePlacement: { mode: "largest_holding" },
+		cashDeployment: { mode: "preserve" },
 		scenarios: [
 			{ kind: "keep", mode: "keep" },
 			{ kind: "fresh_cash", mode: "contribution", externalCash: contribution },
@@ -67,11 +69,33 @@ export function compareRebalance(input: RebalanceRequest) {
 	});
 }
 export const allocateContribution = (
-	input: Omit<AllocationRequest, "configuration">,
-) => allocate({ configuration, ...input });
+	input: Omit<AllocationRequest, "configuration" | "cashDeployment">,
+) => allocate({ configuration, cashDeployment: "preserve", ...input });
+type HistoricalProjection = Omit<
+	ProjectionRequest,
+	"configuration" | "cashSweep" | "periods" | "periodsPerYear" | "contributions"
+> & { months: number; monthlyContribution: number };
 export const projectContributions = (
-	input: Omit<ProjectionRequest, "configuration">,
-) => project({ configuration, ...input });
+	input: HistoricalProjection | ProjectionRequest,
+) => {
+	const result =
+		"configuration" in input
+			? project(input)
+			: project(
+					(({ months, monthlyContribution, ...rest }) => ({
+						configuration,
+						cashSweep: "retain" as const,
+						periods: months,
+						periodsPerYear: 12,
+						contributions: monthlyContribution,
+						...rest,
+					}))(input),
+				);
+	return {
+		...result,
+		timeline: result.timeline.map((p) => ({ ...p, month: p.period })),
+	};
+};
 
 export const policy: AllocationPolicy = {
 	equities: { min: 0.55, target: 0.6, max: 0.65 },

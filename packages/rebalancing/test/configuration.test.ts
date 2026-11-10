@@ -26,7 +26,7 @@ function config(decimalPlaces = 3): RebalancingConfiguration {
 			assetClasses: 256,
 			accounts: 256,
 			orders: 256,
-			projectionMonths: 720,
+			projectionPeriods: 720,
 			scenarios: 256,
 			jsonNodes: 100_000,
 			jsonDepth: 32,
@@ -39,6 +39,8 @@ function config(decimalPlaces = 3): RebalancingConfiguration {
 const policy = { stocks: { min: 0, target: 1, max: 1 } };
 function request(decimalPlaces = 3): RebalanceRequest {
 	return {
+		cashDeployment: { mode: "preserve" },
+		purchasePlacement: { mode: "largest_holding" },
 		configuration: config(decimalPlaces),
 		baseCurrency: "KWD",
 		holdings: [
@@ -152,6 +154,7 @@ describe("caller-owned configuration", () => {
 		const cfg = config();
 		const result = allocateContribution({
 			configuration: cfg,
+			cashDeployment: "preserve",
 			positions: [{ assetClass: "liquid", value: 0.009 }],
 			policy,
 			contribution: 0.01,
@@ -160,15 +163,17 @@ describe("caller-owned configuration", () => {
 		expect(result.allocations[0]!.amount).toBe(0.009);
 		expect(result.retainedCash).toBe(0.001);
 		const projected = projectContributions({
+			cashSweep: "retain",
+			periodsPerYear: 12,
 			configuration: cfg,
 			positions: [],
 			policy,
-			monthlyContribution: 0.001,
-			months: 2,
+			contributions: 0.001,
+			periods: 2,
 			cashFloor: 1,
 			annualReturns: { stocks: 0, liquid: 0 },
 		});
-		expect(projected.methodologyVersion).toBe("contribution-projection-v2");
+		expect(projected.methodologyVersion).toBe("contribution-projection-v3");
 		expect(projected.timeline[1]!.positions).toEqual([
 			{ assetClass: "liquid", value: 0.002 },
 		]);
@@ -215,18 +220,20 @@ describe("caller-owned configuration", () => {
 	});
 	it("supports caller horizons over 600 months and return ranges beyond former bounds", () => {
 		const input = {
+			cashSweep: "retain" as const,
+			periodsPerYear: 12,
 			configuration: config(),
 			positions: [],
 			policy,
-			monthlyContribution: 0,
-			months: 601,
+			contributions: 0,
+			periods: 601,
 			annualReturns: { stocks: 11, liquid: 0 },
 		};
 		expect(projectContributions(input).timeline).toHaveLength(601);
 		input.configuration.annualReturnRange = { minimum: -0.5, maximum: 2 };
 		expect(() => projectContributions(input)).toThrow("configured range");
 		delete input.configuration.annualReturnRange;
-		input.configuration.limits.projectionMonths = 600;
+		input.configuration.limits.projectionPeriods = 600;
 		expect(() => projectContributions(input)).toThrow("configured horizon");
 	});
 	it("supports wealth above the former product limit and rejects unsafe representation", () => {
@@ -337,6 +344,7 @@ describe("caller-selected comparison workflow", () => {
 	it.each([
 		"rebalance-comparison-v1",
 		"rebalance-comparison-v2",
+		"rebalance-comparison-v3",
 	])("refuses %s replay", (version) => {
 		const saved = compareRebalance(request()).snapshot;
 		expect(() =>
