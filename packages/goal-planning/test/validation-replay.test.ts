@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { GoalCashInputError, METHODOLOGY_VERSION, planGoalCash, replayGoalCash } from "../src/index.js";
+import {
+	GoalCashInputError,
+	METHODOLOGY_VERSION,
+	planGoalCash,
+	replayGoalCash,
+} from "../src/index.js";
 import type { GoalCashRequest } from "../src/index.js";
 import { request } from "./fixtures.js";
 
@@ -19,12 +24,20 @@ describe("cash evidence and public input boundary", () => {
 	});
 
 	it("requires complete obligations and an explicit netting decision", () => {
-		const result = planGoalCash(request({ obligationsComplete: false, paymentsTreatment: "unknown" }));
+		const result = planGoalCash(
+			request({ obligationsComplete: false, paymentsTreatment: "unknown" }),
+		);
 		expect(result.status).toBe("incomplete");
-		expect(result.reasonCodes).toEqual(["obligations_not_confirmed_complete", "payment_netting_unknown"]);
+		expect(result.reasonCodes).toEqual([
+			"obligations_not_confirmed_complete",
+			"payment_netting_unknown",
+		]);
 	});
 
-	it.each(["deadline", "monthlyContribution"] as const)("withholds a shared ledger when a goal's %s is unknown", (field) => {
+	it.each([
+		"deadline",
+		"monthlyContribution",
+	] as const)("withholds a shared ledger when a goal's %s is unknown", (field) => {
 		const input = request();
 		input.goals[0]![field] = null;
 		const result = planGoalCash(input);
@@ -41,33 +54,85 @@ describe("cash evidence and public input boundary", () => {
 	it("only requires missing recurring amounts inside the modeled interval", () => {
 		const input = request({
 			paymentsTreatment: "subtract_recorded",
-			recurringPayments: [{ id: "future", monthlyAmount: null, startDate: "2028-01-01", endDate: null }],
+			recurringPayments: [
+				{
+					id: "future",
+					monthlyAmount: null,
+					startDate: "2028-01-01",
+					endDate: null,
+				},
+			],
 		});
 		expect(planGoalCash(input).status).toBe("feasible");
 		input.recurringPayments[0]!.startDate = "2026-02-01";
-		expect(planGoalCash(input).reasonCodes).toContain("recurring_payment_missing");
+		expect(planGoalCash(input).reasonCodes).toContain(
+			"recurring_payment_missing",
+		);
 	});
 
 	it("does not require a redundant payment amount when capacity is already net", () => {
-		const result = planGoalCash(request({ recurringPayments: [{ id: "loan", monthlyAmount: null, startDate: null, endDate: null }] }));
+		const result = planGoalCash(
+			request({
+				recurringPayments: [
+					{ id: "loan", monthlyAmount: null, startDate: null, endDate: null },
+				],
+			}),
+		);
 		expect(result.status).toBe("feasible");
 	});
 
-	it.each([0.291, Number.NaN, Number.POSITIVE_INFINITY, -1, 1_000_000_000.01])("rejects invalid declared cash %s", (unallocatedCash) => {
-		expect(() => planGoalCash(request({ unallocatedCash }))).toThrow(GoalCashInputError);
+	it.each([
+		0.291,
+		Number.NaN,
+		Number.POSITIVE_INFINITY,
+		-1,
+		1_000_000_000.01,
+	])("rejects invalid declared cash %s", (unallocatedCash) => {
+		expect(() => planGoalCash(request({ unallocatedCash }))).toThrow(
+			GoalCashInputError,
+		);
 	});
 
 	it("admits ordinary exact-cent values and a signed capacity", () => {
-		const result = planGoalCash(request({ unallocatedCash: 0.29, reserveFloor: 0, monthlyCapacity: -0.01, goals: [], liquidityNeeds: [] }));
+		const result = planGoalCash(
+			request({
+				unallocatedCash: 0.29,
+				reserveFloor: 0,
+				monthlyCapacity: -0.01,
+				goals: [],
+				liquidityNeeds: [],
+			}),
+		);
 		expect(result.status).toBe("feasible");
 	});
 
 	it("rejects inconsistent recurring dates instead of implying no payment", () => {
-		expect(() => planGoalCash(request({ recurringPayments: [{ id: "loan", monthlyAmount: 10, startDate: "2027-01-01", endDate: "2026-01-01" }] }))).toThrow(GoalCashInputError);
+		expect(() =>
+			planGoalCash(
+				request({
+					recurringPayments: [
+						{
+							id: "loan",
+							monthlyAmount: 10,
+							startDate: "2027-01-01",
+							endDate: "2026-01-01",
+						},
+					],
+				}),
+			),
+		).toThrow(GoalCashInputError);
 	});
 
-	it.each(["2026-02-30", "2025-12-31", "2076-01-02"])("rejects an invalid or out-of-window due date %s", (dueDate) => {
-		expect(() => planGoalCash(request({ liquidityNeeds: [{ id: "expense", dueDate, amount: 1000 }] }))).toThrow(GoalCashInputError);
+	it.each([
+		"2026-02-30",
+		"2025-12-31",
+		"2076-01-02",
+	])("rejects an invalid or out-of-window due date %s", (dueDate) => {
+		expect(() =>
+			planGoalCash(
+				request({ liquidityNeeds: [{ id: "expense", dueDate, amount: 1000 }] }),
+			),
+		).toThrow(GoalCashInputError);
 	});
 
 	it("rejects duplicate goal identities", () => {
@@ -77,7 +142,9 @@ describe("cash evidence and public input boundary", () => {
 	});
 
 	it("rejects fractional cents in capacity and goal requests too", () => {
-		expect(() => planGoalCash(request({ monthlyCapacity: -0.291 }))).toThrow(GoalCashInputError);
+		expect(() => planGoalCash(request({ monthlyCapacity: -0.291 }))).toThrow(
+			GoalCashInputError,
+		);
 		const input = request();
 		input.goals[0]!.monthlyContribution = 0.291;
 		expect(() => planGoalCash(input)).toThrow(GoalCashInputError);
@@ -104,7 +171,9 @@ describe("cash evidence and public input boundary", () => {
 		expect(replayGoalCash(JSON.parse(serialized))).toEqual(result);
 		input.goals[0]!.monthlyContribution = 0;
 		result.snapshot.request.liquidityNeeds[0]!.amount = 0;
-		expect(replayGoalCash(JSON.parse(serialized)).goals[0]?.fundedTotal).toBe(6000);
+		expect(replayGoalCash(JSON.parse(serialized)).goals[0]?.fundedTotal).toBe(
+			6000,
+		);
 		const snapshot = JSON.parse(serialized);
 		const replayed = replayGoalCash(snapshot);
 		replayed.snapshot.request.goals[0]!.monthlyContribution = 0;
@@ -113,14 +182,24 @@ describe("cash evidence and public input boundary", () => {
 
 	it("rejects unsupported snapshot versions and fields", () => {
 		const snapshot = planGoalCash(request()).snapshot;
-		expect(() => replayGoalCash({ ...snapshot, methodologyVersion: "future" })).toThrow(GoalCashInputError);
-		expect(() => replayGoalCash({ ...snapshot, trusted: true })).toThrow(GoalCashInputError);
+		expect(() =>
+			replayGoalCash({ ...snapshot, methodologyVersion: "future" }),
+		).toThrow(GoalCashInputError);
+		expect(() => replayGoalCash({ ...snapshot, trusted: true })).toThrow(
+			GoalCashInputError,
+		);
 	});
 
 	it("rejects accessors without invoking them", () => {
 		let called = false;
 		const input = request();
-		Object.defineProperty(input, "unallocatedCash", { enumerable: true, get() { called = true; return 1000; } });
+		Object.defineProperty(input, "unallocatedCash", {
+			enumerable: true,
+			get() {
+				called = true;
+				return 1000;
+			},
+		});
 		expect(() => planGoalCash(input)).toThrow(GoalCashInputError);
 		expect(called).toBe(false);
 	});
@@ -136,6 +215,9 @@ describe("cash evidence and public input boundary", () => {
 		const cyclic = request() as GoalCashRequest & { cycle?: unknown };
 		cyclic.cycle = cyclic;
 		invalid.push(cyclic);
-		for (const input of invalid) expect(() => planGoalCash(input as GoalCashRequest)).toThrow(GoalCashInputError);
+		for (const input of invalid)
+			expect(() => planGoalCash(input as GoalCashRequest)).toThrow(
+				GoalCashInputError,
+			);
 	});
 });

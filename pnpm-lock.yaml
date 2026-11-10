@@ -26,6 +26,8 @@ importers:
 
   packages/goal-planning: {}
 
+  packages/instrument-research: {}
+
   packages/performance: {}
 
   packages/rebalancing: {}
