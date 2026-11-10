@@ -6,8 +6,15 @@ export function asCents(value: number): Cents {
 	return value as Cents;
 }
 export function fromEuros(value: number): Cents {
-	const scaled = Number((value * 100).toFixed(4));
-	return asCents(scaled < 0 ? -Math.round(-scaled) : Math.round(scaled));
+	const scaled = value * 100;
+	const magnitude = Math.abs(scaled);
+	const half = Math.floor(magnitude) + 0.5;
+	// Correct binary noise at a half-cent without rounding genuine sub-cent
+	// evidence first. The cap keeps exact integers outside the correction zone.
+	const tolerance = Math.min(0.25, Number.EPSILON * Math.max(1, magnitude));
+	const corrected = Math.abs(magnitude - half) <= tolerance ? half : magnitude;
+	const rounded = Math.round(corrected);
+	return asCents(scaled < 0 ? -rounded : rounded);
 }
 export function toEuros(value: Cents): number {
 	return value / 100;
@@ -15,6 +22,23 @@ export function toEuros(value: Cents): number {
 /** Normalize a reporting-currency total at a monetary boundary. */
 export function roundMoney(value: number): number {
 	return toEuros(fromEuros(value));
+}
+/** Preserve raw precision and small net amounts before rounding the total once. */
+export function sumMoneyToCents(values: readonly number[]): Cents {
+	let total = 0;
+	let correction = 0;
+	for (const value of values) {
+		const next = total + value;
+		correction +=
+			Math.abs(total) >= Math.abs(value)
+				? total - next + value
+				: value - next + total;
+		total = next;
+	}
+	return fromEuros(total + correction);
+}
+export function sumMoney(values: readonly number[]): number {
+	return toEuros(sumMoneyToCents(values));
 }
 export function sumCents(values: Cents[]): Cents {
 	return asCents(values.reduce((sum, value) => sum + value, 0));

@@ -1,6 +1,6 @@
 {
 	"name": "@investboard/performance",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Explain portfolio performance with actual-position replay, cash-flow-adjusted returns, price and FX attribution, historical expense estimates and reproducible inputs",
 	"type": "module",
 	"license": "Apache-2.0",
