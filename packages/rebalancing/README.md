@@ -26,7 +26,7 @@ npm pack
 Install the generated tarball in your project:
 
 ```sh
-npm install /path/to/investboard-capabilities/packages/rebalancing/investboard-rebalancing-0.4.0.tgz
+npm install /path/to/investboard-capabilities/packages/rebalancing/investboard-rebalancing-0.4.1.tgz
 ```
 
 This is a source distribution and buildable package, not a published npm release or an Investboard hosted API. Normal `npm pack` rebuilds JavaScript and declarations from source.
@@ -150,7 +150,7 @@ Corridors are descriptive: affordable partial progress may be feasible while out
 
 ## Declare fees and amount rules
 
-Optional `accounts` are declarations keyed by depot ID. `minimum`, `maximum` (zero means uncapped) and positive `increment` apply to monetary order amounts. Choose exactly one fee declaration:
+Optional `accounts` are declarations keyed by depot ID. `minimum`, `maximum` (zero means uncapped) and positive `increment` apply to monetary order amounts. The `AccountRules` type requires exactly one fee declaration. Declare an unknown flat fee as `feePerTrade: null`, or use null schedule sides; do not omit both models. Choose one:
 
 ```ts
 // Flat fee, or null when unknown:

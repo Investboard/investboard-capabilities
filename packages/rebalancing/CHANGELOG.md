@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.4.0 (unreleased)
+## 0.4.1 (unreleased)
+
+- Make `AccountRules` an exclusive union: declare either `feePerTrade` (including null) or separate buy/sell fee schedules. TypeScript now rejects missing or conflicting fee declarations, matching the existing runtime validator.
+- Add compile-time regressions for valid flat/scheduled/unknown fees and invalid combinations. Account specializations should use intersection types rather than extending the former interface.
+- Calculation behavior, JSON requests and comparison/projection methodology versions are unchanged.
+
+## 0.4.0
 
 - Require host-selected purchase placement and existing-cash funding policies. Ordered routes spill broker-capped/rounded amounts to subsequent destinations and determine order admission priority. Largest-holding placement remains an explicit option.
 - Release host-selected existing cash above the pooled reserve without a security sale, tax estimate, extra fee or wealth inflation. Report cash releases separately from external cash and sales in alternatives and depot funding.
