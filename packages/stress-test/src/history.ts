@@ -8,7 +8,7 @@ import { validDate } from "./validation.js";
 
 const day = 86_400_000;
 
-/** Exact identity and bounded endpoint/fixing admission mirror the native replay. */
+/** Admit matching instrument history only within the documented price and FX date windows. */
 export function withHistory(
 	request: StressRequest,
 	impacts: HoldingImpact[],

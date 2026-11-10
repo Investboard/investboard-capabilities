@@ -1,8 +1,17 @@
-# @investboard/stress-test
+# Portfolio stress testing for your investing engine
 
-Deterministic historical-scenario calculations with explicit currency uncertainty, caller-supplied direct history, reconciled loss attribution, and replayable inputs. The package has **no runtime dependencies**, network calls, account access, or data-provider requirements.
+Explore how your current portfolio responds to market-crisis scenarios, see which holdings drive the change, and bring the results into your own dashboard, research scripts or portfolio comparison tools.
 
-Built-in scenarios contain sourced, rounded approximations. Results are hypothetical replays, not forecasts, probabilities, or the investor's actual historical return.
+`@investboard/stress-test` is a standalone TypeScript module from [Investboard](https://investboard.com). It combines named historical scenarios, optional price and FX inputs, holding-level explanations, and reproducible JSON snapshots. It has **no runtime dependencies** and makes no network calls.
+
+## What you can build
+
+- A crisis view in your personal portfolio dashboard.
+- A comparison of alternative portfolio mixes under the same assumptions.
+- A research workflow using price and FX history from your own data sources.
+- A saved analysis you can reproduce from its original inputs.
+
+Built-in scenarios contain sourced, rounded approximations. Results are hypothetical replays, with explicit coverage and unknown states. They do not estimate the probability of a future loss or reproduce your own past investment performance.
 
 ## Run from this repository
 
@@ -15,7 +24,25 @@ pnpm test
 pnpm example
 ```
 
-The example uses synthetic investor data. The package can also be built and installed from a local tarball with `npm pack`; it does not require the Investboard monorepo.
+The example uses synthetic investor data and demonstrates quote-currency uncertainty and JSON replay.
+
+## Use it in your project
+
+Build a package from this checkout:
+
+```sh
+pnpm build
+cd packages/stress-test
+npm pack
+```
+
+Then install the generated tarball from your own project, using the path to your checkout:
+
+```sh
+npm install /path/to/investboard-capabilities/packages/stress-test/investboard-stress-test-0.1.0.tgz
+```
+
+The module is distributed as source and buildable packages in this repository. It is not currently published to the npm registry.
 
 ## Calculate a scenario
 
@@ -39,7 +66,7 @@ const result = evaluateStressScenario({
 
 Every `currentValue` must already be in the selected reporting currency, rounded to cents. Quote currency does not convert the starting capital. Inputs must contain 1–200 uniquely identified holdings with finite, nonnegative values and positive total wealth. Reporting currencies are EUR and USD. Total wealth before and after the scenario is capped at 1 billion reporting-currency units (`MAX_SUPPORTED_WEALTH`); this conservative bound keeps cent reconciliation reliable across 200 holdings. Inputs or outcomes above it raise `StressInputError`. Unknown fields and non-JSON metadata are rejected so snapshots retain only the documented inputs. Built-in scenarios are frozen; clone one to edit custom assumptions. Invalid inputs raise `StressInputError`; unsupported scenario exposure returns `unavailable` with no calculation.
 
-`absoluteLoss` retains the original engine's name but is a **signed monetary change**: a loss is negative and a gain is positive. Percentage fields and coverage fields are fractions, so `-0.57` means -57%. Holding products round half-up to cents, with a bounded correction for machine-precision noise around half-cent ties (v5); attribution reconciles the portfolio change, including offsets and rounding.
+`absoluteLoss` is a **signed monetary change**: a loss is negative and a gain is positive. Percentage fields and coverage fields are fractions, so `-0.57` means -57%. Holding products round half-up to cents, with a bounded correction for machine-precision noise around half-cent ties (v5); attribution reconciles the portfolio change, including offsets and rounding.
 
 ## Currency meaning
 
@@ -65,10 +92,10 @@ Missing, mismatched, ambiguous or invalid direct evidence never becomes an inven
 
 `result.snapshot` is a defensive copy of the original request plus the methodology version. Serialize it and pass it to `replayStressScenario` to reproduce the calculation without current holdings or providers. An unsupported methodology is refused. The snapshot is not signed; a hosting application must authenticate and protect stored evidence and implement retention and authorization.
 
-This module contains financial calculation logic. The hosted app's queue, worker, authenticated recovery, database archive, tax context and provider adapters are separate integrations. Their acceptance evidence must not be inferred from these package tests. The package performs no tax-savings calculation and has no forecast/recovery prediction.
+Your application supplies data, renders the results, and manages any storage or account access. The package calculates scenarios and attribution; tax calculations, data fetching and forecasts belong to other tools.
 
-## Provenance and license
+## Assumptions and license
 
-The financial core and scenario assumptions come from Investboard methodology `whole-wealth-currency-replay-v5`. Each scenario retains its methodology, source links and review date. [source-provenance.json](source-provenance.json) records the reviewed origin and extraction transformations. The public boundary adds runtime validation and caller-supplied history admission.
+The calculation methodology is versioned as `whole-wealth-currency-replay-v5`. Each built-in scenario includes its assumptions, source links and the date those assumptions were assessed. You can inspect them in the [scenario catalogue](src/internal/scenarios/crisis-definitions.ts), or clone a scenario and supply your own assumptions.
 
 Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

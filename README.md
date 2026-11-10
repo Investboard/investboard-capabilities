@@ -1,46 +1,64 @@
 # Investboard capabilities
 
-Reusable investing logic from [Investboard](https://investboard.com), with documented assumptions, synthetic examples and reproducible review evidence.
+## Build your own investing engine
 
-## Released capabilities
+Bring [Investboard](https://investboard.com) portfolio analysis into your own code. Use reusable TypeScript modules to explore how your current holdings respond to market crises, understand what drives the change, and make the assumptions visible in your own investing tools.
 
-| Module | What it demonstrates | Review |
-| --- | --- | --- |
-| [Stress testing](packages/stress-test) · v0.1.0 | Historical scenarios, explicit currency uncertainty, supplied price/FX history, reconciled loss attribution and JSON snapshot replay | [9/10 engineering review](reviews/stress-test-0.1.0.md) |
+Start with the **[portfolio stress-testing engine](packages/stress-test)**. Run it locally, connect your own data, and build the experience you want around it.
 
-The stress engine runs independently, without an Investboard account, network access or runtime dependencies. Its scenarios are sourced approximations; outputs are hypothetical replays, not forecasts or the investor's actual historical return. See the [module documentation](packages/stress-test/README.md) for units, supported scope and limits.
+**[Run the example](#try-it-with-your-own-code)** · **[Explore the API](packages/stress-test/README.md)**
 
-## Run locally
+## Turn portfolio data into useful questions
+
+A holdings list tells you what you own. Scenario analysis helps you explore how that mix responds when markets change.
+
+| Build your own… | Add this capability |
+| --- | --- |
+| Personal portfolio dashboard | Show how today's holdings respond to a financial crisis, a pandemic crash or a rate shock |
+| Portfolio comparison tool | Run different mixes through the same scenario and compare the drivers of the change |
+| Investing research script | Supply your own price and FX history, inspect coverage, and save inputs for a reproducible replay |
+
+## Start with portfolio stress testing
+
+The [stress-testing engine](packages/stress-test) gives you the calculation logic behind the analysis:
+
+- **Explore 15 historical crisis scenarios.** Start with events such as the 2008 financial crisis, the 2020 pandemic crash and the 2022 rate shock, or supply your own scenario assumptions.
+- **See what drives the result.** Inspect each holding's impact, the largest loss drivers, and the gains that offset them.
+- **Keep currency assumptions visible.** Distinguish quote currency from economic exposure and surface the parts that remain unknown.
+- **Bring your own data.** Use named scenario assumptions or supply dated price and FX inputs from sources you choose.
+- **Revisit an analysis.** Save a JSON snapshot and reproduce the calculation from its original inputs.
+
+The engine runs without an Investboard account, API key or runtime dependencies. Your application supplies the portfolio data and decides how to display and store the results.
+
+Historical scenarios use sourced, rounded assumptions. The outputs are hypothetical illustrations of today's holdings, with explicit coverage and limitations.
+
+## Try it with your own code
 
 Use Node 22 or newer and pnpm 9.15.0:
 
 ```sh
+git clone https://github.com/Investboard/investboard-capabilities.git
+cd investboard-capabilities
 pnpm install --frozen-lockfile
-pnpm typecheck
-pnpm test
 pnpm example
 ```
 
-To build a standalone tarball:
+The example uses synthetic holdings to show why two quote currencies do not automatically imply two different economic exposures. It also saves and replays the original inputs.
 
-```sh
-pnpm build
-cd packages/stress-test
-npm pack
-```
+Ready to add it to your own engine? **[Build and use the module](packages/stress-test/README.md#use-it-in-your-project)**, then choose the scenarios and data sources that fit your workflow.
 
-The module is published as source in this repository. It has not been published to the npm registry.
+## Available modules
 
-## Release standard
+| Module | Package | Documentation |
+| --- | --- | --- |
+| Portfolio stress testing | `@investboard/stress-test` | [API, examples and assumptions](packages/stress-test/README.md) |
 
-Only capabilities with clean, independently usable code and a documented review of **at least 9/10** enter [capabilities.json](capabilities.json). Each entry pins its reviewed source, methodology, evidence and limitations. The [release policy](CONTRIBUTING.md) applies to future additions and changes.
+[Browse the module catalogue](capabilities.json) · [Contribute a capability or improvement](CONTRIBUTING.md)
 
-The modules expose calculation logic. Hosted account access, data ingestion, subscriptions and operational infrastructure belong to the Investboard application. Package acceptance does not certify those integrations.
+## More from Investboard
 
-## Related projects
-
-[Investboard AI Toolkit](https://github.com/Investboard/ai-toolkit) contains the investing skills and MCP integration.
+[Explore Investboard](https://investboard.com) for portfolio analysis and long-term investing tools. The [Investboard AI Toolkit](https://github.com/Investboard/ai-toolkit) connects investing workflows with skills and MCP integration.
 
 ## License
 
-[Apache License 2.0](LICENSE).
+Use, adapt and extend these modules under [Apache License 2.0](LICENSE).

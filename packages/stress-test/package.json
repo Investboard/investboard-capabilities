@@ -1,13 +1,12 @@
 {
 	"name": "@investboard/stress-test",
 	"version": "0.1.0",
-	"description": "Deterministic historical scenario stress calculations with explicit currency uncertainty and replayable inputs",
+	"description": "Portfolio stress testing for your own investing engine: historical scenarios, holding-level impacts and reproducible replays",
 	"type": "module",
 	"license": "Apache-2.0",
 	"files": [
 		"dist",
 		"README.md",
-		"source-provenance.json",
 		"LICENSE",
 		"NOTICE"
 	],

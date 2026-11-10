@@ -1,23 +1,17 @@
 {
 	"schemaVersion": 1,
-	"minimumReviewScore": 9,
 	"capabilities": [
 		{
 			"id": "stress-test",
-			"name": "Historical scenario stress engine",
+			"name": "Portfolio stress testing",
 			"version": "0.1.0",
 			"package": "@investboard/stress-test",
 			"path": "packages/stress-test",
 			"license": "Apache-2.0",
 			"methodologyVersion": "whole-wealth-currency-replay-v5",
 			"releaseTag": "stress-test-v0.1.0",
-			"review": {
-				"score": 9,
-				"date": "2026-11-10",
-				"reviewedSourceCommit": "53932d6ffcaef6fe9c7dbdd188aeffa8febb6280",
-				"record": "reviews/stress-test-0.1.0.md",
-				"evidence": "reviews/stress-test-0.1.0.evidence.json"
-			}
+			"description": "Explore historical crisis scenarios, explain holding-level impacts, and replay saved calculations in your own investing engine.",
+			"documentation": "packages/stress-test/README.md"
 		}
 	]
 }
