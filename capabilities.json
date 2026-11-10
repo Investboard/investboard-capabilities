@@ -12,6 +12,17 @@
 			"releaseTag": "stress-test-v0.1.0",
 			"description": "Explore historical crisis scenarios, explain holding-level impacts, and replay saved calculations in your own investing engine.",
 			"documentation": "packages/stress-test/README.md"
+		},
+		{
+			"id": "rebalancing",
+			"name": "Contribution-aware portfolio rebalancing",
+			"version": "0.1.0",
+			"package": "@investboard/rebalancing",
+			"path": "packages/rebalancing",
+			"license": "Apache-2.0",
+			"methodologyVersion": "rebalance-comparison-v1",
+			"description": "Compare fresh-cash allocation and caller-supplied sale plans, inspect reserve and depot funding, project contributions and replay saved inputs.",
+			"documentation": "packages/rebalancing/README.md"
 		}
 	]
 }

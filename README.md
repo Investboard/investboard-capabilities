@@ -2,11 +2,11 @@
 
 ## Build your own investing engine
 
-Bring [Investboard](https://investboard.com) portfolio analysis into your own code. Use reusable TypeScript modules to explore how your current holdings respond to market crises, understand what drives the change, and make the assumptions visible in your own investing tools.
+Bring [Investboard](https://investboard.com) portfolio analysis into your own code. Use reusable TypeScript modules to explore market crises, compare ways to rebalance with new cash, and make the assumptions visible in your own investing tools.
 
-Start with the **[portfolio stress-testing engine](packages/stress-test)**. Run it locally, connect your own data, and build the experience you want around it.
+Start with the **[portfolio stress-testing engine](packages/stress-test)** or **[contribution-aware rebalancing](packages/rebalancing)**. Run either module locally, connect your own data, and build the experience you want around it.
 
-**[Run the example](#try-it-with-your-own-code)** · **[Explore the API](packages/stress-test/README.md)**
+**[Run the examples](#try-it-with-your-own-code)** · **[Explore the modules](#available-modules)**
 
 ## Turn portfolio data into useful questions
 
@@ -17,6 +17,7 @@ A holdings list tells you what you own. Scenario analysis helps you explore how 
 | Personal portfolio dashboard | Show how today's holdings respond to a financial crisis, a pandemic crash or a rate shock |
 | Portfolio comparison tool | Run different mixes through the same scenario and compare the drivers of the change |
 | Investing research script | Supply your own price and FX history, inspect coverage, and save inputs for a reproducible replay |
+| Contribution planner | Compare fresh-cash and cash-limited allocations with a sale plan you supply, including reserves and depot funding |
 
 ## Start with portfolio stress testing
 
@@ -32,6 +33,14 @@ The engine runs without an Investboard account, API key or runtime dependencies.
 
 Historical scenarios use sourced, rounded assumptions. The outputs are hypothetical illustrations of today's holdings, with explicit coverage and limitations.
 
+## Add contribution-aware rebalancing
+
+The [rebalancing module](packages/rebalancing) allocates new money against the portfolio's value after the contribution. Compare keeping current, investing fresh cash, making cash-limited progress and a sale plan you supply.
+
+Inspect allocation corridors, retained cash, flat fees and any transfers needed between depots. Supply exact per-sale tax assumptions or keep tax unknown. Project recurring contributions with explicit return assumptions and trade limits, then save and replay the original comparison inputs. The module has no runtime dependencies or network calls.
+
+**[Run the rebalancing example](packages/rebalancing/README.md#run-the-example)** · **[Explore its API and assumptions](packages/rebalancing/README.md)**
+
 ## Try it with your own code
 
 Use Node 22 or newer and pnpm 9.15.0:
@@ -43,15 +52,16 @@ pnpm install --frozen-lockfile
 pnpm example
 ```
 
-The example uses synthetic holdings to show why two quote currencies do not automatically imply two different economic exposures. It also saves and replays the original inputs.
+The examples use synthetic holdings. Stress testing shows why two quote currencies do not automatically imply two economic exposures. Rebalancing shows how new cash can reach a target allocation, how per-depot tax changes funding, and why contributions below a trade minimum remain cash. Both examples replay the original comparison inputs.
 
-Ready to add it to your own engine? **[Build and use the module](packages/stress-test/README.md#use-it-in-your-project)**, then choose the scenarios and data sources that fit your workflow.
+Ready to add a capability to your own engine? **[Build the stress-testing module](packages/stress-test/README.md#use-it-in-your-project)** or **[build the rebalancing module](packages/rebalancing/README.md#use-it-in-your-project)**, then supply the data and assumptions that fit your workflow.
 
 ## Available modules
 
 | Module | Package | Documentation |
 | --- | --- | --- |
 | Portfolio stress testing | `@investboard/stress-test` | [API, examples and assumptions](packages/stress-test/README.md) |
+| Contribution-aware rebalancing | `@investboard/rebalancing` | [API, examples and assumptions](packages/rebalancing/README.md) |
 
 [Browse the module catalogue](capabilities.json) · [Contribute a capability or improvement](CONTRIBUTING.md)
 
