@@ -5,66 +5,64 @@ import type {
 	ReasonCode,
 } from "./types.js";
 import { validateRequest } from "./validation.js";
-import {
-	requireInput,
-	requireJson,
-	requireShape,
-} from "./internal/input-guards.js";
+import { requireInput, requireShape } from "./internal/input-guards.js";
 import { allocationRows } from "./internal/allocation.js";
 import { cashPurchases } from "./internal/cash-plan.js";
 import { assess, unavailable } from "./internal/assess.js";
-import { toCents } from "./internal/money.js";
 
 export type * from "./types.js";
-export { MAX_SUPPORTED_WEALTH } from "./internal/money.js";
+export { MAX_SAFE_MINOR_UNITS } from "./internal/money.js";
 export { RebalanceInputError } from "./validation.js";
 export { allocateContribution } from "./contribution.js";
 export { projectContributions } from "./projection.js";
-export const METHODOLOGY_VERSION = "rebalance-comparison-v2" as const;
+export const METHODOLOGY_VERSION = "rebalance-comparison-v3" as const;
 
-/** Compare one reporting-currency book without providers, storage or order execution. */
+/** Compare caller-selected scenarios for one reporting-currency book. */
 export function compareRebalance(input: RebalanceRequest): RebalanceComparison {
-	validateRequest(input);
+	const ctx = validateRequest(input);
 	const request = structuredClone(input);
 	const reasons: ReasonCode[] = [];
 	if (request.holdings.some((h) => h.value === null))
 		reasons.push("incomplete_valuation");
 	if (request.holdings.some((h) => h.currency !== request.baseCurrency))
 		reasons.push("currency_mismatch");
-	const alternatives = reasons.length
-		? [
-				unavailable("keep", 0, reasons),
-				unavailable("fresh_cash", request.contribution, reasons),
-				unavailable("partial_cash", request.cashLimit, reasons),
-				unavailable("sales", 0, reasons),
-			]
-		: [
-				assess(request, "keep", 0, [], []),
-				assess(
-					request,
-					"fresh_cash",
-					request.contribution,
+	const alternatives = request.scenarios.map((scenario) => {
+		const externalCash = "externalCash" in scenario ? scenario.externalCash : 0;
+		if (scenario.mode === "unavailable")
+			return unavailable(scenario.kind, 0, [
+				...scenario.reasonCodes,
+				...reasons,
+			]);
+		if (reasons.length)
+			return unavailable(scenario.kind, externalCash, reasons);
+		const scope =
+			"fundingDepotId" in scenario
+				? { ...request, fundingDepotId: scenario.fundingDepotId! }
+				: request;
+		switch (scenario.mode) {
+			case "keep":
+				return assess(scope, scenario.kind, 0, [], [], ctx);
+			case "contribution":
+				return assess(
+					scope,
+					scenario.kind,
+					externalCash,
 					[],
-					cashPurchases(request, request.contribution),
-				),
-				assess(
-					request,
-					"partial_cash",
-					request.cashLimit,
-					[],
-					cashPurchases(request, request.cashLimit),
-				),
-				request.salePlan
-					? assess(
-							request,
-							"sales",
-							0,
-							request.salePlan.sales,
-							request.salePlan.purchases,
-						)
-					: unavailable("sales", 0, ["sale_plan_required"]),
-			];
-	const priority = request.priority ?? "minimize_sales";
+					cashPurchases(scope, externalCash, ctx),
+					ctx,
+				);
+			case "plan":
+				return assess(
+					scope,
+					scenario.kind,
+					externalCash,
+					scenario.plan.sales,
+					scenario.plan.purchases,
+					ctx,
+				);
+		}
+	});
+	const priority = request.priority ?? "input_order";
 	if (priority === "target_alignment")
 		alternatives.sort(
 			(a, b) =>
@@ -72,14 +70,25 @@ export function compareRebalance(input: RebalanceRequest): RebalanceComparison {
 					Number(b.feasibility === "unavailable") ||
 				(a.residualDrift ?? Infinity) - (b.residualDrift ?? Infinity),
 		);
+	if (priority === "minimize_sales")
+		alternatives.sort(
+			(a, b) =>
+				Number(a.feasibility === "unavailable") -
+					Number(b.feasibility === "unavailable") ||
+				ctx.money.sum(a.sales.map((s) => ctx.money.units(s.amount))) -
+					ctx.money.sum(b.sales.map((s) => ctx.money.units(s.amount))),
+		);
 	return {
 		methodologyVersion: METHODOLOGY_VERSION,
 		baseCurrency: request.baseCurrency,
 		priority,
 		valueBefore: reasons.length
 			? null
-			: request.holdings.reduce((sum, h) => sum + toCents(h.value ?? 0), 0) /
-				100,
+			: ctx.money.amount(
+					ctx.money.sum(
+						request.holdings.map((h) => ctx.money.units(h.value ?? 0)),
+					),
+				),
 		rowsBefore: reasons.length
 			? null
 			: allocationRows(
@@ -88,6 +97,7 @@ export function compareRebalance(input: RebalanceRequest): RebalanceComparison {
 						value: h.value ?? 0,
 					})),
 					request.policy,
+					ctx,
 				),
 		alternatives,
 		snapshot: {
@@ -97,11 +107,10 @@ export function compareRebalance(input: RebalanceRequest): RebalanceComparison {
 	};
 }
 
-/** Replay the original assumptions. Snapshots are JSON data, not signed attestations. */
+/** Replay original assumptions. Snapshots are JSON data, not signed attestations. */
 export function replayRebalanceComparison(
 	snapshot: RebalanceSnapshot,
 ): RebalanceComparison {
-	requireJson(snapshot);
 	requireShape(snapshot, ["methodologyVersion", "request"], "Snapshot");
 	requireInput(
 		snapshot.methodologyVersion === METHODOLOGY_VERSION,

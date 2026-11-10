@@ -5,12 +5,31 @@ import {
 	replayRebalanceComparison,
 } from "../dist/index.js";
 
+// Synthetic host choices, not a library or Investboard product preset.
+const configuration = {
+	money: { decimalPlaces: 2, maximumAmount: 10_000_000_000 },
+	limits: {
+		holdings: 500,
+		assetClasses: 128,
+		accounts: 256,
+		orders: 256,
+		projectionMonths: 1200,
+		scenarios: 20,
+		jsonNodes: 100_000,
+		jsonDepth: 32,
+		collectionEntries: 5_000,
+		textLength: 256,
+	},
+	cashAssetClass: "cash",
+};
+
 // Synthetic book. Every amount, including supplied taxes, is already in EUR.
 const policy = {
 	equities: { min: 0.55, target: 0.6, max: 0.65 },
 	bonds: { min: 0.35, target: 0.4, max: 0.45 },
 };
 const result = compareRebalance({
+	configuration,
 	baseCurrency: "EUR",
 	holdings: [
 		{
@@ -29,8 +48,11 @@ const result = compareRebalance({
 		},
 	],
 	policy,
-	contribution: 100000,
-	cashLimit: 1000,
+	scenarios: [
+		{ kind: "keep", mode: "keep" },
+		{ kind: "fresh_cash", mode: "contribution", externalCash: 100000 },
+		{ kind: "partial_cash", mode: "contribution", externalCash: 1000 },
+	],
 	fundingDepotId: "A",
 	accounts: [
 		{ depotId: "A", feePerTrade: 0, minimum: 0, maximum: 0, increment: 0.01 },
@@ -52,9 +74,8 @@ assert.deepEqual(
 );
 
 const funding = compareRebalance({
+	configuration,
 	baseCurrency: "EUR",
-	contribution: 0,
-	cashLimit: 0,
 	fundingDepotId: "A",
 	policy: Object.fromEntries(
 		["equities", "bonds", "gold", "crypto"].map((k) => [
@@ -99,24 +120,41 @@ const funding = compareRebalance({
 		maximum: 0,
 		increment: 0.01,
 	})),
-	salePlan: {
-		sales: [
-			{
-				holdingId: "sale-A",
-				amount: 100,
-				tax: { amount: 26.38, source: "Synthetic caller estimate" },
+	scenarios: [
+		{
+			kind: "sales",
+			mode: "plan",
+			externalCash: 0,
+			plan: {
+				sales: [
+					{
+						holdingId: "sale-A",
+						amount: 100,
+						tax: { amount: 26.38, source: "Synthetic caller estimate" },
+					},
+					{
+						holdingId: "sale-B",
+						amount: 100,
+						tax: { amount: 0, source: "Synthetic caller estimate" },
+					},
+				],
+				purchases: [
+					{
+						holdingId: "buy-A",
+						depotId: "A",
+						assetClass: "bonds",
+						amount: 86.81,
+					},
+					{
+						holdingId: "buy-B",
+						depotId: "B",
+						assetClass: "crypto",
+						amount: 86.81,
+					},
+				],
 			},
-			{
-				holdingId: "sale-B",
-				amount: 100,
-				tax: { amount: 0, source: "Synthetic caller estimate" },
-			},
-		],
-		purchases: [
-			{ holdingId: "buy-A", depotId: "A", assetClass: "bonds", amount: 86.81 },
-			{ holdingId: "buy-B", depotId: "B", assetClass: "crypto", amount: 86.81 },
-		],
-	},
+		},
+	],
 }).alternatives.find((a) => a.kind === "sales");
 assert.equal(funding.feasibility, "conditional");
 assert.equal(
@@ -125,6 +163,7 @@ assert.equal(
 );
 
 const projection = projectContributions({
+	configuration,
 	positions: [
 		{ assetClass: "equities", value: 70000 },
 		{ assetClass: "bonds", value: 30000 },

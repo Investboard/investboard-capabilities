@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { allocateContribution, projectContributions } from "../src/index.js";
-import { policy } from "./fixtures.js";
+import {
+	allocateContribution,
+	projectContributions,
+	policy,
+} from "./fixtures.js";
 
 const positions = [
 	{ assetClass: "equities", value: 70000 },

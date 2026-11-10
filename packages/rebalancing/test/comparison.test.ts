@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { compareRebalance, replayRebalanceComparison } from "../src/index.js";
-import { request, salesRequest } from "./fixtures.js";
-import type { AlternativeKind, RebalanceRequest } from "../src/index.js";
+import { replayRebalanceComparison } from "../src/index.js";
+import {
+	compareRebalance,
+	request,
+	salesRequest,
+	type RebalanceRequest,
+} from "./fixtures.js";
+import type { AlternativeKind } from "../src/index.js";
 
 function alternative(
 	input: RebalanceRequest,

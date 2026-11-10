@@ -1,8 +1,8 @@
 # Contribution-aware portfolio rebalancing
 
-Compare keeping your portfolio, investing fresh cash, making cash-limited progress, and a sale plan you supply. `@investboard/rebalancing` provides allocation and cash-accounting logic for your own portfolio dashboard or research tools.
+`@investboard/rebalancing` provides contribution allocation, scenario funding and reproducible comparisons for your own portfolio tools. Supply your own currency precision, capacities, fee declarations and comparison scenarios. The package exports no Investboard product preset.
 
-The TypeScript module has **no runtime dependencies** and makes no network calls. It adapts Investboard's post-contribution allocation and scenario-funding logic into a standalone API. Account access, data providers, tax calculation, order execution and persistence belong to the hosting application.
+The TypeScript module has **no runtime dependencies** and makes no network calls. Account access, providers, valuation freshness, tax calculation, execution and persistence belong to the hosting application. It does not select sales or invent instruments.
 
 ## Run the example
 
@@ -13,15 +13,9 @@ pnpm install --frozen-lockfile
 pnpm example:rebalancing
 ```
 
-The synthetic example demonstrates three cases:
-
-- EUR100,000 added to a EUR100,000 book at 70/30 buys EUR50,000 in each class and reaches a 60/40 target.
-- Equal EUR100 sales with a supplied EUR26.38 tax estimate in only one depot expose a EUR13.19 funding transfer for equal EUR86.81 purchases.
-- EUR100 monthly contributions under a EUR1,000 trade minimum remain cash throughout the projection.
+The synthetic example shows a contribution reaching a 60/40 target, a transfer caused by different supplied sale taxes in two depots, and monthly contributions retained below a trade minimum.
 
 ## Use it in your project
-
-Build and pack from this checkout:
 
 ```sh
 pnpm build
@@ -29,22 +23,58 @@ cd packages/rebalancing
 npm pack
 ```
 
-Install the generated package from your project:
+Install the generated tarball in your project:
 
 ```sh
-npm install /path/to/investboard-capabilities/packages/rebalancing/investboard-rebalancing-0.2.0.tgz
+npm install /path/to/investboard-capabilities/packages/rebalancing/investboard-rebalancing-0.3.0.tgz
 ```
 
-This is a source distribution and buildable package. It is not published to the npm registry. The public snapshot format is specific to this package; it is not an Investboard hosted API or saved-draft format.
+This is a source distribution and buildable package, not a published npm release or an Investboard hosted API. Normal `npm pack` rebuilds JavaScript and declarations from source.
 
-The normal `npm pack` step rebuilds this package from source, so an old or missing `dist` directory cannot silently determine the packaged calculation behavior.
+## Declare your host policy
 
-## Compare alternatives
+Every calculation requires `configuration`. This illustrative host policy chooses two decimals; a JPY application could choose zero, KWD three, and another unit eight. None of these choices are implied by a currency identifier.
+
+```ts
+import type { RebalancingConfiguration } from "@investboard/rebalancing";
+
+const configuration: RebalancingConfiguration = {
+  money: { decimalPlaces: 2, maximumAmount: 10_000_000_000 },
+  limits: {
+    holdings: 500, assetClasses: 128, accounts: 256, orders: 256,
+    projectionMonths: 1200, scenarios: 20,
+    jsonNodes: 100_000, jsonDepth: 32, collectionEntries: 5000, textLength: 256,
+  },
+  cashAssetClass: "cash",
+  // Optional host policies; no currency list or upper return bound is inferred.
+  allowedCurrencies: ["EUR", "GBP", "JPY", "KWD"],
+  annualReturnRange: { minimum: -1, maximum: 2 },
+};
+```
+
+| Setting | Meaning |
+| --- | --- |
+| `money.decimalPlaces` | Minor-unit precision for all money, including fees, taxes and projection rounding |
+| `money.maximumAmount` | Maximum input amount and total portfolio plus contribution; projected wealth uses the same bound |
+| `limits.holdings`, `assetClasses`, `accounts` | Maximum source rows, distinct held/target/planned classes and account declarations |
+| `limits.orders` | Maximum explicit plan orders and default generated order cap |
+| `limits.projectionMonths`, `scenarios` | Maximum projection horizon and comparison alternatives |
+| `limits.jsonNodes`, `jsonDepth`, `collectionEntries`, `textLength` | Resource budgets for JSON values, nesting, array/object entries and identifiers; include the configuration itself |
+| `cashAssetClass` | Class that represents retained funding and reserves |
+| `allowedCurrencies` | Optional reporting-currency allow-list; any nonempty identifier is otherwise accepted |
+| `annualReturnRange` | Optional host range for annual effective return fractions |
+
+Capacities are nonnegative safe integers; all except accounts/orders must be positive. Size these budgets for your application's resources. The engine also enforces universal representation bounds: `decimalPlaces` is an integer from 0 through 100 (JavaScript's fixed-point conversion range), and scaled amounts/aggregates must fit `MAX_SAFE_MINOR_UNITS`, with exact conversion back to the configured minor units. A higher precision therefore permits a smaller magnitude. The engine rejects imprecise money rather than silently rounding input.
+
+These representation checks, nonnegative money, valid allocation fractions and a return floor of -1 are mathematical invariants. They are independent of host product policy.
+
+## Compare your scenarios
 
 ```ts
 import { compareRebalance } from "@investboard/rebalancing";
 
 const result = compareRebalance({
+  configuration,
   baseCurrency: "EUR",
   holdings: [
     { holdingId: "equity", depotId: "A", assetClass: "equities", value: 70000, currency: "EUR" },
@@ -54,135 +84,128 @@ const result = compareRebalance({
     equities: { min: 0.55, target: 0.6, max: 0.65 },
     bonds: { min: 0.35, target: 0.4, max: 0.45 },
   },
-  contribution: 100000,
-  cashLimit: 1000,
   fundingDepotId: "A",
   accounts: [{ depotId: "A", feePerTrade: 0, minimum: 0, maximum: 0, increment: 0.01 }],
+  scenarios: [
+    { kind: "baseline", mode: "keep" },
+    { kind: "annual addition", mode: "contribution", externalCash: 100000 },
+    { kind: "smaller budget", mode: "contribution", externalCash: 1000 },
+  ],
 });
 ```
 
-All four alternatives share the same whole-book source and policy:
+Only requested scenarios are returned. `kind` is your unique identifier; it does not select behavior. `mode` selects one of:
 
-| Kind | External cash admitted | Behavior |
-| --- | --- | --- |
-| `keep` | 0 | Shows the existing allocation and reserve |
-| `fresh_cash` | `contribution` | Allocates new money against post-contribution shortfalls |
-| `partial_cash` | `cashLimit` | Allocates the smaller budget and shows residual drift |
-| `sales` | 0 | Assesses the exact caller-supplied `salePlan`; unavailable when none is supplied |
+| Mode | Behavior |
+| --- | --- |
+| `keep` | Existing allocation and reserve, with no operations |
+| `contribution` | Allocate the scenario's `externalCash` against post-contribution shortfalls |
+| `plan` | Assess the exact supplied `plan.sales` and `plan.purchases`, plus `externalCash` |
+| `unavailable` | Explicitly withhold this scenario with caller-supplied `reasonCodes` |
 
-`priority` defaults to `minimize_sales`, preserving that order. `target_alignment` sorts available/conditional alternatives by residual drift before unavailable alternatives. The module reports comparisons, not a recommendation or an instruction to trade.
+Funded scenarios may override `fundingDepotId`. A plan may have zero sales or combine sales and new cash. There is no required four-way workflow or relationship between the budgets of different scenarios. `priority` defaults to `input_order`; `minimize_sales` sorts available/conditional scenarios before unavailable ones and by gross sales, while `target_alignment` sorts by residual drift. Ties retain input order.
 
-### Units and source completeness
+### Source completeness and allocation
 
-- Every holding value, contribution, reserve, fee and supplied tax is already in the reporting currency, EUR or USD. No FX conversion is performed. A different holding currency withholds the entire denominator, rather than summing unlike units.
-- `holdings` contains 1–200 rows with unique caller-defined holding IDs. Values are nonnegative and cent-rounded. Measured zero is valid; `null` withholds the comparison. The caller supplies the complete book and is responsible for valuation freshness and classification.
-- Each input monetary value and total modeled wealth are limited to `MAX_SUPPORTED_WEALTH` (1 billion reporting-currency units). Portfolio plus fresh contribution must stay within that bound. This keeps cent arithmetic within a conservative supported range.
-- Policy has 1–32 asset classes. Targets are fractions summing to one within `1e-9`, with `0 <= min <= target <= max <= 1`. Classes outside the policy have zero target and zero corridor. Zero total wealth has no allocation percentages; those row fields remain `null`.
-- The engine retains holding identity when choosing an existing allocation, with largest value first and holding ID as the deterministic tie-break. A class without a held instrument has `holdingId: null`. It invents no ticker, price or share quantity. Outputs are monetary allocation intentions, not executable broker orders.
+Every monetary value is already in `baseCurrency`. The engine performs no FX conversion. Any holding with another currency or `value: null` withholds the whole comparison denominator and all calculated alternatives. Measured zero and a complete empty book are valid, including an initial contribution. Holding IDs must be unique; the host supplies the complete book and classifications.
 
-### Allocation, limits and retained cash
+Policy targets are fractions summing to one within `1e-9`, with `0 <= min <= target <= max <= 1`. Unlisted classes have zero target/corridor. Zero total wealth has unknown percentages, represented by `null`.
 
-Positive shortfalls use `target × (current wealth + new net cash) − current class value`. A constrained budget shares these shortfalls proportionally. Largest remainders reconcile cents; reserve gaps use integer-cent subtraction. Cash, including any target cash allocation, remains retained funding.
+Positive shortfalls use `target × (current wealth + new net cash) − current class value`. A constrained budget shares them proportionally; largest remainders reconcile minor units. The configured cash class, reserve gaps, skipped minimums and rounding remainders stay in cash. Existing cash belongs to the book and reserve; reallocating it requires an explicit sale of that cash holding.
 
-`cashFloor` defaults to zero. `minTradeSize` defaults to 0.01 and `maxTrades` to 100. Cash, minimum-size exclusions and broker-rejected amounts consume no order slots. The comparison applies account caps and increments first, then ranks surviving amounts largest first with class-name ties resolved deterministically, and admits up to `maxTrades`. Rejected, capped and rounding remainders remain cash in the wealth denominator. The cash floor is a hard funding constraint. Corridors are reported separately: affordable partial progress can be `feasible` while still outside a corridor.
+`cashFloor` defaults to zero, `minTradeSize` to one configured minor unit and `maxTrades` to `configuration.limits.orders`. Account caps and increments are applied before surviving purchases are ranked largest first and capped by order count. Class-name ties are deterministic. The selected existing holding is the largest in its class, then the smallest holding ID; unheld classes use `holdingId: null`. No ticker, price or share quantity is invented.
 
-Optional `accounts` are caller declarations keyed by depot ID. `minimum`, `maximum` (zero means no cap), and `increment` apply to monetary amounts; `feePerTrade` is a flat amount or `null` when unknown. Fees are reserved for selected orders only. Fee reservation is conservative when a smaller budget removes an order; any excess reserve remains cash. Quantity increments, spread, slippage, percentage fees, instrument eligibility and actual account balances are not inferred.
+Corridors are descriptive: affordable partial progress may be feasible while outside a corridor. The cash floor is a hard funding constraint.
 
-`feasible` means the modeled flows satisfy the declared amount constraints and reserve, with known costs and any required transfer confirmed. It is not brokerage or tax verification. Unknown account rules, fees or tax produce `conditional` results. Unknown costs withhold after-wealth, retained cash, allocation rows and reserve outcomes. Insufficient funds or a violated floor produce `unavailable` results.
+## Declare fees and amount rules
 
-Incomplete costs do not hide a guaranteed failure. Because all supplied costs are nonnegative, the engine separately retains known fee and tax amounts, including known tax within a depot that also has an unknown sale. If even the most favorable completion of the remaining costs cannot fund the purchases or meet the reserve, the result is `unavailable`. Actual incomplete totals and reserve outcomes still remain `null`.
-
-## Supply a sale plan
-
-The module assesses a plan you choose. It does not select sales or calculate jurisdiction-specific taxes. Extend the request with:
+Optional `accounts` are declarations keyed by depot ID. `minimum`, `maximum` (zero means uncapped) and positive `increment` apply to monetary order amounts. Choose exactly one fee declaration:
 
 ```ts
-salePlan: {
-  sales: [
-    { holdingId: "equity", amount: 10000,
-      tax: { amount: 100, source: "My estimate for this exact sale in EUR" } },
-  ],
-  purchases: [
-    { holdingId: "bond", depotId: "A", assetClass: "bonds", amount: 9900 },
-  ],
+// Flat fee, or null when unknown:
+{ depotId: "A", minimum: 0, maximum: 0, increment: 0.01, feePerTrade: 1 }
+
+// Separate buy/sell schedules; a null side stays unknown:
+{
+  depotId: "B", minimum: 0, maximum: 0, increment: 0.01,
+  fees: {
+    buy: { fixed: 0.5, rate: 0.001, minimum: 1, maximum: 10, rounding: "up" },
+    sell: null,
+  },
 }
 ```
 
-Every sale names one source holding, appears at most once and cannot exceed its value. A purchase bound to a holding must match that holding's depot and asset class. A class-only purchase uses `holdingId: null`. Tax is either `{ amount, source }` for that exact sale or `null`; a supplied zero needs provenance just like any other estimate. The package validates the data shape, not the truth of the estimate.
+`rate` is a nonnegative fraction of gross order amount. The variable charge is rounded to minor units (`up`, `nearest` with ties up, or `down`), added to `fixed`, then clamped to optional minimum/maximum. A schedule's `maximum: 0` means a zero fee cap. Percentage arithmetic uses the supplied number's decimal representation.
 
-Tax follows each holding's depot. It is never split by pooled gross proceeds. `funding` exposes external cash, gross sales, attributed tax, flat fees, purchases, net inflow and any transfer required per depot. `transfersConfirmed: true` acknowledges the transfer assumption; it does not move money. Unknown local tax or fees leave the corresponding transfer amount unknown.
+For tiered, instrument-specific or other external fee models, supply an explicit plan with a `fee` on each sale/purchase. A numeric override replaces the account schedule for that order; `fee: null` explicitly means unknown. Omitting `fee` uses account rules. Callbacks are not accepted: snapshots retain replayable JSON data. Missing account amount rules remain conditional even with a supplied fee.
 
-Only the selected external cash and explicit sale proceeds fund new allocations. Existing cash is part of the book and reserve; reallocating it requires an explicit cash sale. Sale scenarios admit no external contribution. Omitted purchases leave the sale proceeds in cash, and:
+Generated contributions reserve known fees only for selected orders. Reservation is conservative when an order disappears; excess reserve remains cash. Unknown fees are never replaced with zero. Spread, slippage, quantities, instrument eligibility and real account balances are not inferred.
+
+## Supply an explicit plan
+
+Add a scenario such as:
+
+```ts
+{
+  kind: "reviewed proposal", mode: "plan", externalCash: 100,
+  plan: {
+    sales: [{ holdingId: "equity", amount: 10000,
+      tax: { amount: 100, source: "My estimate for this exact sale in EUR" } }],
+    purchases: [{ holdingId: "bond", depotId: "A", assetClass: "bonds", amount: 10000 }],
+  },
+}
+```
+
+Each sale names one source holding, appears at most once and cannot exceed its value. Bound purchases must match their holding's depot/class. Cash is retained funding, not a purchase. Sale tax is `{ amount, source }` for that exact sale or `null`; even a zero estimate requires provenance. The package validates the declaration, not its truth.
+
+Tax and per-order fees follow the holding's depot. `funding` exposes external cash, gross sales, attributed taxes/fees, purchases, net inflow and required transfers per depot. `transfersConfirmed: true` acknowledges that assumption without moving money. Unknown local costs withhold the corresponding transfer amount.
+
+Only the scenario's external cash and explicit sale proceeds fund purchases. Omitted purchases leave proceeds in cash. With known costs:
 
 ```text
 valueAfter = valueBefore + externalCash - feeCost - taxCost
 ```
 
-A supplied sale plan is never silently rounded or resized after its tax has been declared. Amount-rule, minimum-size or order-count violations make it unavailable. Review a new plan and matching tax estimates to change those amounts.
+Explicit orders are never silently rounded or resized after tax/fee estimates have been supplied. Amount-rule or preference violations make a scenario unavailable. An input exceeding configured structural capacities is rejected.
 
-## Allocate a contribution directly
+`feasible` means declared modeled constraints and reserve are satisfied with known costs and confirmed required transfers. Unknown rules/costs produce `conditional`; unknown costs withhold after-wealth, retained cash, rows and reserve outcomes. Guaranteed funding/reserve failures remain `unavailable`, even with other unknown costs: known nonnegative cost components establish a lower bound. Actual incomplete totals remain `null`.
 
-```ts
-import { allocateContribution } from "@investboard/rebalancing";
+## Allocate and project directly
 
-const allocation = allocateContribution({
-  positions: [{ assetClass: "equities", value: 70000 }, { assetClass: "bonds", value: 30000 }],
-  policy: {
-    equities: { min: 0.55, target: 0.6, max: 0.65 },
-    bonds: { min: 0.35, target: 0.4, max: 0.45 },
-  },
-  contribution: 10000,
-  cashFloor: 5000,
-});
-// allocations: EUR5,000 bonds; retainedCash: EUR5,000;
-// postContributionValue: EUR110,000.
-```
-
-This lower-level helper uses pooled class values without accounts or fees. `proportion` is a share of the contribution; admitted shares need not sum to one when cash is retained.
-
-## Project recurring contributions
-
-`projectContributions` takes `positions`, `policy`, `monthlyContribution`, `months`, optional `cashFloor`/trade preferences and explicit `annualReturns`. Supply an annual effective fraction for every held and target class, **including cash**. No return assumption is supplied by the module.
+`allocateContribution({ configuration, positions, policy, contribution, cashFloor?, minTradeSize?, maxTrades? })` returns pooled class allocations, retained cash and post-contribution wealth, without account rules or fees. `proportion` is each allocation's share of the contribution; admitted shares need not sum to one.
 
 ```ts
 import { projectContributions } from "@investboard/rebalancing";
 
 const projection = projectContributions({
+  configuration,
   positions: [{ assetClass: "equities", value: 70000 }, { assetClass: "bonds", value: 30000 }],
-  policy: {
-    equities: { min: 0.55, target: 0.6, max: 0.65 },
-    bonds: { min: 0.35, target: 0.4, max: 0.45 },
-  },
-  monthlyContribution: 100,
-  months: 12,
-  minTradeSize: 1000,
+  policy: result.snapshot.request.policy,
+  monthlyContribution: 100, months: 12, minTradeSize: 1000,
   annualReturns: { equities: 0, bonds: 0, cash: 0 },
 });
-// No purchases below the minimum; EUR1,200 new cash is retained.
+// All 12 contributions remain cash below the minimum.
 ```
 
-Month 1 starts from the supplied positions, applies `(1 + annualReturn) ** (1/12)` to each class, rounds each class to cents, then admits one new monthly contribution. Every following month re-solves current shortfalls with the same minimum and order-count limits. Skipped amounts remain cash; they are not automatically swept into later purchases. `retainedCash` is the amount retained from that month's new contribution; the cash position shows the accumulated balance.
+Supply explicit annual effective fractions for every held/target class and the configured cash class. There are no default returns. Each month applies `(1 + annualReturn) ** (1/12)`, rounds each class to configured minor units, adds one contribution and re-solves shortfalls. Retained cash accumulates but is not automatically swept into subsequent purchases.
 
-Projections are pooled class illustrations. They omit broker fees, transfers and tax, use no wall clock and do not predict future returns. Returns are limited to fractions from -1 through 10, horizons to 1–600 months, and projected wealth to the same supported bound. The result retains a defensive copy of every assumption so calling `projectContributions(result.request)` reproduces it.
+Projections omit broker fees, transfers and taxes, use no wall clock and predict no returns. Horizon, wealth and optional return bounds come from your configuration; returns must always be finite and at least -1. `retainedCash` is new cash retained that month. `projectContributions(projection.request)` reproduces the result.
 
-## Save and replay
+## Save, replay and upgrade
 
 ```ts
 import { replayRebalanceComparison } from "@investboard/rebalancing";
-
 const saved = JSON.stringify(result.snapshot);
 const reproduced = replayRebalanceComparison(JSON.parse(saved));
 ```
 
-Comparisons use `rebalance-comparison-v2`; projections use `contribution-projection-v1`. Unsupported comparison versions are refused. Inputs must be plain JSON data with documented fields: no functions, accessors, symbols, dates, cycles, sparse arrays or non-finite numbers. Omit optional fields instead of passing `undefined`. Malformed inputs raise `RebalanceInputError`; supported inputs with incomplete evidence produce explicit conditional/unavailable results.
+Comparisons use `rebalance-comparison-v3`; projections use `contribution-projection-v2`. Snapshots defensively copy all inputs, including host configuration, fee declarations and scenario choices. They are not signed or independently verified. Your host owns access, storage and review workflows.
 
-Snapshots are defensive copies of the supplied inputs. They are not signed, authenticated or independently verified. Your application manages permissions, storage, retention and any review or save workflow. Replay uses the original evidence, never today's account or provider state.
+Inputs must be plain JSON data: no functions, accessors, symbols, dates, cycles, sparse arrays or non-finite numbers. Omit optional fields instead of passing `undefined`. Invalid inputs raise `RebalanceInputError`. Incomplete supported evidence produces conditional/unavailable results.
 
-### Upgrade from 0.1.0
+**0.3.0 is a breaking API change.** Add `configuration` to allocation/projection requests. For comparison requests, remove root `contribution`, `cashLimit` and `salePlan`, and map them to explicit contribution/plan scenarios as shown above. If you want the former four kinds, declare those four IDs yourself and use an unavailable scenario when no sale plan exists.
 
-Version 0.2.0 corrects broker admission under an order cap and guaranteed funding/reserve failures with incomplete costs. Those corrections can change comparison results for unchanged inputs, so v1 snapshots are refused by `replayRebalanceComparison` rather than silently relabeled or recomputed.
-
-The request shape is unchanged. To obtain a corrected comparison, explicitly call `compareRebalance(oldSnapshot.request)`, review that new result, and store its v2 snapshot separately. Keep the original result or the exact 0.1.0 package when historical v1 reproduction is needed. Direct contribution allocation and `contribution-projection-v1` behavior are unchanged. See [CHANGELOG.md](CHANGELOG.md).
+Comparison v1/v2 replay is refused. Explicitly migrate the stored request, choose the host policy, calculate and review a new v3 result, and store it separately. Keep the original result and exact prior package for historical reproduction. Projection requests also need explicit configuration to be recalculated under v2. See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

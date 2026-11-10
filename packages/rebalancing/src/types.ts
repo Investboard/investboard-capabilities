@@ -1,7 +1,33 @@
-export type ReportingCurrency = "EUR" | "USD";
-export type AlternativeKind = "keep" | "fresh_cash" | "partial_cash" | "sales";
+export type ReportingCurrency = string;
+export type AlternativeKind = string;
 export type Feasibility = "feasible" | "conditional" | "unavailable";
-export type Priority = "minimize_sales" | "target_alignment";
+export type Priority = "input_order" | "minimize_sales" | "target_alignment";
+
+export interface RebalancingConfiguration {
+	money: { decimalPlaces: number; maximumAmount: number };
+	limits: {
+		holdings: number;
+		assetClasses: number;
+		accounts: number;
+		orders: number;
+		projectionMonths: number;
+		scenarios: number;
+		jsonNodes: number;
+		jsonDepth: number;
+		collectionEntries: number;
+		textLength: number;
+	};
+	cashAssetClass: string;
+	allowedCurrencies?: string[];
+	annualReturnRange?: { minimum: number; maximum: number };
+}
+export interface FeeSchedule {
+	fixed: number;
+	rate: number;
+	minimum?: number;
+	maximum?: number;
+	rounding: "up" | "nearest" | "down";
+}
 
 /** Fractions, not percentage points. Every target must lie inside its corridor. */
 export interface AllocationBand {
@@ -23,12 +49,13 @@ export interface Holding {
 	currency: string;
 }
 export interface AllocationPreferences {
-	/** Reporting-currency units; default 0.01. */
+	/** Default: one configured minor unit. */
 	minTradeSize?: number;
-	/** Number of security allocations, excluding retained cash; default 100. */
+	/** Default: the caller's configured order limit. */
 	maxTrades?: number;
 }
 export interface AllocationRequest extends AllocationPreferences {
+	configuration: RebalancingConfiguration;
 	positions: AllocationPosition[];
 	policy: AllocationPolicy;
 	contribution: number;
@@ -47,13 +74,17 @@ export interface ContributionResult {
 export interface AccountRules {
 	depotId: string;
 	/** Null is unknown, including when a declared fee is unavailable. */
-	feePerTrade: number | null;
+	feePerTrade?: number | null;
+	/** Mutually exclusive with feePerTrade. */
+	fees?: { buy: FeeSchedule | null; sell: FeeSchedule | null };
 	minimum: number;
 	/** Zero means no cap. */
 	maximum: number;
 	increment: number;
 }
 export interface Purchase {
+	/** Optional fee from an external model. Null stays unknown. */
+	fee?: number | null;
 	/** Null is a class allocation without a selected holding. No instrument is invented. */
 	holdingId: string | null;
 	depotId: string;
@@ -61,6 +92,7 @@ export interface Purchase {
 	amount: number;
 }
 export interface Sale {
+	fee?: number | null;
 	holdingId: string;
 	amount: number;
 	/** Estimate for this exact sale, in reporting currency. Null remains unknown. */
@@ -71,19 +103,33 @@ export interface SalePlan {
 	purchases: Purchase[];
 }
 export interface RebalanceRequest extends AllocationPreferences {
+	configuration: RebalancingConfiguration;
 	baseCurrency: ReportingCurrency;
 	holdings: Holding[];
 	policy: AllocationPolicy;
-	contribution: number;
-	cashLimit: number;
+	scenarios: RebalanceScenario[];
 	fundingDepotId: string;
 	cashFloor?: number;
 	accounts?: AccountRules[];
 	transfersConfirmed?: boolean;
 	priority?: Priority;
-	/** Explicit caller-selected plan. The module does not choose tax-efficient sales. */
-	salePlan?: SalePlan;
 }
+export type RebalanceScenario =
+	| { kind: string; mode: "keep" }
+	| {
+			kind: string;
+			mode: "contribution";
+			externalCash: number;
+			fundingDepotId?: string;
+	  }
+	| {
+			kind: string;
+			mode: "plan";
+			externalCash: number;
+			plan: SalePlan;
+			fundingDepotId?: string;
+	  }
+	| { kind: string; mode: "unavailable"; reasonCodes: ReasonCode[] };
 export interface AllocationRow {
 	assetClass: string;
 	value: number;
@@ -105,7 +151,9 @@ export interface FundingRow {
 	netInflow: number | null;
 	transferRequired: number | null;
 }
-export type ReasonCode =
+/** Hosts may add reason codes for explicitly unavailable scenarios. */
+export type ReasonCode = string;
+export type BuiltinReasonCode =
 	| "incomplete_valuation"
 	| "currency_mismatch"
 	| "account_rules_unknown"
@@ -138,11 +186,11 @@ export interface RebalanceAlternative {
 	sales: Sale[];
 }
 export interface RebalanceSnapshot {
-	methodologyVersion: "rebalance-comparison-v2";
+	methodologyVersion: "rebalance-comparison-v3";
 	request: RebalanceRequest;
 }
 export interface RebalanceComparison {
-	methodologyVersion: "rebalance-comparison-v2";
+	methodologyVersion: "rebalance-comparison-v3";
 	baseCurrency: ReportingCurrency;
 	priority: Priority;
 	valueBefore: number | null;
@@ -151,11 +199,12 @@ export interface RebalanceComparison {
 	snapshot: RebalanceSnapshot;
 }
 export interface ProjectionRequest extends AllocationPreferences {
+	configuration: RebalancingConfiguration;
 	positions: AllocationPosition[];
 	policy: AllocationPolicy;
 	cashFloor?: number;
 	monthlyContribution: number;
-	/** 1–600 periods; month 1 includes one contribution after its return step. */
+	/** Caller-bounded horizon; first month includes one contribution after returns. */
 	months: number;
 	/** Explicit annual effective fractions for every class, including cash. No default returns. */
 	annualReturns: Record<string, number>;
@@ -169,7 +218,7 @@ export interface ProjectionMonth {
 	rows: AllocationRow[];
 }
 export interface ContributionProjection {
-	methodologyVersion: "contribution-projection-v1";
+	methodologyVersion: "contribution-projection-v2";
 	/** Defensive copy of the complete assumptions, suitable for JSON storage. */
 	request: ProjectionRequest;
 	timeline: ProjectionMonth[];

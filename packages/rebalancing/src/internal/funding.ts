@@ -5,23 +5,26 @@ import type {
 	RebalanceRequest,
 	Sale,
 } from "../types.js";
-import { toCents } from "./money.js";
+import type { CalculationContext } from "../configuration.js";
+import { operationFee } from "./fees.js";
 
 export function fundingEvidence(
 	request: RebalanceRequest,
 	externalCash: number,
 	sales: Sale[],
 	purchases: Purchase[],
+	ctx: CalculationContext,
 ): {
 	funding: FundingRow[];
 	reasons: ReasonCode[];
-	knownFeeCents: number;
-	knownTaxCents: number;
+	knownFeeUnits: number;
+	knownTaxUnits: number;
 } {
+	const { money } = ctx;
 	const byId = new Map(request.holdings.map((h) => [h.holdingId, h]));
 	const reasons = new Set<ReasonCode>();
-	let knownFeeCents = 0;
-	let knownTaxCents = 0;
+	const knownFees: number[] = [],
+		knownTaxes: number[] = [];
 	const placedSales = sales.map((sale) => ({
 		...sale,
 		depotId: byId.get(sale.holdingId)!.depotId,
@@ -39,42 +42,49 @@ export function fundingEvidence(
 		const count = localSales.length + localBuys.length;
 		const account = request.accounts?.find((a) => a.depotId === depotId);
 		if (count > 0 && !account) reasons.add("account_rules_unknown");
-		const fees =
-			count === 0
-				? 0
-				: account?.feePerTrade == null
-					? null
-					: toCents(account.feePerTrade) * count;
-		if (fees === null) reasons.add("fees_unknown");
-		knownFeeCents += fees ?? 0;
-		// Taxes follow the holding sold, never a pooled gross-proceeds ratio.
-		const localKnownTax = localSales.reduce(
-			(sum, s) => sum + (s.tax === null ? 0 : toCents(s.tax.amount)),
-			0,
+		const orderFees = [
+			...localSales.map((s) => operationFee(s, "sell", account, ctx)),
+			...localBuys.map((p) => operationFee(p, "buy", account, ctx)),
+		];
+		const knownLocalFees = money.sum(
+			orderFees.filter((f): f is number => f !== null),
 		);
-		knownTaxCents += localKnownTax;
+		knownFees.push(knownLocalFees);
+		const fees = orderFees.some((f) => f === null) ? null : knownLocalFees;
+		if (fees === null) reasons.add("fees_unknown");
+		// Preserve each known component even when another fee or tax is unknown.
+		const localKnownTax = money.sum(
+			localSales.map((s) => (s.tax === null ? 0 : money.units(s.tax.amount))),
+		);
+		knownTaxes.push(localKnownTax);
 		const tax = localSales.some((s) => s.tax === null) ? null : localKnownTax;
 		if (tax === null) reasons.add("sale_tax_unknown");
-		const cash = depotId === request.fundingDepotId ? toCents(externalCash) : 0;
-		const gross = localSales.reduce((sum, s) => sum + toCents(s.amount), 0);
-		const spent = localBuys.reduce((sum, p) => sum + toCents(p.amount), 0);
-		const inflow = tax === null ? null : cash + gross - tax;
+		const cash =
+			depotId === request.fundingDepotId ? money.units(externalCash) : 0;
+		const gross = money.sum(localSales.map((s) => money.units(s.amount)));
+		const spent = money.sum(localBuys.map((p) => money.units(p.amount)));
+		const inflow = tax === null ? null : money.sum([cash, gross, -tax]);
 		const transfer =
 			inflow === null || fees === null
 				? null
-				: Math.max(0, spent + fees - inflow);
+				: Math.max(0, money.sum([spent, fees, -inflow]));
 		if (transfer !== null && transfer > 0 && !request.transfersConfirmed)
 			reasons.add("funding_transfer_required");
 		return {
 			depotId,
-			externalCash: cash / 100,
-			grossSales: gross / 100,
-			taxCost: tax === null ? null : tax / 100,
-			fees: fees === null ? null : fees / 100,
-			purchases: spent / 100,
-			netInflow: inflow === null ? null : inflow / 100,
-			transferRequired: transfer === null ? null : transfer / 100,
+			externalCash: money.amount(cash),
+			grossSales: money.amount(gross),
+			taxCost: tax === null ? null : money.amount(tax),
+			fees: fees === null ? null : money.amount(fees),
+			purchases: money.amount(spent),
+			netInflow: inflow === null ? null : money.amount(inflow),
+			transferRequired: transfer === null ? null : money.amount(transfer),
 		};
 	});
-	return { funding, reasons: [...reasons], knownFeeCents, knownTaxCents };
+	return {
+		funding,
+		reasons: [...reasons],
+		knownFeeUnits: money.sum(knownFees),
+		knownTaxUnits: money.sum(knownTaxes),
+	};
 }

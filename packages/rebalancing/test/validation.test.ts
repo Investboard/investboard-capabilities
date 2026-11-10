@@ -1,13 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
-	compareRebalance,
-	projectContributions,
 	replayRebalanceComparison,
 	RebalanceInputError,
-	MAX_SUPPORTED_WEALTH,
 } from "../src/index.js";
-import type { RebalanceRequest } from "../src/index.js";
-import { policy, request, salesRequest } from "./fixtures.js";
+import {
+	compareRebalance,
+	projectContributions,
+	MAX_SUPPORTED_WEALTH,
+	type RebalanceRequest,
+	policy,
+	request,
+	salesRequest,
+} from "./fixtures.js";
 
 describe("public JSON and monetary boundary", () => {
 	it.each([
@@ -96,7 +100,7 @@ describe("public JSON and monetary boundary", () => {
 		input.holdings = [{ ...input.holdings[0]!, value: 999999999.98 }];
 		expect(compareRebalance(input).valueBefore).toBe(999999999.98);
 		input.contribution = 0.03;
-		expect(() => compareRebalance(input)).toThrow("supported wealth");
+		expect(() => compareRebalance(input)).toThrow("configured wealth");
 	});
 	it.each([
 		"field",

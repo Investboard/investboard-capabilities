@@ -1,45 +1,56 @@
 import type { AllocationRequest, ContributionResult } from "./types.js";
+import type { CalculationContext } from "./configuration.js";
 import { validateAllocation } from "./validation.js";
 import { allocateContribution as allocate } from "./internal/contribution-allocation.js";
 import {
 	allocationRows,
 	largestAllocationFirst,
 } from "./internal/allocation.js";
-import { toCents } from "./internal/money.js";
 
 /** Internal callers validate their complete request once at the public boundary. */
-export function planContribution(input: AllocationRequest): ContributionResult {
-	const rows = allocationRows(input.positions, input.policy);
-	const allocations = allocate(
+export function planContribution(
+	input: AllocationRequest,
+	ctx: CalculationContext,
+	applyOrderLimit = true,
+): ContributionResult {
+	const { money, configuration } = ctx;
+	const rows = allocationRows(input.positions, input.policy, ctx);
+	const candidates = allocate(
 		rows.map((row) => ({
 			assetClass: row.assetClass,
-			value: row.value,
+			value: money.units(row.value),
 			targetPercent: row.target,
 		})),
-		input.contribution,
-		input.minTradeSize ?? 0.01,
-		input.cashFloor ?? 0,
+		money.units(input.contribution),
+		money.units(input.minTradeSize ?? money.quantum),
+		money.units(input.cashFloor ?? 0),
+		configuration.cashAssetClass,
 	)
-		.filter((a) => a.assetClass !== "cash")
-		.sort(largestAllocationFirst)
-		.slice(0, input.maxTrades ?? 100);
+		.filter((a) => a.assetClass !== configuration.cashAssetClass)
+		.sort(largestAllocationFirst);
+	const selected = applyOrderLimit
+		? candidates.slice(0, input.maxTrades ?? configuration.limits.orders)
+		: candidates;
+	const allocated = money.sum(selected.map((a) => a.amount));
 	return {
-		allocations,
-		retainedCash:
-			(toCents(input.contribution) -
-				allocations.reduce((sum, a) => sum + toCents(a.amount), 0)) /
-			100,
-		postContributionValue:
-			(rows.reduce((sum, row) => sum + toCents(row.value), 0) +
-				toCents(input.contribution)) /
-			100,
+		allocations: selected.map((a) => ({
+			...a,
+			amount: money.amount(a.amount),
+		})),
+		retainedCash: money.amount(money.units(input.contribution) - allocated),
+		postContributionValue: money.amount(
+			money.sum([
+				...rows.map((row) => money.units(row.value)),
+				money.units(input.contribution),
+			]),
+		),
 	};
 }
 
-/** Security allocation amounts; all reserve, target cash and skipped orders remain cash. */
+/** Security allocations; reserve, target cash and skipped orders remain cash. */
 export function allocateContribution(
 	input: AllocationRequest,
 ): ContributionResult {
-	validateAllocation(input);
-	return planContribution(input);
+	const ctx = validateAllocation(input);
+	return planContribution(input, ctx);
 }
