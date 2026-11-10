@@ -12,9 +12,16 @@ export function fundingEvidence(
 	externalCash: number,
 	sales: Sale[],
 	purchases: Purchase[],
-): { funding: FundingRow[]; reasons: ReasonCode[] } {
+): {
+	funding: FundingRow[];
+	reasons: ReasonCode[];
+	knownFeeCents: number;
+	knownTaxCents: number;
+} {
 	const byId = new Map(request.holdings.map((h) => [h.holdingId, h]));
 	const reasons = new Set<ReasonCode>();
+	let knownFeeCents = 0;
+	let knownTaxCents = 0;
 	const placedSales = sales.map((sale) => ({
 		...sale,
 		depotId: byId.get(sale.holdingId)!.depotId,
@@ -39,10 +46,14 @@ export function fundingEvidence(
 					? null
 					: toCents(account.feePerTrade) * count;
 		if (fees === null) reasons.add("fees_unknown");
+		knownFeeCents += fees ?? 0;
 		// Taxes follow the holding sold, never a pooled gross-proceeds ratio.
-		const tax = localSales.some((s) => s.tax === null)
-			? null
-			: localSales.reduce((sum, s) => sum + toCents(s.tax!.amount), 0);
+		const localKnownTax = localSales.reduce(
+			(sum, s) => sum + (s.tax === null ? 0 : toCents(s.tax.amount)),
+			0,
+		);
+		knownTaxCents += localKnownTax;
+		const tax = localSales.some((s) => s.tax === null) ? null : localKnownTax;
 		if (tax === null) reasons.add("sale_tax_unknown");
 		const cash = depotId === request.fundingDepotId ? toCents(externalCash) : 0;
 		const gross = localSales.reduce((sum, s) => sum + toCents(s.amount), 0);
@@ -65,5 +76,5 @@ export function fundingEvidence(
 			transferRequired: transfer === null ? null : transfer / 100,
 		};
 	});
-	return { funding, reasons: [...reasons] };
+	return { funding, reasons: [...reasons], knownFeeCents, knownTaxCents };
 }

@@ -71,21 +71,23 @@ export function assess(
 	];
 	const feeCost = evidence.funding.some((f) => f.fees === null)
 		? null
-		: evidence.funding.reduce((sum, f) => sum + toCents(f.fees!), 0) / 100;
+		: evidence.knownFeeCents / 100;
 	const taxCost = evidence.funding.some((f) => f.taxCost === null)
 		? null
-		: evidence.funding.reduce((sum, f) => sum + toCents(f.taxCost!), 0) / 100;
+		: evidence.knownTaxCents / 100;
 	const gross = sales.reduce((sum, s) => sum + toCents(s.amount), 0);
 	const invested = purchases.reduce((sum, p) => sum + toCents(p.amount), 0);
+	// All unknown costs are nonnegative. This upper bound can prove a deficit
+	// without presenting a partial cost sum as the actual fee or tax total.
+	const maximumRetainedCents =
+		toCents(externalCash) +
+		gross -
+		invested -
+		evidence.knownFeeCents -
+		evidence.knownTaxCents;
 	const retained =
-		feeCost === null || taxCost === null
-			? null
-			: toCents(externalCash) +
-				gross -
-				invested -
-				toCents(feeCost) -
-				toCents(taxCost);
-	if (retained !== null && retained < 0) reasons.push("insufficient_funding");
+		feeCost === null || taxCost === null ? null : maximumRetainedCents;
+	if (maximumRetainedCents < 0) reasons.push("insufficient_funding");
 	const values = classValues(
 		request.holdings.map((h) => ({
 			assetClass: h.assetClass,
@@ -105,12 +107,14 @@ export function assess(
 			purchase.assetClass,
 			(values.get(purchase.assetClass) ?? 0) + toCents(purchase.amount),
 		);
+	const maximumReserveCents =
+		(values.get("cash") ?? 0) + Math.max(0, maximumRetainedCents);
+	if (maximumReserveCents < toCents(request.cashFloor ?? 0))
+		reasons.push("reserve_shortfall");
 	if (retained !== null && retained >= 0)
 		values.set("cash", (values.get("cash") ?? 0) + retained);
 	const reserve =
 		retained === null || retained < 0 ? null : (values.get("cash") ?? 0) / 100;
-	if (reserve !== null && toCents(reserve) < toCents(request.cashFloor ?? 0))
-		reasons.push("reserve_shortfall");
 	const available =
 		retained !== null &&
 		retained >= 0 &&

@@ -138,11 +138,11 @@ export interface RebalanceAlternative {
 	sales: Sale[];
 }
 export interface RebalanceSnapshot {
-	methodologyVersion: "rebalance-comparison-v1";
+	methodologyVersion: "rebalance-comparison-v2";
 	request: RebalanceRequest;
 }
 export interface RebalanceComparison {
-	methodologyVersion: "rebalance-comparison-v1";
+	methodologyVersion: "rebalance-comparison-v2";
 	baseCurrency: ReportingCurrency;
 	priority: Priority;
 	valueBefore: number | null;
