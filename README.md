@@ -4,7 +4,7 @@
 
 Bring [Investboard](https://investboard.com) portfolio analysis into your own code. Use reusable TypeScript modules to explore market crises, explain historical performance, compare ways to rebalance with new cash, and make the assumptions visible in your own investing tools.
 
-Start with **[portfolio stress testing](packages/stress-test)**, **[contribution-aware rebalancing](packages/rebalancing)** or **[historical performance](packages/performance)**. Run the modules locally, connect your own data, and build the experience you want around them.
+Start with **[portfolio stress testing](packages/stress-test)**, **[contribution-aware rebalancing](packages/rebalancing)**, **[historical performance](packages/performance)** or **[goal cash scheduling](packages/goal-planning)**. Run the modules locally, connect your own data, and build the experience you want around them.
 
 **[Run the examples](#try-it-with-your-own-code)** · **[Explore the modules](#available-modules)**
 
@@ -19,6 +19,7 @@ A holdings list tells you what you own. Scenario analysis helps you explore how 
 | Investing research script | Supply your own price and FX history, inspect coverage, and save inputs for a reproducible replay |
 | Contribution planner | Compare fresh-cash and cash-limited allocations with a sale plan you supply, including reserves and depot funding |
 | Historical performance dashboard | Separate funding from gains, explain holding contributions and quote FX, and estimate embedded fund expenses |
+| Goal cash planner | Share cash across goals while protecting reserves, funding dated expenses and identifying deadline shortfalls |
 
 ## Start with portfolio stress testing
 
@@ -48,6 +49,12 @@ The [performance engine](packages/performance) reconstructs the positions actual
 
 Run its synthetic price/FX example with `pnpm example:performance`. See the [API and accounting conventions](packages/performance/README.md) before connecting real history.
 
+## Schedule goals against available cash
+
+The [goal-planning module](packages/goal-planning) checks whether declared cash can fund competing goal contributions and dated obligations. Its deadline-aware buffer allows later capacity to cover later expenses without locking away their full face value today. Inspect the exact-cent ledger, due-time shortfalls, reserve and unallocated cash, then save and replay the inputs. Account and provider access belong to your application.
+
+Run the synthetic timing example with `pnpm example:goals`. The package returns funded contribution streams and no-growth target gaps; your application can supply a separate investment-return model.
+
 ## Try it with your own code
 
 Use Node 22 or newer and pnpm 9.15.0:
@@ -59,9 +66,9 @@ pnpm install --frozen-lockfile
 pnpm example
 ```
 
-The examples use synthetic holdings. Stress testing shows why two quote currencies do not automatically imply two economic exposures. Rebalancing shows how new cash can reach a target allocation, how per-depot tax changes funding, and why contributions below a trade minimum remain cash. Performance separates historical price and quote-FX effects. All three examples replay their original inputs.
+The examples use synthetic data. Stress testing shows why two quote currencies do not automatically imply two economic exposures. Rebalancing shows how new cash can reach a target allocation, how per-depot tax changes funding, and why contributions below a trade minimum remain cash. Performance separates historical price and quote-FX effects. Goal scheduling shows how payment timing changes the required cash buffer and contribution funding. All four examples replay their original inputs.
 
-Ready to add a capability to your own engine? **[Build the stress-testing module](packages/stress-test/README.md#use-it-in-your-project)**, **[build the rebalancing module](packages/rebalancing/README.md#use-it-in-your-project)** or **[build the performance module](packages/performance/README.md#use-it-in-your-project)**, then supply the data and assumptions that fit your workflow.
+Ready to add a capability to your own engine? **[Build the stress-testing module](packages/stress-test/README.md#use-it-in-your-project)**, **[build the rebalancing module](packages/rebalancing/README.md#use-it-in-your-project)**, **[build the performance module](packages/performance/README.md#use-it-in-your-project)** or **[build the goal-planning module](packages/goal-planning/README.md#use-it-in-your-project)**, then supply the data and assumptions that fit your workflow.
 
 ## Available modules
 
@@ -70,6 +77,7 @@ Ready to add a capability to your own engine? **[Build the stress-testing module
 | Portfolio stress testing | `@investboard/stress-test` | [API, examples and assumptions](packages/stress-test/README.md) |
 | Contribution-aware rebalancing | `@investboard/rebalancing` | [API, examples and assumptions](packages/rebalancing/README.md) |
 | Historical portfolio performance | `@investboard/performance` | [API, accounting conventions and replay](packages/performance/README.md) |
+| Deadline-aware goal cash scheduling | `@investboard/goal-planning` | [API, timing conventions and replay](packages/goal-planning/README.md) |
 
 [Browse the module catalogue](capabilities.json) · [Contribute a capability or improvement](CONTRIBUTING.md)
 

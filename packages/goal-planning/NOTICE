@@ -1,0 +1,7 @@
+Investboard capabilities
+Copyright 2026 Investboard GmbH
+
+Adapts Investboard's deadline-aware cash reservation and exact-cent goal
+allocation logic into an independent, caller-supplied-data API. The public
+snapshot format is specific to this package. No account, provider, database,
+tax engine or investment-return model is included.
