@@ -174,9 +174,11 @@ describe("public whole-book comparison", () => {
 	it("ignores an unused depot's fees", () => {
 		const input = request();
 		input.accounts!.push({
-			...input.accounts![0]!,
 			depotId: "unused",
 			feePerTrade: 1000000,
+			minimum: 0,
+			maximum: 0,
+			increment: 0.01,
 		});
 		expect(alternative(input)).toMatchObject({
 			invested: 100000,

@@ -90,17 +90,25 @@ export interface ContributionResult {
 	retainedCash: number;
 	postContributionValue: number;
 }
-export interface AccountRules {
+/** Account amount rules with exactly one fee declaration. */
+export type AccountRules = {
 	depotId: string;
-	/** Null is unknown, including when a declared fee is unavailable. */
-	feePerTrade?: number | null;
-	/** Mutually exclusive with feePerTrade. */
-	fees?: { buy: FeeSchedule | null; sell: FeeSchedule | null };
 	minimum: number;
 	/** Zero means no cap. */
 	maximum: number;
 	increment: number;
-}
+} & (
+	| {
+			/** Null explicitly declares an unknown flat fee. */
+			feePerTrade: number | null;
+			fees?: never;
+	  }
+	| {
+			/** Each null side explicitly declares an unknown scheduled fee. */
+			fees: { buy: FeeSchedule | null; sell: FeeSchedule | null };
+			feePerTrade?: never;
+	  }
+);
 export interface Purchase {
 	/** Optional fee from an external model. Null stays unknown. */
 	fee?: number | null;
