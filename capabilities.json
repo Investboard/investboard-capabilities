@@ -2,6 +2,17 @@
 	"schemaVersion": 1,
 	"capabilities": [
 		{
+			"id": "goal-planning",
+			"name": "Deadline-aware goal cash scheduling",
+			"version": "0.1.0",
+			"package": "@investboard/goal-planning",
+			"path": "packages/goal-planning",
+			"license": "Apache-2.0",
+			"methodologyVersion": "goal-cash-schedule-v1",
+			"description": "Schedule competing goal contributions against reserves, recurring cash capacity and dated obligations, inspect shortfalls and replay declared inputs.",
+			"documentation": "packages/goal-planning/README.md"
+		},
+		{
 			"id": "stress-test",
 			"name": "Portfolio stress testing",
 			"version": "0.1.0",
