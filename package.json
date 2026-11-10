@@ -1,0 +1,27 @@
+{
+	"name": "investboard-capabilities",
+	"private": true,
+	"type": "module",
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {
+		"build": "pnpm -r build",
+		"typecheck": "pnpm -r typecheck",
+		"test": "vitest run",
+		"example": "pnpm build && node packages/stress-test/examples/replay.mjs",
+		"format": "biome format --write .",
+		"format:check": "biome format ."
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.13",
+		"@types/node": "20.19.39",
+		"typescript": "5.9.3",
+		"vitest": "4.1.9",
+		"zod": "4.6.7"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"packageManager": "pnpm@9.15.0"
+}

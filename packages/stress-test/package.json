@@ -1,0 +1,35 @@
+{
+	"name": "@investboard/stress-test",
+	"version": "0.1.0",
+	"description": "Deterministic historical scenario stress calculations with explicit currency uncertainty and replayable inputs",
+	"type": "module",
+	"license": "Apache-2.0",
+	"files": [
+		"dist",
+		"README.md",
+		"source-provenance.json",
+		"LICENSE",
+		"NOTICE"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"typecheck": "tsc -p tsconfig.json --noEmit"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Investboard/investboard-capabilities.git",
+		"directory": "packages/stress-test"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}
