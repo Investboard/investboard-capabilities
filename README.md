@@ -1,6 +1,6 @@
 # Investboard capabilities
 
-Reusable investing logic from [Investboard](https://investboard.de), with documented assumptions, synthetic examples and reproducible review evidence.
+Reusable investing logic from [Investboard](https://investboard.com), with documented assumptions, synthetic examples and reproducible review evidence.
 
 ## Released capabilities
 
