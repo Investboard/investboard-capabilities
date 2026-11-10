@@ -26,6 +26,8 @@ importers:
 
   packages/performance: {}
 
+  packages/rebalancing: {}
+
   packages/stress-test: {}
 
 packages:
