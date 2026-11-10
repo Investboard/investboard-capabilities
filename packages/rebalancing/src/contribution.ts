@@ -1,7 +1,10 @@
 import type { AllocationRequest, ContributionResult } from "./types.js";
 import { validateAllocation } from "./validation.js";
 import { allocateContribution as allocate } from "./internal/contribution-allocation.js";
-import { allocationRows } from "./internal/allocation.js";
+import {
+	allocationRows,
+	largestAllocationFirst,
+} from "./internal/allocation.js";
 import { toCents } from "./internal/money.js";
 
 /** Internal callers validate their complete request once at the public boundary. */
@@ -18,15 +21,7 @@ export function planContribution(input: AllocationRequest): ContributionResult {
 		input.cashFloor ?? 0,
 	)
 		.filter((a) => a.assetClass !== "cash")
-		.sort(
-			(a, b) =>
-				b.amount - a.amount ||
-				(a.assetClass < b.assetClass
-					? -1
-					: a.assetClass > b.assetClass
-						? 1
-						: 0),
-		)
+		.sort(largestAllocationFirst)
 		.slice(0, input.maxTrades ?? 100);
 	return {
 		allocations,

@@ -32,10 +32,12 @@ npm pack
 Install the generated package from your project:
 
 ```sh
-npm install /path/to/investboard-capabilities/packages/rebalancing/investboard-rebalancing-0.1.0.tgz
+npm install /path/to/investboard-capabilities/packages/rebalancing/investboard-rebalancing-0.2.0.tgz
 ```
 
 This is a source distribution and buildable package. It is not published to the npm registry. The public snapshot format is specific to this package; it is not an Investboard hosted API or saved-draft format.
+
+The normal `npm pack` step rebuilds this package from source, so an old or missing `dist` directory cannot silently determine the packaged calculation behavior.
 
 ## Compare alternatives
 
@@ -82,11 +84,13 @@ All four alternatives share the same whole-book source and policy:
 
 Positive shortfalls use `target × (current wealth + new net cash) − current class value`. A constrained budget shares these shortfalls proportionally. Largest remainders reconcile cents; reserve gaps use integer-cent subtraction. Cash, including any target cash allocation, remains retained funding.
 
-`cashFloor` defaults to zero. `minTradeSize` defaults to 0.01 and `maxTrades` to 100. After excluding cash and amounts below the minimum, the largest allocations are admitted first, with class-name ties resolved deterministically. Minimum-size exclusions, capped orders and rounding remainders remain cash in the wealth denominator. The cash floor is a hard funding constraint. Corridors are reported separately: affordable partial progress can be `feasible` while still outside a corridor.
+`cashFloor` defaults to zero. `minTradeSize` defaults to 0.01 and `maxTrades` to 100. Cash, minimum-size exclusions and broker-rejected amounts consume no order slots. The comparison applies account caps and increments first, then ranks surviving amounts largest first with class-name ties resolved deterministically, and admits up to `maxTrades`. Rejected, capped and rounding remainders remain cash in the wealth denominator. The cash floor is a hard funding constraint. Corridors are reported separately: affordable partial progress can be `feasible` while still outside a corridor.
 
 Optional `accounts` are caller declarations keyed by depot ID. `minimum`, `maximum` (zero means no cap), and `increment` apply to monetary amounts; `feePerTrade` is a flat amount or `null` when unknown. Fees are reserved for selected orders only. Fee reservation is conservative when a smaller budget removes an order; any excess reserve remains cash. Quantity increments, spread, slippage, percentage fees, instrument eligibility and actual account balances are not inferred.
 
 `feasible` means the modeled flows satisfy the declared amount constraints and reserve, with known costs and any required transfer confirmed. It is not brokerage or tax verification. Unknown account rules, fees or tax produce `conditional` results. Unknown costs withhold after-wealth, retained cash, allocation rows and reserve outcomes. Insufficient funds or a violated floor produce `unavailable` results.
+
+Incomplete costs do not hide a guaranteed failure. Because all supplied costs are nonnegative, the engine separately retains known fee and tax amounts, including known tax within a depot that also has an unknown sale. If even the most favorable completion of the remaining costs cannot fund the purchases or meet the reserve, the result is `unavailable`. Actual incomplete totals and reserve outcomes still remain `null`.
 
 ## Supply a sale plan
 
@@ -170,9 +174,15 @@ const saved = JSON.stringify(result.snapshot);
 const reproduced = replayRebalanceComparison(JSON.parse(saved));
 ```
 
-Comparisons use `rebalance-comparison-v1`; projections use `contribution-projection-v1`. Unsupported comparison versions are refused. Inputs must be plain JSON data with documented fields: no functions, accessors, symbols, dates, cycles, sparse arrays or non-finite numbers. Omit optional fields instead of passing `undefined`. Malformed inputs raise `RebalanceInputError`; supported inputs with incomplete evidence produce explicit conditional/unavailable results.
+Comparisons use `rebalance-comparison-v2`; projections use `contribution-projection-v1`. Unsupported comparison versions are refused. Inputs must be plain JSON data with documented fields: no functions, accessors, symbols, dates, cycles, sparse arrays or non-finite numbers. Omit optional fields instead of passing `undefined`. Malformed inputs raise `RebalanceInputError`; supported inputs with incomplete evidence produce explicit conditional/unavailable results.
 
 Snapshots are defensive copies of the supplied inputs. They are not signed, authenticated or independently verified. Your application manages permissions, storage, retention and any review or save workflow. Replay uses the original evidence, never today's account or provider state.
+
+### Upgrade from 0.1.0
+
+Version 0.2.0 corrects broker admission under an order cap and guaranteed funding/reserve failures with incomplete costs. Those corrections can change comparison results for unchanged inputs, so v1 snapshots are refused by `replayRebalanceComparison` rather than silently relabeled or recomputed.
+
+The request shape is unchanged. To obtain a corrected comparison, explicitly call `compareRebalance(oldSnapshot.request)`, review that new result, and store its v2 snapshot separately. Keep the original result or the exact 0.1.0 package when historical v1 reproduction is needed. Direct contribution allocation and `contribution-projection-v1` behavior are unchanged. See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

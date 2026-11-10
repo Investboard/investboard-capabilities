@@ -1,12 +1,13 @@
 {
 	"name": "@investboard/rebalancing",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Contribution-aware portfolio allocation, scenario funding and reproducible rebalancing comparisons",
 	"type": "module",
 	"license": "Apache-2.0",
 	"files": [
 		"dist",
 		"README.md",
+		"CHANGELOG.md",
 		"LICENSE",
 		"NOTICE"
 	],
@@ -17,6 +18,7 @@
 		}
 	},
 	"scripts": {
+		"prepack": "pnpm --silent build",
 		"build": "tsc -p tsconfig.json",
 		"typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json"
 	},
