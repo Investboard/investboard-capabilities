@@ -1,6 +1,6 @@
 /** The weight of the ten largest positions. */
 import { isResidualId } from "./identity.js";
-const TOP_N = 10;
+export const TOP_N = 10;
 interface BookWeightedPosition {
 	id: string;
 	weight: number;

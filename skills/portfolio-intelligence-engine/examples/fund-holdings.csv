@@ -1,0 +1,12 @@
+as_of,fund_id,company_id,company_name,fund_weight_pct,isin
+2026-09-30,world,ALDR,Alder Inc.,25,US1111110005
+2026-09-30,world,CDSF,Cedarsoft Corp.,20,US4444441045
+2026-09-30,world,ELMT,Elmtron Corp.,15,US5555551040
+2026-09-30,world,MAPLE,Maple SE,10,DESYN0000010
+2026-09-30,world,PNCR,Pinecrest SA,10,CHSYN0000040
+2026-09-30,world,SYSC,Synthetic Semiconductor Co.,10,TWSYN0000050
+2026-09-30,world,RVMT,Rivermart.com Inc.,8,US3333331067
+2026-09-30,tech,ALDR,Alder Inc.,30,US1111110005
+2026-09-30,tech,CDSF,Cedarsoft Corp.,30,US4444441045
+2026-09-30,tech,ELMT,Elmtron Corp.,25,US5555551040
+2026-09-30,tech,SYSC,Synthetic Semiconductor Co.,13,TWSYN0000050

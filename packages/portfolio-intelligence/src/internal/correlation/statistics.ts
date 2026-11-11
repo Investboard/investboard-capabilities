@@ -4,7 +4,7 @@ export interface Correlation {
 	readonly r: number | null;
 	readonly n: number;
 }
-const BAND_BOUNDARIES = [-0.3, 0.3, 0.7] as const;
+export const BAND_BOUNDARIES = [-0.3, 0.3, 0.7] as const;
 const Z_95 = 1.96;
 export function pearson(xs: WeeklySeries, ys: WeeklySeries): Correlation {
 	const px: number[] = [];

@@ -66,7 +66,7 @@ export function lookThroughDissolutionTally(
 	}
 	return tally;
 }
-const FULL_DISSOLUTION_THRESHOLD = 0.98;
+export const FULL_DISSOLUTION_THRESHOLD = 0.98;
 const RESIDUAL_MIN_VALUE = 0.01;
 export function dissolveEtfs(etfs: EngineEtfInput[]): {
 	exposures: DissolvedExposure[];

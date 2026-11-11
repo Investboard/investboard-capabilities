@@ -3,7 +3,7 @@ import { mergeEtfInputsByFund } from "./fund-identity.js";
 import { positionIdentity } from "./identity.js";
 import type { EngineEtfInput, OverlapPairV2 } from "./types.js";
 export const OVERLAP_NOISE_FLOOR = 0.01;
-const MAX_SHARED_HOLDINGS = 20;
+export const MAX_SHARED_HOLDINGS = 20;
 function round4(v: number): number {
 	return Number(v.toFixed(4));
 }

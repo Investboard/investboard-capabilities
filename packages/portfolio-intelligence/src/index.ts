@@ -14,3 +14,4 @@ export {
 	measureCorrelations,
 	replayCorrelations,
 } from "./correlations.js";
+export { METHOD_CONSTANTS } from "./method-constants.js";

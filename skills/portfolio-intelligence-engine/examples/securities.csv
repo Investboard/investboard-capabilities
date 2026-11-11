@@ -1,0 +1,8 @@
+isin,name,sector,industry,country,asset_class
+US1111110005,Alder Inc.,Technology,Consumer Electronics,United States,equities
+US4444441045,Cedarsoft Corp.,Technology,Software,United States,equities
+US5555551040,Elmtron Corp.,Technology,Semiconductors,United States,equities
+DESYN0000010,Maple SE,Technology,Software,Germany,equities
+CHSYN0000040,Pinecrest SA,Consumer Defensive,Packaged Foods,Switzerland,equities
+TWSYN0000050,Synthetic Semiconductor Co.,Technology,Semiconductors,Taiwan,equities
+US3333331067,Rivermart.com Inc.,Consumer Cyclical,Internet Retail,United States,equities

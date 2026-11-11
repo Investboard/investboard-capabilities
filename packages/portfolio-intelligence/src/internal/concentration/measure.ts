@@ -10,7 +10,7 @@ import type { MergedPosition } from "../xray/types.js";
 import { evaluateIssuerConcentration } from "./from-lookthrough.js";
 
 /** The cap is required by the engine but plays no part in the figures reported here. */
-const NEUTRAL_CAP_PCT = 10;
+export const NEUTRAL_CAP_PCT = 10;
 const FULL = 1 - 1e-12;
 
 export function measureConcentration(
