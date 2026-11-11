@@ -38,7 +38,7 @@ export interface ClassifiablePosition {
 export function profileOf(
 	position: ClassifiablePosition,
 	profiles: ReadonlyMap<string, SecurityProfile>,
-): Pick<SecurityProfile, "sector" | "country"> | null {
+): { sector: string | null; country: string | null } | null {
 	if (!position.isin) return null;
 	if (!isEquityAxisDirect(position)) return null;
 	const profile = profiles.get(position.isin);

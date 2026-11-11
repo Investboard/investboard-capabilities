@@ -30,3 +30,10 @@ export type IssuerIdentitySource =
 	| "manual"
 	| "row_name"
 	| "none";
+
+/** Where an issuer's weight comes from: held directly, through which funds, or unassigned. */
+export interface IssuerSources {
+	directWeight: number;
+	viaFunds: Array<{ id?: string; name: string; weight: number }>;
+	unassignedWeight: number;
+}

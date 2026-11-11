@@ -19,13 +19,13 @@ describe("mergeByIdentity", () => {
 		expect(aldr.weight).toBeCloseTo(expectedValue / total, 4);
 		expect(aldr.provenance.direct).toBeCloseTo(10000 / total, 4);
 		expect(aldr.provenance.viaFunds).toHaveLength(2);
-		const viaVwce = aldr.provenance.viaFunds.find((s) => s.etf === "WRLD.DE")!;
+		const viaWrld = aldr.provenance.viaFunds.find((s) => s.etf === "WRLD.DE")!;
 		expect(aldr.provenance.directValue).toBe(10000);
-		expect(viaVwce.value).toBe(50000 * 0.039);
-		expect(viaVwce.name).toBe(WRLD.name);
-		expect(viaVwce.id).toBe(`isin:${WRLD.isin}`);
-		expect(viaVwce.shareInEtf).toBeCloseTo(0.039, 4);
-		expect(viaVwce.weight).toBeCloseTo((50000 * 0.039) / total, 4);
+		expect(viaWrld.value).toBe(50000 * 0.039);
+		expect(viaWrld.name).toBe(WRLD.name);
+		expect(viaWrld.id).toBe(`isin:${WRLD.isin}`);
+		expect(viaWrld.shareInEtf).toBeCloseTo(0.039, 4);
+		expect(viaWrld.weight).toBeCloseTo((50000 * 0.039) / total, 4);
 	});
 	it("combines source listings by fund ISIN and keeps ticker collisions separate", () => {
 		const aliases = dissolveEtfs([

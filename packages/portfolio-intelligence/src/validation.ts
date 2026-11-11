@@ -207,17 +207,6 @@ export function validatePortfolioRequest(request: PortfolioRequest): void {
 			optionalText(security[field], `Security ${security.isin}: ${field}`);
 	}
 
-	for (const identity of request.issuerIdentities ?? []) {
-		require(isObject(identity), "Each issuer identity must be an object");
-		text(identity.isin, "Issuer identity isin");
-		text(
-			identity.verifiedName,
-			`Issuer identity ${identity.isin}: verifiedName`,
-		);
-		require(typeof identity.receipt ===
-			"boolean", `Issuer identity ${identity.isin}: receipt must be a boolean`);
-	}
-
 	for (const override of request.fundOverrides ?? []) {
 		require(isObject(override), "Each fund override must be an object");
 		text(override.isin, "Fund override isin");

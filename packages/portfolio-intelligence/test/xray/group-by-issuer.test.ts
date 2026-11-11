@@ -83,7 +83,7 @@ describe("groupByIssuer", () => {
 		expect(own.breakdown).toHaveLength(1);
 	});
 	it("groups two non-US same-issuer lines (a DE equity + a DE bond) into one issuer", () => {
-		const sapEquity = pos({
+		const mapleEquity = pos({
 			id: "isin:DESYN3691660",
 			isin: "DESYN3691660",
 			ticker: "MAPLE",
@@ -91,7 +91,7 @@ describe("groupByIssuer", () => {
 			value: 2000,
 			weight: 0.02,
 		});
-		const sapBond = pos({
+		const mapleBond = pos({
 			id: "isin:XS1234567890",
 			isin: "XS1234567890",
 			ticker: null,
@@ -99,7 +99,7 @@ describe("groupByIssuer", () => {
 			value: 1000,
 			weight: 0.01,
 		});
-		const groups = groupByIssuer([sapEquity, sapBond]);
+		const groups = groupByIssuer([mapleEquity, mapleBond]);
 		const maple = groups.find((g) => g.key === "issuer-name:maple")!;
 		expect(maple).toBeDefined();
 		expect(maple.grouped).toBe(true);

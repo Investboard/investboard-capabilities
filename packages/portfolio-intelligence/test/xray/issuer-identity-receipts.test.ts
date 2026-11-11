@@ -5,7 +5,7 @@ import {
 	hasDepositaryReceiptMarker,
 	stripDepositaryReceiptMarkers,
 } from "../../src/internal/xray/receipt-markers.js";
-const SAP_ORDINARY = {
+const MAPLE_ORDINARY = {
 	id: "isin:DESYN3691660",
 	isin: "DESYN3691660",
 	name: "MAPLE SE O.N.",
@@ -15,7 +15,7 @@ const SAP_ORDINARY = {
 		source: "caller" as const,
 	},
 };
-const SAP_ADR = {
+const MAPLE_ADR = {
 	id: "isin:US6666662042",
 	isin: "US6666662042",
 	name: "MAPLE SE ADR",
@@ -27,8 +27,8 @@ const SAP_ADR = {
 };
 describe("issuerKeyForPosition with a verified identity (R1)", () => {
 	it("keys a receipt by its verified company name, never by its US CUSIP", () => {
-		expect(issuerKeyForPosition(SAP_ADR)).toBe("issuer-name:maple");
-		expect(issuerKeyForPosition(SAP_ORDINARY)).toBe("issuer-name:maple");
+		expect(issuerKeyForPosition(MAPLE_ADR)).toBe("issuer-name:maple");
+		expect(issuerKeyForPosition(MAPLE_ORDINARY)).toBe("issuer-name:maple");
 	});
 	it("prefers the verified name over the broker's row name on a non-US line", () => {
 		expect(
@@ -80,15 +80,15 @@ describe("issuerKeyForPosition with a verified identity (R1)", () => {
 		]) {
 			expect(
 				issuerKeyForPosition({
-					...SAP_ADR,
-					issuerIdentity: { ...SAP_ADR.issuerIdentity, verifiedName },
+					...MAPLE_ADR,
+					issuerIdentity: { ...MAPLE_ADR.issuerIdentity, verifiedName },
 				}),
 			).toBe("issuer-name:maple");
 		}
 		expect(
 			issuerKeyForPosition({
-				...SAP_ADR,
-				issuerIdentity: { ...SAP_ADR.issuerIdentity, verifiedName: "ADR" },
+				...MAPLE_ADR,
+				issuerIdentity: { ...MAPLE_ADR.issuerIdentity, verifiedName: "ADR" },
 			}),
 		).toBeNull();
 	});
@@ -115,17 +115,17 @@ describe("issuerKeyForPosition with a verified identity (R1)", () => {
 });
 describe("canonicalIssuerIdentities with verified names (R1)", () => {
 	it("joins an ordinary share and its receipt into one issuer", () => {
-		const { keys } = canonicalIssuerIdentities([SAP_ORDINARY, SAP_ADR]);
+		const { keys } = canonicalIssuerIdentities([MAPLE_ORDINARY, MAPLE_ADR]);
 		expect(keys[0]).toBe(keys[1]);
 		expect(keys[0]).toBe("issuer-name:maple");
 	});
 	it("joins a receipt whose provider name carries the marker with the ordinary share, and aliases the CUSIP key it abandoned", () => {
 		const { keys, aliases } = canonicalIssuerIdentities([
-			SAP_ORDINARY,
+			MAPLE_ORDINARY,
 			{
-				...SAP_ADR,
+				...MAPLE_ADR,
 				issuerIdentity: {
-					...SAP_ADR.issuerIdentity,
+					...MAPLE_ADR.issuerIdentity,
 					verifiedName: "MAPLE SE Sponsored ADR",
 				},
 			},
@@ -160,7 +160,7 @@ describe("canonicalIssuerIdentities with verified names (R1)", () => {
 	});
 	it("never joins two issuers whose verified names differ", () => {
 		const { keys } = canonicalIssuerIdentities([
-			SAP_ADR,
+			MAPLE_ADR,
 			{
 				id: "isin:US7777772048",
 				isin: "US7777772048",
@@ -176,7 +176,7 @@ describe("canonicalIssuerIdentities with verified names (R1)", () => {
 	});
 	it("keeps an unresolved receipt on its own identity", () => {
 		const { keys } = canonicalIssuerIdentities([
-			SAP_ORDINARY,
+			MAPLE_ORDINARY,
 			{
 				id: "isin:US6666662042",
 				isin: "US6666662042",

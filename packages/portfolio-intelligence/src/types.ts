@@ -23,8 +23,6 @@ export interface PortfolioRequest {
 	funds?: FundInput[];
 	/** Classification of individual securities by ISIN (company profiles). */
 	securities?: SecurityProfile[];
-	/** Verified company names for depositary receipts and share classes. */
-	issuerIdentities?: IssuerIdentityInput[];
 	/** Reviewed corrections of a fund's class or treatment. */
 	fundOverrides?: FundOverride[];
 }
@@ -85,12 +83,6 @@ export interface SecurityProfile {
 	issuerName?: string | null;
 	/** The security's class as profiled; null when the profile is a fund's own, not a company's. */
 	assetClass?: string | null;
-}
-
-export interface IssuerIdentityInput {
-	isin: string;
-	verifiedName: string;
-	receipt: boolean;
 }
 
 export interface FundOverride {
