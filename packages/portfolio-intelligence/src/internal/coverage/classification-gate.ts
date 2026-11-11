@@ -17,11 +17,14 @@ export function classificationGate(
 ): { degraded: boolean; reason: string | null } {
 	let classifiable = 0;
 	let named = 0;
+	// The named share is counted within the same base it is divided by: equity
+	// with an ISIN whose profile is not a fund's own. A position outside that
+	// base (no ISIN, or a fund's own profile that still carried a sector for a
+	// look-through constituent) can neither lower nor raise the ratio.
 	for (const p of classified) {
-		if (p.assetClass !== "equities") continue;
-		const fundProfile =
-			p.isin !== null && profiles.get(p.isin)?.assetClass === null;
-		if (p.isin !== null && !fundProfile) classifiable += p.value;
+		if (p.assetClass !== "equities" || p.isin === null) continue;
+		if (profiles.get(p.isin)?.assetClass === null) continue;
+		classifiable += p.value;
 		if (p.sektor !== null) named += p.value;
 	}
 	const share = (value: number) => (valuedTotal > 0 ? value / valuedTotal : 0);
