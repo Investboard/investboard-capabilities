@@ -1,6 +1,6 @@
 {
 	"name": "reported-class",
-	"description": "A fund stated as equities whose own documents report bonds.",
+	"description": "A fund stated as equities whose documents report bonds, and a fund of real-estate companies that reports itself as real estate (read as equities).",
 	"basisParity": true,
 	"request": {
 		"asOf": "2026-10-30",
@@ -23,6 +23,16 @@
 				"isin": "IESYN0000145",
 				"ticker": "INCM",
 				"value": 4000,
+				"listingCurrency": "EUR",
+				"assetClass": "equities"
+			},
+			{
+				"id": "reits",
+				"kind": "fund",
+				"name": "Synthetic Global REIT UCITS ETF",
+				"isin": "IESYN0000135",
+				"ticker": "REIT",
+				"value": 2000,
 				"listingCurrency": "EUR",
 				"assetClass": "equities"
 			}
@@ -94,6 +104,28 @@
 					]
 				},
 				"reportedClass": "bonds"
+			},
+			{
+				"holdingId": "reits",
+				"reportedClass": "real_estate",
+				"holdings": {
+					"status": "listed",
+					"asOf": "2026-09-30",
+					"constituents": [
+						{
+							"id": "LRH",
+							"isin": "DESYN0000030",
+							"name": "Larchhaus SE",
+							"weight": 0.5
+						},
+						{
+							"id": "BRCH",
+							"isin": "US7777772048",
+							"name": "Birchgate Realty Trust",
+							"weight": 0.4
+						}
+					]
+				}
 			}
 		],
 		"securities": [
@@ -151,6 +183,20 @@
 				"name": "France Treasury 2.5% 2034",
 				"sector": "Financial Services",
 				"country": "France",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "DESYN0000030",
+				"name": "Larchhaus SE",
+				"sector": "Real Estate",
+				"country": "Germany",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US7777772048",
+				"name": "Birchgate Realty Trust",
+				"sector": "Real Estate",
+				"country": "United States",
 				"assetClass": "equities"
 			}
 		]

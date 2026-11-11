@@ -1,5 +1,8 @@
 /** Grouping positions into weighted buckets (asset class, listing currency) with their largest contributors. */
-import type { MergedPosition } from "./types.js";
+import { directHoldingClass } from "./asset-class.js";
+import { fundAssetClass } from "./dissolve.js";
+import { positionIdentity } from "./identity.js";
+import type { EngineDirectHolding, EngineEtfInput } from "./types.js";
 const CONTRIBUTORS_CAP = 5;
 export interface BucketContributor {
 	id: string;
@@ -68,8 +71,9 @@ function finalize(
 		})
 		.sort((a, b) => b.weight - a.weight);
 }
-export function assetClassBuckets(
-	merged: MergedPosition[],
+export function holdingAssetClassBuckets(
+	direct: readonly EngineDirectHolding[],
+	funds: readonly EngineEtfInput[],
 	valuedTotal: number,
 ): {
 	coverage: number;
@@ -79,21 +83,63 @@ export function assetClassBuckets(
 		string,
 		{
 			value: number;
+			byId: Map<
+				string,
+				BucketContributor & {
+					value: number;
+				}
+			>;
+		}
+	>();
+	const add = (
+		key: string,
+		id: string,
+		name: string,
+		isin: string | null,
+		value: number,
+	) => {
+		const g = groups.get(key) ?? { value: 0, byId: new Map() };
+		g.value += value;
+		const c = g.byId.get(id);
+		if (c) c.value += value;
+		else g.byId.set(id, { id, label: name, isin, weight: 0, value });
+		groups.set(key, g);
+	};
+	for (const h of direct) {
+		add(
+			directHoldingClass(h.assetClass),
+			positionIdentity(h.isin, h.ticker) ?? `ticker:${h.ticker}`,
+			h.name,
+			h.isin,
+			h.value,
+		);
+	}
+	for (const f of funds) {
+		add(
+			fundAssetClass(f),
+			positionIdentity(f.isin, f.ticker) ?? `ticker:${f.ticker}`,
+			f.name,
+			f.isin,
+			f.value,
+		);
+	}
+	const finalGroups = new Map<
+		string,
+		{
+			value: number;
 			contributors: BucketContributor[];
 		}
 	>();
-	for (const p of merged) {
-		const g = groups.get(p.assetClass) ?? { value: 0, contributors: [] };
-		g.value += p.value;
-		g.contributors.push({
-			id: p.id,
-			label: p.name,
-			isin: p.isin,
-			weight: p.weight,
+	for (const [key, g] of groups) {
+		finalGroups.set(key, {
+			value: g.value,
+			contributors: Array.from(g.byId.values()).map(({ value, ...c }) => ({
+				...c,
+				weight: valuedTotal > 0 ? round4(value / valuedTotal) : 0,
+			})),
 		});
-		groups.set(p.assetClass, g);
 	}
-	return { coverage: 1, buckets: finalize(groups, valuedTotal) };
+	return { coverage: 1, buckets: finalize(finalGroups, valuedTotal) };
 }
 export interface CurrencyBucketInput {
 	id: string;

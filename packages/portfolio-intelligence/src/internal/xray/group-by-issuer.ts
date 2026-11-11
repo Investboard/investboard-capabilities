@@ -1,4 +1,5 @@
 /** Grouping positions by company: share classes, receipts and bonds of one issuer together. */
+import { foldCompanyParts } from "./company-fold.js";
 import { isResidualId } from "./identity.js";
 import { canonicalIssuerIdentities } from "./issuer-identities.js";
 import type { IssuerGroup, MergedPosition } from "./types.js";
@@ -8,7 +9,8 @@ function round2(v: number): number {
 function round4(v: number): number {
 	return Number(v.toFixed(4));
 }
-export function groupByIssuer(positions: MergedPosition[]): IssuerGroup[] {
+export function groupByIssuer(merged: MergedPosition[]): IssuerGroup[] {
+	const positions = foldCompanyParts(merged);
 	interface Acc {
 		key: string;
 		name: string;

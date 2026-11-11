@@ -1,7 +1,7 @@
 {
 	"name": "shared-reit",
-	"description": "A world fund and a property fund that share a company. Basis parity waits for the app to count its Basis line by holding.",
-	"basisParity": false,
+	"description": "A world fund and a fund stated as real estate that share a company: the company is one row per class.",
+	"basisParity": true,
 	"request": {
 		"asOf": "2026-10-30",
 		"baseCurrency": "EUR",

@@ -36,6 +36,12 @@ export function holdNeverLookedThroughFundsWhole(
 ): EngineEtfInput[] {
 	return etfs.map(heldWholeIfNeverLookedThrough);
 }
+export function fundAssetClass(etf: EngineEtfInput): string {
+	const held = heldWholeIfNeverLookedThrough(etf);
+	return held.underlyingAssetClass
+		? normalizeAssetClass(held.underlyingAssetClass)
+		: "equities";
+}
 type FundClassOnly = Pick<EngineEtfInput, "underlyingAssetClass"> &
 	Partial<Pick<EngineEtfInput, "isin" | "heldWholeAs">>;
 export function canBeLookedThrough(fund: FundClassOnly): boolean {
@@ -75,9 +81,7 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 	const exposures: DissolvedExposure[] = [];
 	const dissolutions: EtfDissolution[] = [];
 	for (const etf of holdNeverLookedThroughFundsWhole(etfs)) {
-		const constituentClass = etf.underlyingAssetClass
-			? normalizeAssetClass(etf.underlyingAssetClass)
-			: "equities";
+		const constituentClass = fundAssetClass(etf);
 		const valid: {
 			id: string;
 			isin: string | null;

@@ -6,7 +6,8 @@
  * - a fund whose stated class is cash, bonds, gold or crypto is held whole and its list is never read;
  * - a missing list is pending, unless an index list is supplied to read through;
  * - a fund that reports no constituents is held whole, not pending;
- * - otherwise the class is resolved from the stated and reported class, and a
+ * - otherwise the class is resolved from the stated and reported class (a
+ *   reported real-estate class reads as equities), and a
  *   fund that resolves to cash, bonds, gold or crypto is held whole;
  * - every other fund is looked through.
  */
@@ -109,7 +110,14 @@ export function resolveFundInput(
 	if (constituents === null)
 		return { ...base(holding, resolveFundClass(stated, null)), degraded: true };
 
-	const resolved = resolveFundClass(stated, fund?.reportedClass ?? null);
+	// A fund reporting itself as real estate is a fund of real-estate companies:
+	// a stock fund. The class real estate is for holdings that own buildings,
+	// which the caller states on the holding itself.
+	const reported =
+		fund?.reportedClass === "real_estate"
+			? "equities"
+			: (fund?.reportedClass ?? null);
+	const resolved = resolveFundClass(stated, reported);
 	if (NEVER_LOOKED_THROUGH_CLASSES.has(resolved ?? ""))
 		return base(holding, resolved);
 

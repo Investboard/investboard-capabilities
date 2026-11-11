@@ -15,6 +15,9 @@ export const UNKNOWN_ASSET_CLASS: string = UNKNOWN_HOLDING_CLASS;
 export function normalizeAssetClass(raw: string): string {
 	return VALID.has(raw) ? raw : "alternatives";
 }
+export function directHoldingClass(raw: string): string {
+	return raw === UNKNOWN_ASSET_CLASS ? raw : normalizeAssetClass(raw);
+}
 export function mapReportedFundClass(
 	label: string | null | undefined,
 ): string | null {
@@ -32,7 +35,7 @@ export function mapReportedFundClass(
 		case "commodities":
 			return "commodities";
 		case "real estate":
-			return "real_estate";
+			return "equities";
 		case "money market":
 		case "cash":
 			return "cash";

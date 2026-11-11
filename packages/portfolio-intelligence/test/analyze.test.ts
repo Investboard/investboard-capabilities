@@ -109,6 +109,39 @@ describe("analyzePortfolio", () => {
 		expect(result.status).toBe("available");
 	});
 
+	for (const order of ["world first", "property first"] as const) {
+		it(`keeps a company held through an equity fund and a real-estate fund as one row per class (${order})`, () => {
+			const holdings = [
+				fundHolding("world", 600),
+				fundHolding("homes", 400, { assetClass: "real_estate" }),
+			];
+			const funds = [
+				listed("world", [
+					{ ...LARCH, weight: 0.1 },
+					{ ...ALDER, weight: 0.5 },
+				]),
+				listed("homes", [{ ...LARCH, weight: 0.6 }]),
+			];
+			if (order === "property first") {
+				holdings.reverse();
+				funds.reverse();
+			}
+			const result = analyzePortfolio(book({ holdings, funds }));
+			const parts = result.positions.filter((p) => p.isin === LARCH.isin);
+			expect(parts.map((p) => p.assetClass).sort()).toEqual([
+				"equities",
+				"real_estate",
+			]);
+			const equity = parts.find((p) => p.assetClass === "equities");
+			const property = parts.find((p) => p.assetClass === "real_estate");
+			expect(equity?.weight).toBeCloseTo(0.06, 10);
+			expect(equity?.sector).toBe("realEstate");
+			expect(property?.weight).toBeCloseTo(0.24, 10);
+			expect(property?.sector).toBeNull();
+			expect(property?.region).toBeNull();
+		});
+	}
+
 	it("never dissolves a bond fund", () => {
 		const result = analyzePortfolio(
 			book({

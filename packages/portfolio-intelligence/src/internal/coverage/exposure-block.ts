@@ -2,10 +2,7 @@
 import type { SecurityProfile } from "../../types.js";
 import type { XRayOpaqueSleeve } from "../contracts.js";
 import { profileOf } from "../resolve/security-profile.js";
-import {
-	classifyExposures,
-	type ExposureProfile,
-} from "../xray/classify-exposures.js";
+import { classifyExposures } from "../xray/classify-exposures.js";
 import { type BookCoverage, computeBookCoverage } from "../xray/coverage.js";
 import { isResidualId } from "../xray/identity.js";
 import { deriveOpaqueSleeves } from "../xray/opaque-sleeves.js";
@@ -44,22 +41,18 @@ export function classifyPositions(
 	merged: readonly MergedPosition[],
 	profiles: ReadonlyMap<string, SecurityProfile>,
 ): MergedPosition[] {
-	const byIsin = new Map<string | null, ExposureProfile | null>(
-		merged.map((p): [string | null, ExposureProfile | null] => [
-			p.isin,
+	// Per position, not per ISIN: the class parts of one company share an ISIN.
+	const classified = classifyExposures(
+		[...merged],
+		(isin, p) =>
 			profileOf(
 				{
-					isin: p.isin,
+					isin,
 					assetClass: p.assetClass,
 					heldDirectly: p.provenance.direct > 0,
 				},
 				profiles,
 			),
-		]),
-	);
-	const classified = classifyExposures(
-		[...merged],
-		(isin) => byIsin.get(isin) ?? null,
 		merged.length,
 	);
 	for (const p of classified) {

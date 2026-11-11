@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { dissolveEtfs } from "../../src/internal/xray/dissolve.js";
 import { isOffAxisClass } from "../../src/internal/xray/equity-axis.js";
+import { classPartId, companyIdOf } from "../../src/internal/xray/identity.js";
 import { mergeByIdentity } from "../../src/internal/xray/merge.js";
 import type { EngineEtfInput } from "../../src/internal/xray/types.js";
 import { DIRECT_AAPL, DIRECT_GOLD, CORE, WRLD } from "./fixtures.js";
@@ -19,13 +20,13 @@ describe("mergeByIdentity", () => {
 		expect(aldr.weight).toBeCloseTo(expectedValue / total, 4);
 		expect(aldr.provenance.direct).toBeCloseTo(10000 / total, 4);
 		expect(aldr.provenance.viaFunds).toHaveLength(2);
-		const viaWrld = aldr.provenance.viaFunds.find((s) => s.etf === "WRLD.DE")!;
+		const viaVwce = aldr.provenance.viaFunds.find((s) => s.etf === "WRLD.DE")!;
 		expect(aldr.provenance.directValue).toBe(10000);
-		expect(viaWrld.value).toBe(50000 * 0.039);
-		expect(viaWrld.name).toBe(WRLD.name);
-		expect(viaWrld.id).toBe(`isin:${WRLD.isin}`);
-		expect(viaWrld.shareInEtf).toBeCloseTo(0.039, 4);
-		expect(viaWrld.weight).toBeCloseTo((50000 * 0.039) / total, 4);
+		expect(viaVwce.value).toBe(50000 * 0.039);
+		expect(viaVwce.name).toBe(WRLD.name);
+		expect(viaVwce.id).toBe(`isin:${WRLD.isin}`);
+		expect(viaVwce.shareInEtf).toBeCloseTo(0.039, 4);
+		expect(viaVwce.weight).toBeCloseTo((50000 * 0.039) / total, 4);
 	});
 	it("combines source listings by fund ISIN and keeps ticker collisions separate", () => {
 		const aliases = dissolveEtfs([
@@ -99,7 +100,7 @@ describe("mergeByIdentity", () => {
 		}
 	});
 });
-describe("mergeByIdentity: the class of a fund-derived identity", () => {
+describe("mergeByIdentity: one company within one class", () => {
 	const LARCHHAUS = "DESYN1494950";
 	const INFRA = "GBSYN6568350";
 	const fund = (
@@ -138,17 +139,35 @@ describe("mergeByIdentity: the class of a fund-derived identity", () => {
 		{ isin: INFRA, name: "9Z INFRASTRUCTURE", weight: 1 },
 	]);
 	it.each([
-		{ order: "the property fund first", etfs: [propertyFund, worldFund] },
+		{
+			order: "the real-estate-filed fund first",
+			etfs: [propertyFund, worldFund],
+		},
 		{ order: "the world fund first", etfs: [worldFund, propertyFund] },
-	])("reads a name held through an equity fund as a listed company, with $order", ({
+	])("keeps the real-estate-filed fund's share of a company in real estate, with $order", ({
 		etfs,
 	}) => {
 		const { exposures } = dissolveEtfs(etfs);
 		const merged = mergeByIdentity([], exposures, 20000);
-		const larchhaus = merged.find((p) => p.id === `isin:${LARCHHAUS}`);
-		expect(larchhaus?.assetClass).toBe("equities");
-		expect(isOffAxisClass(larchhaus?.assetClass)).toBe(false);
-		expect(larchhaus?.value).toBeCloseTo(15000, 2);
+		const onFilm = merged.find((p) => p.id === `isin:${LARCHHAUS}`);
+		expect(onFilm?.assetClass).toBe("equities");
+		expect(isOffAxisClass(onFilm?.assetClass)).toBe(false);
+		expect(onFilm?.value).toBeCloseTo(5000, 2);
+		expect(onFilm?.provenance.viaFunds.map((f) => f.etf)).toEqual(["WRLD.DE"]);
+		const property = merged.find(
+			(p) => p.id === classPartId(`isin:${LARCHHAUS}`, "real_estate"),
+		);
+		expect(property?.assetClass).toBe("real_estate");
+		expect(isOffAxisClass(property?.assetClass)).toBe(true);
+		expect(property?.value).toBeCloseTo(10000, 2);
+		expect(property?.isin).toBe(LARCHHAUS);
+		expect(companyIdOf(property?.id ?? "")).toBe(`isin:${LARCHHAUS}`);
+		const byClass = (cls: string) =>
+			merged
+				.filter((p) => p.assetClass === cls)
+				.reduce((sum, p) => sum + p.value, 0);
+		expect(byClass("real_estate")).toBeCloseTo(10000, 2);
+		expect(byClass("equities")).toBeCloseTo(10000, 2);
 	});
 	it.each([
 		{ order: "the infrastructure fund first", etfs: [infraFund, bondFund] },
@@ -161,7 +180,7 @@ describe("mergeByIdentity: the class of a fund-derived identity", () => {
 		const held = merged.find((p) => p.id === `isin:${INFRA}`);
 		expect(isOffAxisClass(held?.assetClass)).toBe(true);
 	});
-	it("keeps the DIRECT leg's off-axis class when an equity fund holds the same name (the accepted limitation, pinned)", () => {
+	it("splits a DIRECT off-axis line from an equity fund's leg of the same company", () => {
 		const { exposures } = dissolveEtfs([worldFund]);
 		const merged = mergeByIdentity(
 			[
@@ -176,8 +195,38 @@ describe("mergeByIdentity: the class of a fund-derived identity", () => {
 			exposures,
 			25000,
 		);
-		const larchhaus = merged.find((p) => p.id === `isin:${LARCHHAUS}`);
-		expect(larchhaus?.assetClass).toBe("alternatives");
-		expect(larchhaus?.provenance.direct).toBeGreaterThan(0);
+		const viaFund = merged.find((p) => p.id === `isin:${LARCHHAUS}`);
+		expect(viaFund?.assetClass).toBe("equities");
+		expect(viaFund?.value).toBeCloseTo(5000, 2);
+		expect(viaFund?.provenance.direct).toBe(0);
+		const own = merged.find(
+			(p) => p.id === classPartId(`isin:${LARCHHAUS}`, "alternatives"),
+		);
+		expect(own?.assetClass).toBe("alternatives");
+		expect(own?.name).toBe("Larchhaus SE");
+		expect(own?.value).toBeCloseTo(5000, 2);
+		expect(own?.provenance.direct).toBeGreaterThan(0);
+	});
+	it("gives the plain identity to the direct line's class when no equity leg exists", () => {
+		const { exposures } = dissolveEtfs([propertyFund]);
+		const merged = mergeByIdentity(
+			[
+				{
+					ticker: "LRH",
+					isin: LARCHHAUS,
+					name: "Larchhaus SE",
+					value: 1000,
+					assetClass: "alternatives",
+				},
+			],
+			exposures,
+			11000,
+		);
+		expect(merged.map((p) => [p.id, p.assetClass, p.value]).sort()).toEqual(
+			[
+				[`isin:${LARCHHAUS}`, "alternatives", 1000],
+				[classPartId(`isin:${LARCHHAUS}`, "real_estate"), "real_estate", 10000],
+			].sort(),
+		);
 	});
 });

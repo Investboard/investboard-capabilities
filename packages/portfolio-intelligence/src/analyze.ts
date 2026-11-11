@@ -25,6 +25,7 @@ import {
 	dissolveEtfs,
 	lookThroughFundCount,
 } from "./internal/xray/dissolve.js";
+import { holdingAssetClassBuckets } from "./internal/xray/buckets.js";
 import { mergeEtfInputsByFund } from "./internal/xray/fund-identity.js";
 import { groupByIssuer } from "./internal/xray/group-by-issuer.js";
 import { isResidualId, positionIdentity } from "./internal/xray/identity.js";
@@ -48,32 +49,10 @@ import type {
 import { freeze } from "./internal/freeze.js";
 import { validatePortfolioRequest } from "./validation.js";
 
-export const METHODOLOGY_VERSION = "portfolio-intelligence-v1" as const;
+export const METHODOLOGY_VERSION = "portfolio-intelligence-v2" as const;
 
 function fundKey(isin: string | null | undefined, ticker: string): string {
 	return positionIdentity(normalizeIsin(isin), ticker) ?? ticker;
-}
-
-/** Each direct holding in its class and each fund whole in its resolved class. */
-function basisByHolding(
-	direct: readonly { value: number; assetClass: string }[],
-	funds: readonly EngineEtfInput[],
-	valuedTotal: number,
-): Bucket[] {
-	const totals = new Map<string, number>();
-	const add = (key: string, value: number) =>
-		totals.set(key, (totals.get(key) ?? 0) + value);
-	for (const d of direct) add(d.assetClass, d.value);
-	for (const f of funds) add(f.underlyingAssetClass ?? "unknown", f.value);
-	return [...totals.entries()]
-		.map(([key, value]) => ({ key, value, weight: value / valuedTotal }))
-		.sort((a, b) =>
-			a.key === "unknown"
-				? 1
-				: b.key === "unknown"
-					? -1
-					: b.value - a.value || a.key.localeCompare(b.key),
-		);
 }
 
 function treatmentOf(
@@ -252,7 +231,9 @@ export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 		asOf: request.asOf,
 		constituentsAsOf: bookAsOf(dissolutions),
 		valuation: { valuedTotal, valuedCount, unvalued },
-		basis: basisByHolding(direct, etfInputs, valuedTotal),
+		basis: holdingAssetClassBuckets(direct, etfInputs, valuedTotal).buckets.map(
+			(b) => ({ key: b.key, value: b.value, weight: b.weight }),
+		),
 		positions: classified.map((p) => toPosition(p, holdingOf)),
 		issuers: groupByIssuer(classified).map((g) => ({
 			key: g.key,

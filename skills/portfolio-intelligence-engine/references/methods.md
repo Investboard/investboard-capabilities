@@ -26,8 +26,12 @@ non-cash portion.
   unknown class gives way to it.
 - A constituent's whole-portfolio weight is the fund's weight times the
   constituent's weight in the fund. Direct holdings and constituents with the
-  same identity (ISIN first, ticker otherwise) merge into one position, whose
-  provenance lists each part.
+  same identity (ISIN first, ticker otherwise) and class merge into one
+  position, whose provenance lists each part. A company held through an equity
+  fund and a fund of another class is one position per class; only the equity
+  part has a sector and region.
+- Real estate is a class for holdings that own buildings. An ETF of
+  real-estate companies is a stock fund.
 - The uncovered part of a fund stays one residual row in the fund's class. A
   fund is fully covered at `fundFullyCovered`.
 - A fund held inside a fund stays one position; there is no recursive
