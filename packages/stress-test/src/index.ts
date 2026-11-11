@@ -1,11 +1,26 @@
 import { computePortfolioImpact } from "./internal/impact-calculator.js";
-import { isStressScenarioCovered } from "./internal/coverage.js";
+import {
+	isStressScenarioCovered,
+	partitionStressCoverage,
+} from "./internal/coverage.js";
 import { summarizeStressImpacts } from "./internal/attribution.js";
+import { scenarioCarriesBase } from "./internal/scenario-fx.js";
+import {
+	ASSET_CLASS_SHOCK_PROXY,
+	V5_ASSET_CLASS_SHOCK_PROXY,
+} from "./internal/shock-applicator.js";
 import { withHistory } from "./history.js";
-import { MAX_SUPPORTED_WEALTH } from "./limits.js";
-export { MAX_SUPPORTED_WEALTH } from "./limits.js";
+import { maxSupportedWealth } from "./limits.js";
+export { MAX_SUPPORTED_WEALTH, maxSupportedWealth } from "./limits.js";
 import { StressInputError, validateRequest } from "./validation.js";
-import type { StressRequest, StressResult, StressSnapshot } from "./types.js";
+import type {
+	HoldingImpact,
+	StressExcludedHolding,
+	StressMethodologyVersion,
+	StressRequest,
+	StressResult,
+	StressSnapshot,
+} from "./types.js";
 
 export type * from "./types.js";
 export { StressInputError } from "./validation.js";
@@ -21,16 +36,42 @@ function freeze<T>(value: T): T {
 
 /** Protect shared defaults; clone a scenario before editing custom assumptions. */
 export const BUILT_IN_SCENARIOS = freeze(structuredClone(scenarios));
-export const METHODOLOGY_VERSION = "whole-wealth-currency-replay-v5" as const;
+export const METHODOLOGY_VERSION = "whole-wealth-currency-replay-v6" as const;
+const V5 = "whole-wealth-currency-replay-v5" as const;
 
 /** All holding values are already in baseCurrency; capital is never converted twice. */
 export function evaluateStressScenario(input: StressRequest): StressResult {
-	validateRequest(input);
+	return evaluate(input, METHODOLOGY_VERSION);
+}
+
+/**
+ * v6 leaves a holding the scenario cannot model out of every figure and
+ * reports the rest; v5 refuses the whole request. v5 also has no crypto
+ * stand-in and reports in EUR or USD only.
+ */
+function evaluate(
+	input: StressRequest,
+	methodologyVersion: StressMethodologyVersion,
+): StressResult {
+	validateRequest(input, methodologyVersion);
+	const v5 = methodologyVersion === V5;
+	const standIns = v5 ? V5_ASSET_CLASS_SHOCK_PROXY : ASSET_CLASS_SHOCK_PROXY;
 	const request = structuredClone(input);
-	const snapshot: StressSnapshot = {
-		methodologyVersion: METHODOLOGY_VERSION,
-		request,
+	const snapshot: StressSnapshot = { methodologyVersion, request };
+	const result = {
+		interpretation: "hypothetical_replay" as const,
+		baseCurrency: request.baseCurrency,
+		snapshot,
 	};
+	const unavailable = (reason: string): StressResult => ({
+		...result,
+		status: "unavailable",
+		reasonCodes: [reason],
+		calculation: null,
+	});
+	// A base the scenario carries no move for has no cross rate.
+	if (!v5 && !scenarioCarriesBase(request.scenario, request.baseCurrency))
+		return unavailable("unsupported_base_currency");
 	const reasons = new Set<string>();
 	if (
 		request.histories?.some(
@@ -48,36 +89,46 @@ export function evaluateStressScenario(input: StressRequest): StressResult {
 		request.holdings,
 		request.scenario,
 		request.baseCurrency,
+		standIns,
 	);
-	const impacts = withHistory(request, baseline.holdingImpacts, reasons);
-	const postCents = impacts.reduce(
-		(sum, holding) => sum + Math.round(holding.postStressValue * 100),
-		0,
-	);
-	if (
-		!Number.isSafeInteger(postCents) ||
-		postCents > MAX_SUPPORTED_WEALTH * 100
-	)
-		throw new StressInputError("Calculated wealth exceeds the supported limit");
-	const covered = isStressScenarioCovered(
-		request.holdings,
-		impacts,
-		request.scenario,
-		request.baseCurrency,
-	);
+	const allImpacts = withHistory(request, baseline.holdingImpacts, reasons);
+	let impacts: HoldingImpact[] = allImpacts;
+	let excluded: StressExcludedHolding[] = [];
+	if (v5) {
+		requireWealthLimit(allImpacts, request.baseCurrency);
+		if (
+			!isStressScenarioCovered(
+				request.holdings,
+				allImpacts,
+				request.scenario,
+				request.baseCurrency,
+				standIns,
+			)
+		)
+			return unavailable("unsupported_scenario_exposure");
+	} else {
+		const partition = partitionStressCoverage(
+			request.holdings,
+			allImpacts,
+			request.scenario,
+			request.baseCurrency,
+			standIns,
+		);
+		if (!partition?.modeled.length)
+			return unavailable("unsupported_scenario_exposure");
+		impacts = partition.modeled;
+		excluded = partition.leftOut.map(({ holding, reason }) => ({
+			holdingId: holding.holdingId,
+			ticker: holding.ticker,
+			name: holding.name,
+			value: holding.currentValue,
+			reason,
+		}));
+		requireWealthLimit(impacts, request.baseCurrency);
+		if (excluded.length) reasons.add("unmodeled_holdings_excluded");
+	}
 	const attribution = summarizeStressImpacts(impacts);
-	const result = {
-		interpretation: "hypothetical_replay" as const,
-		baseCurrency: request.baseCurrency,
-		snapshot,
-	};
-	if (!covered || !attribution)
-		return {
-			...result,
-			status: "unavailable",
-			reasonCodes: ["unsupported_scenario_exposure"],
-			calculation: null,
-		};
+	if (!attribution) return unavailable("unsupported_scenario_exposure");
 	for (const value of [
 		attribution.preStressValueCents,
 		attribution.postStressValueCents,
@@ -127,13 +178,30 @@ export function evaluateStressScenario(input: StressRequest): StressResult {
 				proxyValueFraction: Math.max(0, 1 - direct),
 				currencyDecompositionValueFraction: Math.min(1, currency),
 			},
+			...(excluded.length ? { excludedHoldings: excluded } : {}),
 		},
 	};
 }
 
+function requireWealthLimit(
+	impacts: readonly HoldingImpact[],
+	base: string,
+): void {
+	const postCents = impacts.reduce(
+		(sum, holding) => sum + Math.round(holding.postStressValue * 100),
+		0,
+	);
+	if (
+		!Number.isSafeInteger(postCents) ||
+		postCents > maxSupportedWealth(base) * 100
+	)
+		throw new StressInputError("Calculated wealth exceeds the supported limit");
+}
+
 /** Re-evaluates the original inputs only, without providers or current account state. */
 export function replayStressScenario(snapshot: StressSnapshot): StressResult {
-	if (snapshot?.methodologyVersion !== METHODOLOGY_VERSION)
+	const version = snapshot?.methodologyVersion;
+	if (version !== METHODOLOGY_VERSION && version !== V5)
 		throw new StressInputError("Unsupported snapshot methodology");
-	return evaluateStressScenario(snapshot.request);
+	return evaluate(snapshot.request, version);
 }

@@ -108,9 +108,22 @@ export function validateHoldings(
 	for (const h of holdings) {
 		requireShape(
 			h,
-			["holdingId", "depotId", "assetClass", "value", "currency"],
+			[
+				"holdingId",
+				"depotId",
+				"assetClass",
+				"value",
+				"currency",
+				"fund",
+				"priced",
+			],
 			"Holding",
 		);
+		for (const flag of [h.fund, h.priced])
+			requireInput(
+				flag === undefined || typeof flag === "boolean",
+				"Holding fund and price declarations must be boolean",
+			);
 		text(h.holdingId, "Holding ID", ctx);
 		text(h.depotId, "Depot ID", ctx);
 		text(h.assetClass, "Asset class", ctx);

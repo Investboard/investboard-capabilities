@@ -285,10 +285,22 @@ describe("public whole-book comparison", () => {
 			alternative(input).purchases.every((p) => p.holdingId === null),
 		).toBe(true);
 	});
-	it("keeps all-class corridors visible and rejects an unfunded floor", () => {
+	it("keeps all-class corridors visible and states or rejects an unfunded floor", () => {
 		const input = request();
 		input.cashFloor = 100000000;
-		const result = alternative(input);
+		// v5: the contribution raises the reserve without reaching the floor.
+		expect(alternative(input)).toMatchObject({
+			feasibility: "conditional",
+			reasonCodes: ["reserve_floor_not_reached"],
+			invested: 0,
+			reserveAfter: 100000,
+			reserveShortfall: 99900000,
+			valueAfter: 200000,
+		});
+		const result = replayRebalanceComparison({
+			methodologyVersion: "rebalance-comparison-v4",
+			request: compareRebalance(input).snapshot.request,
+		}).alternatives.find((a) => a.kind === "fresh_cash")!;
 		expect(result).toMatchObject({
 			feasibility: "unavailable",
 			valueAfter: null,

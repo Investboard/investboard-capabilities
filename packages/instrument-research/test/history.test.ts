@@ -109,6 +109,18 @@ describe("source-aware instrument history", () => {
 		expect(rising.peakDate).toBeNull();
 		expect(rising.recoveryDate).toBeNull();
 	});
+	it("withholds volatility for a valid two-observation window instead of failing", () => {
+		const input = research();
+		input.from = "2024-01-01";
+		input.to = "2024-01-02";
+		input.history!.points = daily(input.from, input.to, (i) => 100 + i);
+		const m = evaluateInstrumentResearch(input).history.metrics!;
+		expect(m.quality.availability).toBe("available");
+		expect(m.observations).toBe(2);
+		expect(m.cumulativeReturn).toBeCloseTo(0.01, 12);
+		expect(m.maxDrawdown).toBe(0);
+		expect(m.annualizedVolatility).toBeNull();
+	});
 	it("refuses duplicate or nonpositive prices rather than repairing source history", () => {
 		const input = research();
 		input.history!.points.push({ ...input.history!.points[0]! });
@@ -194,9 +206,14 @@ describe("historical contribution illustration", () => {
 	it("keeps zero contributions explicit and guards overflowing illustrations", () => {
 		const input = research();
 		input.investment = { lumpSum: 0, monthlyContribution: 0 };
-		expect(
-			evaluateInstrumentResearch(input).history.investment?.moneyWeightedReason,
-		).toBe("no_contributions");
+		const zero = evaluateInstrumentResearch(input).history.investment;
+		expect(zero).toMatchObject({
+			totalContributed: 0,
+			endingValue: 0,
+			contributionReturn: null,
+			annualizedMoneyWeightedReturn: null,
+			moneyWeightedReason: "no_contributions",
+		});
 		input.investment = { lumpSum: 1e12, monthlyContribution: 0 };
 		expect(() => evaluateInstrumentResearch(input)).toThrow("amount bound");
 	});

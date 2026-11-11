@@ -23,6 +23,8 @@ The example compares three timing assumptions for the same EUR1,000 cash balance
 | Month 2 | First month's EUR1,000 buffer is needed before the next receipt | EUR5,500 |
 | Month 1, before that day's receipt | Expense is late even though same-day capacity settles it | EUR5,500 |
 
+The example also checks a [partial schedule](#partial-schedules): adding a goal whose deadline has passed leaves that goal out and still funds the first goal EUR6,000.
+
 `feasible` describes the requested cash schedule. A feasible EUR6,000 contribution stream can still fall short of a EUR10,000 investment target. No probability of reaching that target is calculated.
 
 ## Use it in your project
@@ -38,15 +40,19 @@ npm pack
 Install the generated archive in your project:
 
 ```sh
-npm install /path/to/investboard-capabilities/packages/goal-planning/investboard-goal-planning-0.1.0.tgz
+npm install /path/to/investboard-capabilities/packages/goal-planning/investboard-goal-planning-0.2.0.tgz
 ```
 
 This is a source distribution with a package build configuration. It is not published to npm, and its snapshot is independent of Investboard's hosted API and saved plans.
 
 ```ts
-import { planGoalCash, replayGoalCash } from "@investboard/goal-planning";
+import {
+  planGoalCash,
+  replayGoalCash,
+  type GoalCashRequest,
+} from "@investboard/goal-planning";
 
-const result = planGoalCash({
+const request: GoalCashRequest = {
   reportingCurrency: "EUR",
   asOfDate: "2026-01-01",
   unallocatedCash: 1000,
@@ -63,7 +69,8 @@ const result = planGoalCash({
     targetAmount: 10000,
     startingCapital: { amount: 0, asOfDate: "2026-01-01", sourceIds: [] },
   }],
-});
+};
+const result = planGoalCash(request);
 
 // result.status === "feasible"
 // result.goals[0].fundedTotal === 6000
@@ -88,7 +95,7 @@ All fields in the example are required. Empty collections mean no recorded entri
 | `liquidityNeeds` | Unique `id`, nonnegative `amount` and `dueDate`; balloon payments belong here explicitly |
 | `goals` | Unique `id`, `deadline`, `monthlyContribution`, `targetAmount` and `startingCapital` |
 
-Goal deadline and monthly contribution may be `null`; either makes the shared cash ledger `incomplete`, because its commitments cannot be established. An unknown target or starting capital only withholds that goal's target comparison; its known cash requests can still be scheduled. Zero is a known value.
+Goal deadline and monthly contribution may be `null`; either leaves that goal out of the shared cash ledger, because its commitments cannot be established, and the other goals are still scheduled (see [Partial schedules](#partial-schedules)). An unknown target or starting capital only withholds that goal's target comparison; its known cash requests can still be scheduled. Zero is a known value.
 
 Recurring payments are sampled on each monthly savings date. With `subtract_recorded`, subtract only entries whose inclusive dates contain that event. An unknown payment blocks the ledger only when it overlaps a modeled monthly event. With `already_netted`, payment amounts are informational. Inconsistent start/end dates are rejected in either mode. This is a monthly model, not a payroll or loan-amortization calendar; it does not infer due days, interest, settlement delays or balloon balances.
 
@@ -116,7 +123,7 @@ It protects dated payments before same-day receipts. Future capacity reduces the
 
 ## Read the result
 
-`status` is `incomplete` when declarations are unknown or aggregate amounts exceed the supported range, `constrained` when a request is underfunded, a payment is late, or the reserve is breached, and otherwise `feasible`. These are cash-feasibility states, not target-achievement ratings. `reasonCodes` identify missing declarations or range/floor problems. Constrained events and goal requests are identified in the ledger itself.
+`status` is `incomplete` when declarations are unknown, aggregate amounts exceed the supported range, or one or more goals are left out of the schedule; `constrained` when a request is underfunded, a payment is late, or the reserve is breached; and otherwise `feasible`. These are cash-feasibility states, not target-achievement ratings. `reasonCodes` identify missing declarations or range/floor problems. Constrained events and goal requests are identified in the ledger itself.
 
 Each row reports `date`, `month` (1-based, or `null` for a payment-only date), signed `netCapacity`, remaining `cash`, `allocations` with requested/funded amounts, `liquidityPaid` including arrears settlements, `liquidityShortfall` at the due time, `obligationsShortfall`, `overduePayments`, `futureCommitmentReserve` and `availableCash`.
 
@@ -129,15 +136,45 @@ cashAfter = cashBefore + netCapacity + obligationsShortfall
 
 Each goal reports requested/funded totals, current capital, a no-growth outcome, target gap and its own reason codes. Missing outcomes remain `null`. To compose an investment-return model, supply each row's `allocations[].funded` at its actual month/date to your projection engine. Do not replace this stream with the requested monthly amount. A target is a nominal deadline amount; your application supplies any inflation adjustment and its assumptions. The package supplies no return, tax, fee or inflation model, probability, valuation refresh or recommendation.
 
+## Partial schedules
+
+A goal enters the ledger only with what the ledger needs from it: a deadline with at least one monthly savings date on or before it, a monthly contribution, and requests within the supported range. Every other goal is left out, and the goals that are complete are still scheduled:
+
+| Goal reason | Meaning |
+| --- | --- |
+| `deadline_missing` | The deadline is unknown |
+| `deadline_passed` | The deadline lies before `asOfDate` |
+| `deadline_before_first_savings_date` | The deadline falls before the first monthly anniversary, so no contribution can be made |
+| `contribution_missing` | The monthly contribution is unknown |
+| `amounts_exceed_supported_range` | Starting capital plus requested contributions exceed `LIMITS.amount` |
+
+`leftOutGoals` lists each left-out goal with these reasons, in goal-identity order. The field is absent when every goal is scheduled. A left-out goal is never allocated cash and never counted as funded: its `requestedTotal`, `fundedTotal`, `noGrowthOutcome` and `targetGap` stay `null`, and `horizonMonths` is `0` for a deadline that leaves no savings date. A passed deadline is its own state, distinct from an unfunded or unknown goal. The left-out goals do not extend the cash timeline.
+
+A schedule that leaves a goal out is never presented as the full picture. Its `status` is `incomplete` and its first reason code is `partial_schedule_goals_left_out`; the rows still hold the exact-cent ledger for the scheduled goals. `partial_schedule_constrained` adds that a scheduled request is underfunded, a payment is late or the reserve is breached within that ledger. When a missing declaration withholds the whole ledger, `rows` is empty and `leftOutGoals` still names the goals that would have been left out.
+
+```ts
+const partial = planGoalCash({
+  ...request,
+  goals: [...request.goals, {
+    id: "past", deadline: "2025-10-01", monthlyContribution: 300,
+    targetAmount: 2000, startingCapital: null,
+  }],
+});
+// partial.status === "incomplete"
+// partial.reasonCodes[0] === "partial_schedule_goals_left_out"
+// partial.leftOutGoals: [{ goalId: "past", reasonCodes: ["deadline_passed"] }]
+// The complete goal is still funded EUR6,000.
+```
+
 ## Limits, admission and replay
 
 Amounts have at most two decimals. Individual absolute values are at most `LIMITS.amount` (1 billion currency units); only capacity may be negative. Opening cash plus all positive net receipts, total dated needs, total requested contributions, and each goal's starting capital plus requested contributions must separately stay within that bound. Future buffers, event net capacity and arrears have the same bound. Aggregate excess returns `incomplete` with no partial ledger. Cash and funds use integer cents; proportional products use internal `BigInt`, never serialized big integers.
 
-Requests admit up to 100 goals, 500 dated needs, 100 recurring payments and 600 months. Dates are real ISO `YYYY-MM-DD` calendar dates from 1900 onward. Observation dates stop at 9949-12-31 so a 50-year horizon remains representable. Goal and due dates must lie between the observation date and its 600-month anniversary. Past obligations must be reflected in the declared opening state; future-valued capital is rejected.
+Requests admit up to 100 goals, 500 dated needs, 100 recurring payments and 600 months. Dates are real ISO `YYYY-MM-DD` calendar dates from 1900 onward. Observation dates stop at 9949-12-31 so a 50-year horizon remains representable. Due dates must lie between the observation date and its 600-month anniversary; goal deadlines must not lie beyond that anniversary and may have passed. Past obligations must be reflected in the declared opening state; future-valued capital is rejected.
 
 Inputs must be plain JSON data with documented fields and bounded collections: no undefined fields, accessors, symbols, sparse arrays, cycles, class instances, dates or non-finite numbers. Invalid shapes, fractional cents, duplicate identities, impossible dates and unsupported versions throw `GoalCashInputError`. Known but incomplete evidence returns explicit unknowns.
 
-Snapshots retain a defensive copy of inputs under `goal-cash-schedule-v1`. Replay recalculates from that evidence without contacting providers or reading the clock. Save serialized snapshots before mutating returned objects. They are not signed, authenticated or independently verified. Permission checks, source validation, persistence and retention belong to the host.
+Snapshots retain a defensive copy of inputs under `goal-cash-schedule-v2`. Replay recalculates from that evidence without contacting providers or reading the clock. A saved `goal-cash-schedule-v1` snapshot replays under version 1 rules and returns the result it was saved with: an unknown goal commitment or an out-of-range goal withholds the whole ledger, a deadline before the first savings date is a zero-month goal, and a passed deadline is refused. To apply version 2, evaluate the saved request again with `planGoalCash` and store the new snapshot. See the [changelog](CHANGELOG.md). Save serialized snapshots before mutating returned objects. They are not signed, authenticated or independently verified. Permission checks, source validation, persistence and retention belong to the host.
 
 ## License
 

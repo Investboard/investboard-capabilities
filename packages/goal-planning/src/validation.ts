@@ -1,4 +1,4 @@
-import type { GoalCashRequest } from "./types.js";
+import type { GoalCashRequest, GoalCashSnapshot } from "./types.js";
 import { LIMITS } from "./limits.js";
 import { savingsDate } from "./internal/dates.js";
 import {
@@ -22,6 +22,7 @@ function uniqueId(value: unknown, ids: Set<string>): void {
 
 export function validateRequest(
 	input: unknown,
+	version: GoalCashSnapshot["methodologyVersion"] = "goal-cash-schedule-v2",
 ): asserts input is GoalCashRequest {
 	requireJson(input);
 	shape(
@@ -115,9 +116,12 @@ export function validateRequest(
 		uniqueId(goal.id, goalIds);
 		if (goal.deadline !== null) {
 			date(goal.deadline);
+			// A passed deadline is a goal state from version 2; version 1 refused it.
 			requireInput(
-				goal.deadline >= input.asOfDate && goal.deadline <= lastDay,
-				"Goal deadline must lie within the observation date and 50-year horizon",
+				(version !== "goal-cash-schedule-v1" ||
+					goal.deadline >= input.asOfDate) &&
+					goal.deadline <= lastDay,
+				"Goal deadline must lie within the 50-year horizon",
 			);
 		}
 		if (goal.monthlyContribution !== null) money(goal.monthlyContribution);

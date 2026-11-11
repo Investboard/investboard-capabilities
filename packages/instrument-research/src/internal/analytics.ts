@@ -130,6 +130,8 @@ export function historyMetrics(
 		result.troughDate = drawdown.maxDrawdownDate;
 		result.recoveryDate = drawdown.recoveryDate;
 	}
+	// A sample deviation needs two returns; one return withholds volatility.
+	if (returns.length < 2) return result;
 	const mean = returns.reduce((sum, v) => sum + v, 0) / returns.length;
 	// Actual observation frequency preserves daily crypto versus trading sessions.
 	result.annualizedVolatility = Math.sqrt(

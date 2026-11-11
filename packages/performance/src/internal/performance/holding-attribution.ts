@@ -8,6 +8,7 @@ import {
 	type AttributionContext,
 	buildAttributionContext,
 	openingNav,
+	recordedCostInPeriod,
 	sumByHolding,
 	terminalHoldingValue,
 	terminalSeriesValue,
@@ -17,6 +18,8 @@ import { calculateTwr } from "./twr.js";
 import type { CashFlow, Snapshot } from "./types.js";
 export interface AttributedCashFlow extends CashFlow {
 	readonly holdingId: string | null;
+	/** A fee booked on its own: known, so it is explained on its own line. */
+	readonly recordedCost?: boolean;
 }
 export interface HoldingValuePoint {
 	readonly date: string;
@@ -43,6 +46,14 @@ export interface HoldingAttributionResult {
 	readonly methodology: "modified_dietz_frongello";
 	readonly totalReturn: number;
 	readonly holdings: ReadonlyArray<HoldingContributionRow>;
+	/**
+	 * Linked effect of fees booked on their own, explained at portfolio level
+	 * and never part of the residual. Present only when the request records
+	 * such a fee.
+	 */
+	readonly recordedCostContribution?: number;
+	readonly recordedCostContributionPp?: number;
+	/** Return explained neither by the holdings nor by recorded standalone fees. */
 	readonly residualContribution: number;
 	readonly residualContributionPp: number;
 	readonly attributedPeriodCount: number;
@@ -55,6 +66,7 @@ const EPSILON = 1e-12;
 interface PeriodAttribution {
 	periodContributions: number[][];
 	residualByPeriod: number[];
+	recordedCostByPeriod: number[];
 	fxEffects: HoldingFxPeriodEffect[];
 	expectedFxEffectCount: number;
 	attributedPeriodCount: number;
@@ -161,6 +173,7 @@ function attributeOnePeriod(input: {
 }): {
 	contributions: number[];
 	explained: number;
+	recordedCost: number;
 	hasAnyValuation: boolean;
 	fxEffects: HoldingFxPeriodEffect[];
 	expectedFxEffectCount: number;
@@ -171,6 +184,7 @@ function attributeOnePeriod(input: {
 		return {
 			contributions,
 			explained: 0,
+			recordedCost: 0,
 			hasAnyValuation: false,
 			fxEffects: [],
 			expectedFxEffectCount: 0,
@@ -206,6 +220,8 @@ function attributeOnePeriod(input: {
 	return {
 		contributions,
 		explained,
+		recordedCost:
+			-recordedCostInPeriod(input.context, input.period) / denominator,
 		hasAnyValuation,
 		fxEffects,
 		expectedFxEffectCount,
@@ -224,6 +240,7 @@ function attributePeriods(
 		new Array<number>(periods.length).fill(0),
 	);
 	const residualByPeriod = new Array<number>(periods.length).fill(0);
+	const recordedCostByPeriod = new Array<number>(periods.length).fill(0);
 	const fxEffects: HoldingFxPeriodEffect[] = [];
 	let expectedFxEffectCount = 0;
 	let attributedPeriodCount = 0;
@@ -245,10 +262,12 @@ function attributePeriods(
 		fxEffects.push(...outcome.fxEffects);
 		expectedFxEffectCount += outcome.expectedFxEffectCount;
 		residualByPeriod[periodIndex] = (period.return ?? 0) - outcome.explained;
+		recordedCostByPeriod[periodIndex] = outcome.recordedCost;
 	}
 	return {
 		periodContributions,
 		residualByPeriod,
+		recordedCostByPeriod,
 		fxEffects,
 		expectedFxEffectCount,
 		attributedPeriodCount,
@@ -321,12 +340,18 @@ export function calculateHoldingAttribution(input: {
 		totalReturn: twr.twr,
 		periodCount: twr.subPeriodReturns.length,
 	};
+	// The recorded-cost line appears only when the request records a standalone fee.
+	const hasRecordedCost = cashFlows.some((flow) => flow.recordedCost === true);
+	const zeroRecordedCost = hasRecordedCost
+		? { recordedCostContribution: 0, recordedCostContributionPp: 0 }
+		: {};
 	if (twr.dataQuality === "undefined_subperiod") {
 		return {
 			...base,
 			status: "withheld",
 			withheldReason: "undefined_subperiod",
 			holdings: [],
+			...zeroRecordedCost,
 			residualContribution: twr.twr,
 			residualContributionPp: twr.twr * 100,
 			attributedPeriodCount: 0,
@@ -348,6 +373,7 @@ export function calculateHoldingAttribution(input: {
 				contribution: 0,
 				contributionPp: 0,
 			})),
+			...zeroRecordedCost,
 			residualContribution: 0,
 			residualContributionPp: 0,
 			attributedPeriodCount: 0,
@@ -360,6 +386,7 @@ export function calculateHoldingAttribution(input: {
 	const {
 		periodContributions,
 		residualByPeriod,
+		recordedCostByPeriod,
 		fxEffects,
 		expectedFxEffectCount,
 		attributedPeriodCount,
@@ -375,16 +402,23 @@ export function calculateHoldingAttribution(input: {
 		(sum, row) => sum + row.contribution,
 		0,
 	);
-	const linkedPeriodResidual = residualByPeriod.reduce(
-		(sum, periodResidual, periodIndex) =>
-			sum + periodResidual * (futureFactors[periodIndex] ?? 1),
-		0,
-	);
+	const linked = (byPeriod: ReadonlyArray<number>) =>
+		byPeriod.reduce(
+			(sum, value, periodIndex) =>
+				sum + value * (futureFactors[periodIndex] ?? 1),
+			0,
+		);
+	const linkedPeriodResidual = linked(residualByPeriod);
+	// Standalone fees sit inside the unexplained period gap; they are known,
+	// so they leave the residual for their own line.
+	const recordedCostContribution = linked(recordedCostByPeriod);
 	const rawReconciliationGap =
 		twr.twr - (holdingContribution + linkedPeriodResidual);
-	const residualContribution = linkedPeriodResidual + rawReconciliationGap;
+	const residualContribution =
+		linkedPeriodResidual - recordedCostContribution + rawReconciliationGap;
 	const reconciliationGap =
-		twr.twr - (holdingContribution + residualContribution);
+		twr.twr -
+		(holdingContribution + recordedCostContribution + residualContribution);
 	const fxAttribution = aggregateFxAttribution({
 		holdings: holdingRows,
 		effects: fxEffects,
@@ -397,6 +431,12 @@ export function calculateHoldingAttribution(input: {
 		status: "ready",
 		withheldReason: null,
 		holdings: holdingRows,
+		...(hasRecordedCost
+			? {
+					recordedCostContribution,
+					recordedCostContributionPp: recordedCostContribution * 100,
+				}
+			: {}),
 		residualContribution,
 		residualContributionPp: residualContribution * 100,
 		attributedPeriodCount,

@@ -168,6 +168,7 @@ export type PreparedHistory = ReturnType<typeof prepareHistory>;
 export function valueTransfers(
 	request: PerformanceRequest,
 	history: PreparedHistory,
+	noise: "addends" | "total" = "addends",
 ) {
 	const first = request.snapshots[0]!.date;
 	const last = request.snapshots.at(-1)!.date;
@@ -256,6 +257,7 @@ export function valueTransfers(
 		);
 		const amounts = allocateTransferRounding(
 			day.map((row) => row.rawAmount * Math.sign(row.effects[0]!.quantity)),
+			noise,
 		);
 		day.forEach((row, index) => {
 			const value = Math.abs(amounts[index]!);

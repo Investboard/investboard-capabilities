@@ -2,21 +2,48 @@ import type {
 	GoalCashRequest,
 	GoalFundingOutcome,
 	GoalReason,
+	LeftOutGoal,
+	LeftOutReason,
 	PlanReason,
 } from "../types.js";
 import { fromCents, LIMITS, toCents } from "../limits.js";
 import { fullMonths } from "./dates.js";
 
+const LEFT_OUT_REASONS: ReadonlySet<GoalReason> = new Set<LeftOutReason>([
+	"deadline_missing",
+	"deadline_passed",
+	"deadline_before_first_savings_date",
+	"contribution_missing",
+	"amounts_exceed_supported_range",
+]);
+
+function isLeftOutReason(reason: GoalReason): reason is LeftOutReason {
+	return LEFT_OUT_REASONS.has(reason);
+}
+
+export interface PreparedGoals {
+	outcomes: GoalFundingOutcome[];
+	/** Empty under version 1, which schedules every goal or withholds the ledger. */
+	leftOut: LeftOutGoal[];
+}
+
+/**
+ * With `leaveOut` (v2), a goal without a usable deadline, a future savings
+ * date, a monthly contribution or supported amounts is left out and named;
+ * version 1 instead withholds the whole ledger for an unknown commitment.
+ */
 export function prepareOutcomes(
 	request: GoalCashRequest,
 	reasons: Set<PlanReason>,
-): GoalFundingOutcome[] {
+	leaveOut: boolean,
+): PreparedGoals {
 	const usage = new Map<string, number>();
 	for (const goal of request.goals) {
 		for (const id of goal.startingCapital?.sourceIds ?? [])
 			usage.set(id, (usage.get(id) ?? 0) + 1);
 	}
-	return [...request.goals]
+	const leftOut: LeftOutGoal[] = [];
+	const outcomes = [...request.goals]
 		.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0))
 		.map((goal) => {
 			const reasonCodes: GoalReason[] = [];
@@ -24,11 +51,18 @@ export function prepareOutcomes(
 				goal.deadline === null
 					? null
 					: fullMonths(request.asOfDate, goal.deadline);
-			if (horizonMonths === null) reasonCodes.push("deadline_missing");
+			if (goal.deadline === null) reasonCodes.push("deadline_missing");
+			else if (leaveOut && goal.deadline < request.asOfDate)
+				reasonCodes.push("deadline_passed");
+			else if (leaveOut && horizonMonths === 0)
+				reasonCodes.push("deadline_before_first_savings_date");
 			if (goal.monthlyContribution === null)
 				reasonCodes.push("contribution_missing");
 			if (goal.targetAmount === null) reasonCodes.push("target_missing");
-			if (horizonMonths === null || goal.monthlyContribution === null)
+			if (
+				!leaveOut &&
+				(horizonMonths === null || goal.monthlyContribution === null)
+			)
 				reasons.add("goal_commitment_missing");
 			const source = goal.startingCapital;
 			let currentCapital: number | null = source?.amount ?? null;
@@ -51,7 +85,12 @@ export function prepareOutcomes(
 			) {
 				requestedTotal = null;
 				reasonCodes.push("amounts_exceed_supported_range");
-				reasons.add("amounts_exceed_supported_range");
+				if (!leaveOut) reasons.add("amounts_exceed_supported_range");
+			}
+			const missing = leaveOut ? reasonCodes.filter(isLeftOutReason) : [];
+			if (missing.length) {
+				requestedTotal = null;
+				leftOut.push({ goalId: goal.id, reasonCodes: missing });
 			}
 			return {
 				goalId: goal.id,
@@ -64,14 +103,18 @@ export function prepareOutcomes(
 				reasonCodes,
 			};
 		});
+	return { outcomes, leftOut };
 }
 
+/** A left-out goal keeps its unknown funding: it is never counted as funded. */
 export function finishOutcomes(
 	request: GoalCashRequest,
 	outcomes: GoalFundingOutcome[],
 	funded: Map<string, number>,
+	leftOut: ReadonlySet<string>,
 ): GoalFundingOutcome[] {
 	return outcomes.map((outcome) => {
+		if (leftOut.has(outcome.goalId)) return outcome;
 		const fundedTotal = fromCents(funded.get(outcome.goalId) ?? 0);
 		const noGrowthOutcome =
 			outcome.currentCapital === null

@@ -40,7 +40,6 @@ export const BLACK_MONDAY_1987: CrisisDefinition = {
 		etf: -0.34, // Most retail ETFs are equity-heavy; mirror equities baseline when no sector look-through is available
 		bonds: 0.05,
 		gold: 0.05,
-		crypto: 0,
 		cash: 0,
 		alternatives: -0.15,
 	},
@@ -54,7 +53,7 @@ export const BLACK_MONDAY_1987: CrisisDefinition = {
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.34 is the S&P 500 peak-to-trough (1987-08-25 close 336.77 → 1987-12-04 close 223.92, ≈ −33.5%), including the −20.5% single day on 1987-10-19. Sector shocks are rounded approximations of the broadly uniform crash dispersion (rate-sensitive Financials worst, defensive Utilities/Staples least). Bonds positive reflects the post-crash flight to Treasuries and falling yields; USD negative reflects the post-Louvre dollar slide into year-end 1987. Not a backtest of the user's holdings.",
+			"Headline −0.34 is the S&P 500 peak-to-trough (1987-08-25 close 336.77 → 1987-12-04 close 223.92, ≈ −33.5%), including the −20.5% single day on 1987-10-19. Sector shocks are rounded approximations of the broadly uniform crash dispersion (rate-sensitive Financials worst, defensive Utilities/Staples least). Bonds positive reflects the post-crash flight to Treasuries and falling yields; USD negative reflects the post-Louvre dollar slide into year-end 1987. Crypto has no figure of its own in this window and takes the shares figure as a stand-in, a scenario assumption rather than a measured crypto move. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, peak 1987-08-25 → trough 1987-12-04 (≈ −33.5%) · https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"Federal Reserve History, Stock Market Crash of 1987 · https://www.federalreservehistory.org/essays/stock-market-crash-of-1987",
@@ -96,7 +95,6 @@ export const GULF_WAR_1990: CrisisDefinition = {
 		etf: -0.2, // Most retail ETFs are equity-heavy; mirror equities baseline when no sector look-through is available
 		bonds: 0,
 		gold: 0.07,
-		crypto: 0,
 		cash: 0,
 		alternatives: -0.1,
 	},
@@ -110,7 +108,7 @@ export const GULF_WAR_1990: CrisisDefinition = {
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.20 is the S&P 500 peak-to-trough (1990-07-16 close 368.95 → 1990-10-11 close 295.46, ≈ −19.9%). Energy +0.10 approximates the sector's gain as WTI roughly doubled after 1990-08-02; Financials worst on the concurrent S&L overhang. USD −0.10 approximates the dollar's slide against the D-Mark through 1990. Not a backtest of the user's holdings.",
+			"Headline −0.20 is the S&P 500 peak-to-trough (1990-07-16 close 368.95 → 1990-10-11 close 295.46, ≈ −19.9%). Energy +0.10 approximates the sector's gain as WTI roughly doubled after 1990-08-02; Financials worst on the concurrent S&L overhang. USD −0.10 approximates the dollar's slide against the D-Mark through 1990. Crypto has no figure of its own in this window and takes the shares figure as a stand-in, a scenario assumption rather than a measured crypto move. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, peak 1990-07-16 → trough 1990-10-11 (≈ −19.9%) · https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"WTI crude spot doubling Aug–Oct 1990 · https://www.eia.gov/dnav/pet/hist/RWTCD.htm",
@@ -153,7 +151,6 @@ export const BOND_MASSACRE_1994: CrisisDefinition = {
 		etf: -0.09, // Most retail ETFs are equity-heavy; mirror equities baseline when no sector look-through is available
 		bonds: -0.08,
 		gold: -0.02,
-		crypto: 0,
 		cash: 0,
 		alternatives: -0.05,
 	},
@@ -167,7 +164,7 @@ export const BOND_MASSACRE_1994: CrisisDefinition = {
 	provenance: {
 		approximate: true,
 		methodology:
-			"Window dated by the 1994 Fed tightening cycle (first hike 1994-02-04; +250bp over the year), not an equity trough. Equity −0.09 approximates the S&P 500 Feb–Apr drawdown; bonds −0.08 approximates long-duration Treasury losses (10y yield 5.6% → 8.0%; 30y total returns ≈ −12%, aggregate ≈ −5%). Utilities/Real Estate worst as bond proxies. USD −0.10 approximates the 1994 dollar slide against the yen and D-Mark. Not a backtest of the user's holdings.",
+			"Window dated by the 1994 Fed tightening cycle (first hike 1994-02-04; +250bp over the year), not an equity trough. Equity −0.09 approximates the S&P 500 Feb–Apr drawdown; bonds −0.08 approximates long-duration Treasury losses (10y yield 5.6% → 8.0%; 30y total returns ≈ −12%, aggregate ≈ −5%). Utilities/Real Estate worst as bond proxies. USD −0.10 approximates the 1994 dollar slide against the yen and D-Mark. Crypto has no figure of its own in this window and takes the shares figure as a stand-in, a scenario assumption rather than a measured crypto move. Not a backtest of the user's holdings.",
 		sources: [
 			"Federal Reserve, 1994 rate decisions (Feb 4 first hike; +250bp cycle) · https://www.federalreserve.gov/monetarypolicy/openmarket_archive.htm",
 			"US 10y Treasury constant-maturity yield, 1994 (≈ 5.6% → 8.0%) · https://fred.stlouisfed.org/series/DGS10",
@@ -209,7 +206,6 @@ export const ASIAN_CRISIS_1997: CrisisDefinition = {
 		etf: -0.11, // Most retail ETFs are equity-heavy; mirror equities baseline when no sector look-through is available
 		bonds: 0.03,
 		gold: -0.08,
-		crypto: 0,
 		cash: 0,
 		alternatives: -0.08,
 	},
@@ -223,7 +219,7 @@ export const ASIAN_CRISIS_1997: CrisisDefinition = {
 	provenance: {
 		approximate: true,
 		methodology:
-			"Window runs from the Thai baht float (1997-07-02) to the US spillover trough (1997-10-27, Dow −7.2% in one session). Headline −0.11 approximates the S&P 500 drawdown into that session; Asian markets fell far more, but the shock table models the DACH retail universe (US/EU-heavy). Gold −0.08 reflects its decline through the crisis autumn; JPY −0.05 the yen's 1997 weakness. Not a backtest of the user's holdings.",
+			"Window runs from the Thai baht float (1997-07-02) to the US spillover trough (1997-10-27, Dow −7.2% in one session). Headline −0.11 approximates the S&P 500 drawdown into that session; Asian markets fell far more, but the shock table models the DACH retail universe (US/EU-heavy). Gold −0.08 reflects its decline through the crisis autumn; JPY −0.05 the yen's 1997 weakness. Crypto has no figure of its own in this window and takes the shares figure as a stand-in, a scenario assumption rather than a measured crypto move. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 / DJIA, 1997-10-27 session (−7.2% DJIA, trading halts) · https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"IMF, Recovery from the Asian Crisis · https://www.imf.org/external/np/exr/ib/2000/062300.htm",
@@ -265,7 +261,6 @@ export const RUSSIA_LTCM_1998: CrisisDefinition = {
 		etf: -0.19, // Most retail ETFs are equity-heavy; mirror equities baseline when no sector look-through is available
 		bonds: 0.04,
 		gold: 0,
-		crypto: 0,
 		cash: 0,
 		alternatives: -0.2,
 	},
@@ -279,7 +274,7 @@ export const RUSSIA_LTCM_1998: CrisisDefinition = {
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.19 is the S&P 500 peak-to-trough (1998-07-17 close 1186.75 → 1998-10-08 close 959.44, ≈ −19.2%). Financials and alternatives worst (bank LTCM exposure; hedge-fund deleveraging), Energy hit by oil near 11 USD. Bonds positive on the flight to Treasuries; JPY +0.15 approximates the violent October 1998 yen-carry unwind (USD/JPY ≈ 135 → 115). Not a backtest of the user's holdings.",
+			"Headline −0.19 is the S&P 500 peak-to-trough (1998-07-17 close 1186.75 → 1998-10-08 close 959.44, ≈ −19.2%). Financials and alternatives worst (bank LTCM exposure; hedge-fund deleveraging), Energy hit by oil near 11 USD. Bonds positive on the flight to Treasuries; JPY +0.15 approximates the violent October 1998 yen-carry unwind (USD/JPY ≈ 135 → 115). Crypto has no figure of its own in this window and takes the shares figure as a stand-in, a scenario assumption rather than a measured crypto move. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, peak 1998-07-17 → trough 1998-10-08 (≈ −19%) · https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"Federal Reserve History, Near failure of LTCM · https://www.federalreservehistory.org/essays/ltcm-near-failure",
@@ -321,7 +316,6 @@ export const SEPTEMBER_2001: CrisisDefinition = {
 		etf: -0.12, // Most retail ETFs are equity-heavy; mirror equities baseline when no sector look-through is available
 		bonds: 0.02,
 		gold: 0.06,
-		crypto: 0,
 		cash: 0,
 		alternatives: -0.05,
 	},
@@ -335,7 +329,7 @@ export const SEPTEMBER_2001: CrisisDefinition = {
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.12 is the S&P 500 move from the last pre-attack close (2001-09-10, 1092.54) to the post-reopening trough (2001-09-21, 965.80, ≈ −11.6%). Industrials worst on airlines, Financials on insurers; defensive Staples nearly flat. Gold and CHF positive as classic haven moves. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2001-09-10 and 2001-09-21 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
+			"Headline −0.12 is the S&P 500 move from the last pre-attack close (2001-09-10, 1092.54) to the post-reopening trough (2001-09-21, 965.80, ≈ −11.6%). Industrials worst on airlines, Financials on insurers; defensive Staples nearly flat. Gold and CHF positive as classic haven moves. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2001-09-10 and 2001-09-21 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Crypto has no figure of its own in this window and takes the shares figure as a stand-in, a scenario assumption rather than a measured crypto move. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, 2001-09-10 → 2001-09-21 (≈ −11.6%) · https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"NYSE closure 2001-09-11 → 2001-09-17 (longest since 1933) · https://www.federalreservehistory.org/essays/september-11-attacks",

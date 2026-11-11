@@ -47,6 +47,10 @@ export interface Holding {
 	/** Already in the reporting currency. Null withholds the whole comparison. */
 	value: number | null;
 	currency: string;
+	/** True for a fund or ETF. Omitted ranks the holding with single shares. */
+	fund?: boolean;
+	/** True when the host holds a usable current price to buy more of it. Omitted ranks it as unpriced. */
+	priced?: boolean;
 }
 export interface AllocationPreferences {
 	/** Default: one configured minor unit. */
@@ -196,6 +200,9 @@ export type BuiltinReasonCode =
 	| "trade_limit_exceeded"
 	| "insufficient_funding"
 	| "reserve_shortfall"
+	| "reserve_floor_not_reached"
+	| "uninvested_below_order_minimum"
+	| "uninvested_above_order_maximum"
 	| "funding_transfer_required";
 export interface RebalanceAlternative {
 	existingCashReleased: number;
@@ -209,20 +216,32 @@ export interface RebalanceAlternative {
 	taxCost: number | null;
 	taxCoverage: "no_sales" | "supplied" | "unknown";
 	cashRetained: number | null;
+	/**
+	 * Part of the funding budget meant for securities that no admissible order
+	 * could take after consolidation and routing; included in cashRetained.
+	 * Present only when positive.
+	 */
+	uninvestedCash?: number;
 	valueAfter: number | null;
 	reserveAfter: number | null;
+	/** Cash floor minus reserveAfter; present only while the reserve stays below the floor. */
+	reserveShortfall?: number;
 	residualDrift: number | null;
 	rows: AllocationRow[] | null;
 	funding: FundingRow[];
 	purchases: Purchase[];
 	sales: Sale[];
 }
+/** v4 snapshots replay under the rules they were saved with; new comparisons use v5. */
+export type ComparisonMethodology =
+	| "rebalance-comparison-v4"
+	| "rebalance-comparison-v5";
 export interface RebalanceSnapshot {
-	methodologyVersion: "rebalance-comparison-v4";
+	methodologyVersion: ComparisonMethodology;
 	request: RebalanceRequest;
 }
 export interface RebalanceComparison {
-	methodologyVersion: "rebalance-comparison-v4";
+	methodologyVersion: ComparisonMethodology;
 	baseCurrency: ReportingCurrency;
 	priority: Priority;
 	valueBefore: number | null;

@@ -25,7 +25,15 @@ export function calculateSchedule(snapshot: GoalCashSnapshot): GoalCashResult {
 	if (request.monthlyCapacity === null) reasons.add("monthly_capacity_missing");
 	if (request.paymentsTreatment === "unknown")
 		reasons.add("payment_netting_unknown");
-	const outcomes = prepareOutcomes(request, reasons);
+	const { outcomes, leftOut } = prepareOutcomes(
+		request,
+		reasons,
+		snapshot.methodologyVersion !== "goal-cash-schedule-v1",
+	);
+	const leftOutIds = new Set(leftOut.map((goal) => goal.goalId));
+	const scheduled = outcomes.filter((goal) => !leftOutIds.has(goal.goalId));
+	// A withheld or partial ledger still names every goal it leaves out.
+	const named = leftOut.length ? { leftOutGoals: leftOut } : {};
 	const incomplete = (): GoalCashResult => ({
 		status: "incomplete",
 		reportingCurrency: request.reportingCurrency,
@@ -33,11 +41,12 @@ export function calculateSchedule(snapshot: GoalCashSnapshot): GoalCashResult {
 		reasonCodes: [...reasons],
 		rows: [],
 		goals: outcomes,
+		...named,
 	});
 	if (reasons.size > 0) return incomplete();
 	const lastGoalMonth = Math.max(
 		0,
-		...outcomes.map((goal) => goal.horizonMonths ?? 0),
+		...scheduled.map((goal) => goal.horizonMonths ?? 0),
 	);
 	const finalDay =
 		[
@@ -91,7 +100,7 @@ export function calculateSchedule(snapshot: GoalCashSnapshot): GoalCashResult {
 	let overdue = 0;
 	let constrained = cash < reserve;
 	if (constrained) reasons.add("reserve_underfunded");
-	const funded = new Map(outcomes.map((goal) => [goal.goalId, 0]));
+	const funded = new Map(scheduled.map((goal) => [goal.goalId, 0]));
 	const goals = new Map(request.goals.map((goal) => [goal.id, goal]));
 	const rows: CashScheduleRow[] = [];
 	for (const [index, event] of events.entries()) {
@@ -122,7 +131,7 @@ export function calculateSchedule(snapshot: GoalCashSnapshot): GoalCashResult {
 		const requests =
 			event.month === null
 				? []
-				: outcomes
+				: scheduled
 						.filter(
 							(goal) =>
 								event.month !== null &&
@@ -166,12 +175,28 @@ export function calculateSchedule(snapshot: GoalCashSnapshot): GoalCashResult {
 			})),
 		});
 	}
+	const goalOutcomes = finishOutcomes(request, outcomes, funded, leftOutIds);
+	if (!leftOut.length)
+		return {
+			status: constrained ? "constrained" : "feasible",
+			reportingCurrency: request.reportingCurrency,
+			snapshot,
+			reasonCodes: [...reasons],
+			rows,
+			goals: goalOutcomes,
+		};
+	// A schedule without every goal is never presented as the full picture.
 	return {
-		status: constrained ? "constrained" : "feasible",
+		status: "incomplete",
 		reportingCurrency: request.reportingCurrency,
 		snapshot,
-		reasonCodes: [...reasons],
+		reasonCodes: [
+			"partial_schedule_goals_left_out",
+			...reasons,
+			...(constrained ? (["partial_schedule_constrained"] as const) : []),
+		],
 		rows,
-		goals: finishOutcomes(request, outcomes, funded),
+		goals: goalOutcomes,
+		leftOutGoals: leftOut,
 	};
 }

@@ -1,6 +1,9 @@
 import { calculateTwr } from "./internal/performance/twr.js";
 import { calculateXirr } from "./internal/performance/xirr.js";
-import { calculateHoldingAttribution } from "./internal/performance/holding-attribution.js";
+import {
+	calculateHoldingAttribution,
+	type AttributedCashFlow,
+} from "./internal/performance/holding-attribution.js";
 import { aggregateCurrencyAttribution } from "./internal/performance/currency-attribution.js";
 import {
 	attributionCoverage,
@@ -18,6 +21,7 @@ import {
 	validateRequest,
 } from "./validation.js";
 import type {
+	PerformanceMethodologyVersion,
 	PerformanceRequest,
 	PerformanceResult,
 	PerformanceSnapshot,
@@ -27,16 +31,55 @@ import type {
 export type * from "./types.js";
 export { PerformanceInputError } from "./validation.js";
 export { LIMITS } from "./limits.js";
-export const METHODOLOGY_VERSION = "actual-position-performance-v3" as const;
+export const METHODOLOGY_VERSION = "actual-position-performance-v4" as const;
+const V3 = "actual-position-performance-v3" as const;
+
+/**
+ * The rules a methodology version calculates by. v4 annualizes both returns
+ * from 365 days and judges half-cent transfer ties against the addends; v3
+ * annualized the time-weighted return only beyond 365 days and judged them
+ * against the net. Standalone fees exist only in v4 requests.
+ */
+const RULES = {
+	[METHODOLOGY_VERSION]: {
+		annualizationMinDays: 365,
+		transferNoise: "addends",
+	},
+	[V3]: { annualizationMinDays: 366, transferNoise: "total" },
+} as const satisfies Record<
+	PerformanceMethodologyVersion,
+	{ annualizationMinDays: number; transferNoise: "addends" | "total" }
+>;
+
+/** A fee booked on its own is money paid in that buys nothing, at portfolio level. */
+function standaloneFeeFlows(request: PerformanceRequest): AttributedCashFlow[] {
+	return (request.recordedCosts ?? [])
+		.filter((cost) => cost.standalone === true && cost.fees > 0)
+		.map((cost) => ({
+			date: cost.date,
+			amount: cost.fees,
+			type: "buy",
+			holdingId: null,
+			recordedCost: true,
+		}));
+}
 
 /** Pure, deterministic calculation. All monetary inputs share reporting currency. */
 export function evaluatePerformance(
 	input: PerformanceRequest,
 ): PerformanceResult {
-	validateRequest(input);
+	return evaluate(input, METHODOLOGY_VERSION);
+}
+
+function evaluate(
+	input: PerformanceRequest,
+	methodologyVersion: PerformanceMethodologyVersion,
+): PerformanceResult {
+	validateRequest(input, methodologyVersion);
+	const rules = RULES[methodologyVersion];
 	const original = structuredClone(input);
 	const snapshot: PerformanceSnapshot = {
-		methodologyVersion: METHODOLOGY_VERSION,
+		methodologyVersion,
 		request: original,
 	};
 	const reasons = new Set<PerformanceReason>();
@@ -52,10 +95,18 @@ export function evaluatePerformance(
 	const request = projectScope(original);
 	if (!request) return unavailable("scope_history_missing");
 	const history = prepareHistory(request);
-	const transfers = valueTransfers(request, history);
+	const transfers = valueTransfers(request, history, rules.transferNoise);
 	if (!transfers) return unavailable("transfer_valuation_missing");
-	const flows = [...request.cashFlows, ...transfers.flows];
-	const twr = calculateTwr([...request.snapshots], flows);
+	const flows = [
+		...request.cashFlows,
+		...transfers.flows,
+		...standaloneFeeFlows(request),
+	];
+	const twr = calculateTwr(
+		[...request.snapshots],
+		flows,
+		rules.annualizationMinDays,
+	);
 	if (twr.dataQuality === "undefined_subperiod")
 		return unavailable("undefined_subperiod");
 	const first = request.snapshots[0]!;
@@ -180,9 +231,10 @@ export function replayPerformance(
 ): PerformanceResult {
 	requireJson(snapshot);
 	shape(snapshot, ["methodologyVersion", "request"], "Snapshot");
+	const version = snapshot.methodologyVersion;
 	requireInput(
-		snapshot.methodologyVersion === METHODOLOGY_VERSION,
+		version === METHODOLOGY_VERSION || version === V3,
 		"Unsupported snapshot methodology",
 	);
-	return evaluatePerformance(snapshot.request);
+	return evaluate(snapshot.request, version);
 }

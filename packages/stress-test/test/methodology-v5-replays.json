@@ -1,0 +1,494 @@
+{
+	"unmodeled_holdings": {
+		"interpretation": "hypothetical_replay",
+		"baseCurrency": "EUR",
+		"snapshot": {
+			"methodologyVersion": "whole-wealth-currency-replay-v5",
+			"request": {
+				"holdings": [
+					{
+						"holdingId": "fund",
+						"isin": "XX0000000001",
+						"ticker": "FUND",
+						"name": "Synthetic share fund",
+						"sector": "Technology",
+						"assetClass": "equities",
+						"instrumentType": "fund_etf",
+						"currency": "EUR",
+						"currentValue": 900
+					},
+					{
+						"holdingId": "art",
+						"isin": null,
+						"ticker": "ART",
+						"name": "Synthetic collectible",
+						"sector": null,
+						"assetClass": "collectibles",
+						"instrumentType": "other",
+						"currency": "EUR",
+						"currentValue": 100
+					},
+					{
+						"holdingId": "nok",
+						"isin": null,
+						"ticker": "NOK-CASH",
+						"name": "Synthetic krone account",
+						"sector": null,
+						"assetClass": "cash",
+						"instrumentType": "cash",
+						"currency": "NOK",
+						"currentValue": 50
+					}
+				],
+				"scenario": {
+					"key": "gfc_2008",
+					"name": {
+						"de": "Finanzkrise 2008",
+						"en": "Global Financial Crisis 2008"
+					},
+					"description": {
+						"de": "Der schlimmste Boersencrash seit der Grossen Depression. Ausgeloest durch die Subprime-Hypothekenkrise in den USA.",
+						"en": "The worst market crash since the Great Depression. Triggered by the US subprime mortgage crisis."
+					},
+					"crisisType": "financial_crisis",
+					"dateFrom": "2007-10-09",
+					"dateTo": "2009-03-09",
+					"peakToTroughPct": -0.57,
+					"recoveryMonths": 48,
+					"sectorShocks": {
+						"Technology": -0.5,
+						"Healthcare": -0.38,
+						"Financials": -0.83,
+						"Consumer Discretionary": -0.59,
+						"Consumer Staples": -0.29,
+						"Industrials": -0.58,
+						"Energy": -0.55,
+						"Materials": -0.57,
+						"Utilities": -0.45,
+						"Real Estate": -0.68,
+						"Communication Services": -0.45,
+						"Other": -0.57
+					},
+					"assetClassShocks": {
+						"equities": -0.57,
+						"etf": -0.57,
+						"bonds": -0.05,
+						"gold": 0.25,
+						"crypto": 0,
+						"cash": 0,
+						"alternatives": -0.25
+					},
+					"currencyShocks": {
+						"EUR": 0,
+						"USD": 0.12,
+						"GBP": -0.24,
+						"CHF": 0.14,
+						"JPY": 0.32
+					},
+					"provenance": {
+						"approximate": true,
+						"methodology": "Saved copy of the built-in gfc_2008 figures as published in package 0.2.0.",
+						"sources": ["Built-in scenario catalogue, package 0.2.0"],
+						"reviewedAt": "2026-05-31",
+						"currencyReviewedAt": "2026-11-11"
+					}
+				},
+				"baseCurrency": "EUR"
+			}
+		},
+		"status": "unavailable",
+		"reasonCodes": ["unsupported_scenario_exposure"],
+		"calculation": null
+	},
+	"custom_scenario_without_crypto": {
+		"interpretation": "hypothetical_replay",
+		"baseCurrency": "EUR",
+		"snapshot": {
+			"methodologyVersion": "whole-wealth-currency-replay-v5",
+			"request": {
+				"holdings": [
+					{
+						"holdingId": "fund",
+						"isin": "XX0000000001",
+						"ticker": "FUND",
+						"name": "Synthetic share fund",
+						"sector": "Technology",
+						"assetClass": "equities",
+						"instrumentType": "fund_etf",
+						"currency": "EUR",
+						"currentValue": 900
+					},
+					{
+						"holdingId": "coin",
+						"isin": null,
+						"ticker": "COIN",
+						"name": "Synthetic crypto asset",
+						"sector": null,
+						"assetClass": "crypto",
+						"instrumentType": "other",
+						"currency": "EUR",
+						"currentValue": 1000
+					}
+				],
+				"scenario": {
+					"key": "custom_no_crypto",
+					"name": {
+						"de": "Finanzkrise 2008",
+						"en": "Global Financial Crisis 2008"
+					},
+					"description": {
+						"de": "Der schlimmste Boersencrash seit der Grossen Depression. Ausgeloest durch die Subprime-Hypothekenkrise in den USA.",
+						"en": "The worst market crash since the Great Depression. Triggered by the US subprime mortgage crisis."
+					},
+					"crisisType": "financial_crisis",
+					"dateFrom": "2007-10-09",
+					"dateTo": "2009-03-09",
+					"peakToTroughPct": -0.57,
+					"recoveryMonths": 48,
+					"sectorShocks": {
+						"Technology": -0.5,
+						"Healthcare": -0.38,
+						"Financials": -0.83,
+						"Consumer Discretionary": -0.59,
+						"Consumer Staples": -0.29,
+						"Industrials": -0.58,
+						"Energy": -0.55,
+						"Materials": -0.57,
+						"Utilities": -0.45,
+						"Real Estate": -0.68,
+						"Communication Services": -0.45,
+						"Other": -0.57
+					},
+					"assetClassShocks": {
+						"equities": -0.57,
+						"etf": -0.57,
+						"bonds": -0.05,
+						"gold": 0.25,
+						"cash": 0,
+						"alternatives": -0.25
+					},
+					"currencyShocks": {
+						"EUR": 0,
+						"USD": 0.12,
+						"GBP": -0.24,
+						"CHF": 0.14,
+						"JPY": 0.32
+					},
+					"provenance": {
+						"approximate": true,
+						"methodology": "Saved copy of the built-in gfc_2008 figures as published in package 0.2.0.",
+						"sources": ["Built-in scenario catalogue, package 0.2.0"],
+						"reviewedAt": "2026-05-31",
+						"currencyReviewedAt": "2026-11-11"
+					}
+				},
+				"baseCurrency": "EUR"
+			}
+		},
+		"status": "unavailable",
+		"reasonCodes": ["unsupported_scenario_exposure"],
+		"calculation": null
+	},
+	"saved_crypto_zero": {
+		"interpretation": "hypothetical_replay",
+		"baseCurrency": "EUR",
+		"snapshot": {
+			"methodologyVersion": "whole-wealth-currency-replay-v5",
+			"request": {
+				"holdings": [
+					{
+						"holdingId": "fund",
+						"isin": "XX0000000001",
+						"ticker": "FUND",
+						"name": "Synthetic share fund",
+						"sector": "Technology",
+						"assetClass": "equities",
+						"instrumentType": "fund_etf",
+						"currency": "EUR",
+						"currentValue": 900
+					},
+					{
+						"holdingId": "coin",
+						"isin": null,
+						"ticker": "COIN",
+						"name": "Synthetic crypto asset",
+						"sector": null,
+						"assetClass": "crypto",
+						"instrumentType": "other",
+						"currency": "EUR",
+						"currentValue": 1000
+					}
+				],
+				"scenario": {
+					"key": "gfc_2008",
+					"name": {
+						"de": "Finanzkrise 2008",
+						"en": "Global Financial Crisis 2008"
+					},
+					"description": {
+						"de": "Der schlimmste Boersencrash seit der Grossen Depression. Ausgeloest durch die Subprime-Hypothekenkrise in den USA.",
+						"en": "The worst market crash since the Great Depression. Triggered by the US subprime mortgage crisis."
+					},
+					"crisisType": "financial_crisis",
+					"dateFrom": "2007-10-09",
+					"dateTo": "2009-03-09",
+					"peakToTroughPct": -0.57,
+					"recoveryMonths": 48,
+					"sectorShocks": {
+						"Technology": -0.5,
+						"Healthcare": -0.38,
+						"Financials": -0.83,
+						"Consumer Discretionary": -0.59,
+						"Consumer Staples": -0.29,
+						"Industrials": -0.58,
+						"Energy": -0.55,
+						"Materials": -0.57,
+						"Utilities": -0.45,
+						"Real Estate": -0.68,
+						"Communication Services": -0.45,
+						"Other": -0.57
+					},
+					"assetClassShocks": {
+						"equities": -0.57,
+						"etf": -0.57,
+						"bonds": -0.05,
+						"gold": 0.25,
+						"crypto": 0,
+						"cash": 0,
+						"alternatives": -0.25
+					},
+					"currencyShocks": {
+						"EUR": 0,
+						"USD": 0.12,
+						"GBP": -0.24,
+						"CHF": 0.14,
+						"JPY": 0.32
+					},
+					"provenance": {
+						"approximate": true,
+						"methodology": "Saved copy of the built-in gfc_2008 figures as published in package 0.2.0.",
+						"sources": ["Built-in scenario catalogue, package 0.2.0"],
+						"reviewedAt": "2026-05-31",
+						"currencyReviewedAt": "2026-11-11"
+					}
+				},
+				"baseCurrency": "EUR"
+			}
+		},
+		"status": "partial",
+		"reasonCodes": ["proxy_currency_decomposition_unavailable"],
+		"calculation": {
+			"holdingImpacts": [
+				{
+					"holdingId": "fund",
+					"isin": "XX0000000001",
+					"ticker": "FUND",
+					"name": "Synthetic share fund",
+					"sector": "Technology",
+					"assetClass": "equities",
+					"preStressValue": 900,
+					"postStressValue": 450,
+					"absoluteLoss": -450,
+					"percentageLoss": -0.5,
+					"shockApplied": -0.5,
+					"shockSource": "sector_proxy",
+					"betaAdjusted": false,
+					"fxShockApplied": null,
+					"currencyMethod": "unknown"
+				},
+				{
+					"holdingId": "coin",
+					"ticker": "COIN",
+					"name": "Synthetic crypto asset",
+					"sector": "Other",
+					"assetClass": "crypto",
+					"preStressValue": 1000,
+					"postStressValue": 1000,
+					"absoluteLoss": 0,
+					"percentageLoss": 0,
+					"shockApplied": 0,
+					"shockSource": "asset_class_default",
+					"betaAdjusted": false,
+					"fxShockApplied": null,
+					"currencyMethod": "unknown"
+				}
+			],
+			"preStressTotal": 1900,
+			"postStressTotal": 1450,
+			"absoluteLoss": -450,
+			"percentageLoss": -0.2368,
+			"attribution": {
+				"preStressValueCents": 190000,
+				"postStressValueCents": 145000,
+				"netImpactCents": -45000,
+				"lossDrivers": [
+					{
+						"holdingId": "fund",
+						"name": "Synthetic share fund",
+						"shockSource": "sector_proxy",
+						"impactCents": -45000,
+						"portfolioImpactFraction": -0.23684210526315788
+					}
+				],
+				"otherImpactCents": 0,
+				"historicalValueFraction": 0
+			},
+			"coverage": {
+				"directValueFraction": 0,
+				"proxyValueFraction": 1,
+				"currencyDecompositionValueFraction": 0
+			}
+		}
+	},
+	"usd_reporting": {
+		"interpretation": "hypothetical_replay",
+		"baseCurrency": "USD",
+		"snapshot": {
+			"methodologyVersion": "whole-wealth-currency-replay-v5",
+			"request": {
+				"holdings": [
+					{
+						"holdingId": "fund",
+						"isin": "XX0000000001",
+						"ticker": "FUND",
+						"name": "Synthetic share fund",
+						"sector": "Technology",
+						"assetClass": "equities",
+						"instrumentType": "fund_etf",
+						"currency": "EUR",
+						"currentValue": 900
+					},
+					{
+						"holdingId": "usd",
+						"isin": null,
+						"ticker": "USD-CASH",
+						"name": "Synthetic dollar account",
+						"sector": null,
+						"assetClass": "cash",
+						"instrumentType": "cash",
+						"currency": "USD",
+						"currentValue": 100
+					}
+				],
+				"scenario": {
+					"key": "gfc_2008",
+					"name": {
+						"de": "Finanzkrise 2008",
+						"en": "Global Financial Crisis 2008"
+					},
+					"description": {
+						"de": "Der schlimmste Boersencrash seit der Grossen Depression. Ausgeloest durch die Subprime-Hypothekenkrise in den USA.",
+						"en": "The worst market crash since the Great Depression. Triggered by the US subprime mortgage crisis."
+					},
+					"crisisType": "financial_crisis",
+					"dateFrom": "2007-10-09",
+					"dateTo": "2009-03-09",
+					"peakToTroughPct": -0.57,
+					"recoveryMonths": 48,
+					"sectorShocks": {
+						"Technology": -0.5,
+						"Healthcare": -0.38,
+						"Financials": -0.83,
+						"Consumer Discretionary": -0.59,
+						"Consumer Staples": -0.29,
+						"Industrials": -0.58,
+						"Energy": -0.55,
+						"Materials": -0.57,
+						"Utilities": -0.45,
+						"Real Estate": -0.68,
+						"Communication Services": -0.45,
+						"Other": -0.57
+					},
+					"assetClassShocks": {
+						"equities": -0.57,
+						"etf": -0.57,
+						"bonds": -0.05,
+						"gold": 0.25,
+						"crypto": 0,
+						"cash": 0,
+						"alternatives": -0.25
+					},
+					"currencyShocks": {
+						"EUR": 0,
+						"USD": 0.12,
+						"GBP": -0.24,
+						"CHF": 0.14,
+						"JPY": 0.32
+					},
+					"provenance": {
+						"approximate": true,
+						"methodology": "Saved copy of the built-in gfc_2008 figures as published in package 0.2.0.",
+						"sources": ["Built-in scenario catalogue, package 0.2.0"],
+						"reviewedAt": "2026-05-31",
+						"currencyReviewedAt": "2026-11-11"
+					}
+				},
+				"baseCurrency": "USD"
+			}
+		},
+		"status": "partial",
+		"reasonCodes": ["proxy_currency_decomposition_unavailable"],
+		"calculation": {
+			"holdingImpacts": [
+				{
+					"holdingId": "fund",
+					"isin": "XX0000000001",
+					"ticker": "FUND",
+					"name": "Synthetic share fund",
+					"sector": "Technology",
+					"assetClass": "equities",
+					"preStressValue": 900,
+					"postStressValue": 450,
+					"absoluteLoss": -450,
+					"percentageLoss": -0.5,
+					"shockApplied": -0.5,
+					"shockSource": "sector_proxy",
+					"betaAdjusted": false,
+					"fxShockApplied": null,
+					"currencyMethod": "unknown"
+				},
+				{
+					"holdingId": "usd",
+					"ticker": "USD-CASH",
+					"name": "Synthetic dollar account",
+					"sector": "Other",
+					"assetClass": "cash",
+					"preStressValue": 100,
+					"postStressValue": 100,
+					"absoluteLoss": 0,
+					"percentageLoss": 0,
+					"shockApplied": 0,
+					"shockSource": "asset_class_default",
+					"betaAdjusted": false,
+					"fxShockApplied": 0,
+					"currencyMethod": "economic_exposure"
+				}
+			],
+			"preStressTotal": 1000,
+			"postStressTotal": 550,
+			"absoluteLoss": -450,
+			"percentageLoss": -0.45,
+			"attribution": {
+				"preStressValueCents": 100000,
+				"postStressValueCents": 55000,
+				"netImpactCents": -45000,
+				"lossDrivers": [
+					{
+						"holdingId": "fund",
+						"name": "Synthetic share fund",
+						"shockSource": "sector_proxy",
+						"impactCents": -45000,
+						"portfolioImpactFraction": -0.45
+					}
+				],
+				"otherImpactCents": 0,
+				"historicalValueFraction": 0
+			},
+			"coverage": {
+				"directValueFraction": 0,
+				"proxyValueFraction": 1,
+				"currencyDecompositionValueFraction": 0.1
+			}
+		}
+	}
+}

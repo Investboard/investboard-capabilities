@@ -205,11 +205,15 @@ describe("deadline-aware public cash schedule", () => {
 		const result = planGoalCash(input);
 		expect(result.rows).toEqual([]);
 		expect(result.goals[0]).toMatchObject({
-			requestedTotal: 0,
-			fundedTotal: 0,
-			noGrowthOutcome: 0,
-			targetGap: 10000,
+			horizonMonths: 0,
+			requestedTotal: null,
+			fundedTotal: null,
+			noGrowthOutcome: null,
+			targetGap: null,
 		});
+		expect(result.leftOutGoals).toEqual([
+			{ goalId: "goal", reasonCodes: ["deadline_before_first_savings_date"] },
+		]);
 	});
 
 	it("pays an observation-day need only from the opening cash", () => {
