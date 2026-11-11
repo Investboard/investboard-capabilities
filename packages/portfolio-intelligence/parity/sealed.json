@@ -1,0 +1,232 @@
+{
+	"name": "sealed",
+	"description": "Bond, money market, gold and a futures fund held whole beside an equity fund.",
+	"basisParity": true,
+	"request": {
+		"asOf": "2026-10-30",
+		"baseCurrency": "EUR",
+		"holdings": [
+			{
+				"id": "world",
+				"kind": "fund",
+				"name": "Synthetic All-World UCITS ETF",
+				"isin": "IESYN0000110",
+				"ticker": "WRLD",
+				"value": 5000,
+				"listingCurrency": "EUR",
+				"assetClass": "equities"
+			},
+			{
+				"id": "bond",
+				"kind": "fund",
+				"name": "Synthetic Euro Corporate Bond UCITS ETF",
+				"isin": "IESYN0000140",
+				"ticker": "BOND",
+				"value": 2000,
+				"listingCurrency": "EUR",
+				"assetClass": "bonds"
+			},
+			{
+				"id": "overnight",
+				"kind": "fund",
+				"name": "Synthetic EUR Overnight Rate UCITS ETF",
+				"isin": "LUSYN0000150",
+				"ticker": "OVNT",
+				"value": 1500,
+				"listingCurrency": "EUR",
+				"assetClass": "cash"
+			},
+			{
+				"id": "futures",
+				"kind": "fund",
+				"name": "Synthetic Commodity Futures Fund",
+				"isin": "USSYN0000155",
+				"ticker": "FUTR",
+				"value": 500,
+				"listingCurrency": "EUR",
+				"assetClass": "commodities"
+			},
+			{
+				"id": "gold",
+				"kind": "security",
+				"name": "Synthetic Physical Gold ETC",
+				"isin": "DESYN0000160",
+				"ticker": "GOLD",
+				"value": 800,
+				"listingCurrency": "EUR",
+				"assetClass": "gold"
+			},
+			{
+				"id": "cash",
+				"kind": "cash",
+				"name": "Cash",
+				"value": 200,
+				"listingCurrency": "EUR",
+				"assetClass": "cash"
+			}
+		],
+		"funds": [
+			{
+				"holdingId": "world",
+				"holdings": {
+					"status": "listed",
+					"asOf": "2026-09-30",
+					"constituents": [
+						{
+							"id": "ALDR",
+							"isin": "US1111110005",
+							"name": "Alder Inc.",
+							"weight": 0.05
+						},
+						{
+							"id": "CDSF",
+							"isin": "US4444441045",
+							"name": "Cedarsoft Corp.",
+							"weight": 0.04
+						},
+						{
+							"id": "ELMT",
+							"isin": "US5555551040",
+							"name": "Elmtron Corp.",
+							"weight": 0.03
+						},
+						{
+							"id": "MAPLE",
+							"isin": "DESYN0000010",
+							"name": "Maple SE",
+							"weight": 0.02
+						},
+						{
+							"id": "PNCR",
+							"isin": "CHSYN0000040",
+							"name": "Pinecrest SA",
+							"weight": 0.01
+						},
+						{
+							"id": "SYSC",
+							"isin": "TWSYN0000050",
+							"name": "Synthetic Semiconductor Co.",
+							"weight": 0.02
+						}
+					]
+				}
+			},
+			{
+				"holdingId": "bond",
+				"holdings": {
+					"status": "listed",
+					"asOf": "2026-09-30",
+					"constituents": [
+						{
+							"id": "OAK",
+							"isin": "DESYN0000020",
+							"name": "Oakfield SE",
+							"weight": 0.3
+						},
+						{
+							"id": "GOVA",
+							"isin": "FRSYN0000060",
+							"name": "France Treasury 2.5% 2034",
+							"weight": 0.2
+						}
+					]
+				}
+			},
+			{
+				"holdingId": "overnight",
+				"holdings": {
+					"status": "listed",
+					"asOf": "2026-09-30",
+					"constituents": [
+						{
+							"id": "GOVA",
+							"isin": "FRSYN0000060",
+							"name": "France Treasury 2.5% 2034",
+							"weight": 0.9
+						}
+					]
+				}
+			},
+			{
+				"holdingId": "futures",
+				"holdings": {
+					"status": "listed",
+					"asOf": "2026-09-30",
+					"constituents": [
+						{
+							"id": "ALDR",
+							"isin": "US1111110005",
+							"name": "Alder Inc.",
+							"weight": 0.5
+						}
+					]
+				}
+			}
+		],
+		"securities": [
+			{
+				"isin": "US1111110005",
+				"name": "Alder Inc.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US4444441045",
+				"name": "Cedarsoft Corp.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US5555551040",
+				"name": "Elmtron Corp.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "DESYN0000010",
+				"name": "Maple SE",
+				"sector": "Technology",
+				"country": "Germany",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "CHSYN0000040",
+				"name": "Pinecrest SA",
+				"sector": "Consumer Defensive",
+				"country": "Switzerland",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "TWSYN0000050",
+				"name": "Synthetic Semiconductor Co.",
+				"sector": "Technology",
+				"country": "Taiwan",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "DESYN0000020",
+				"name": "Oakfield SE",
+				"sector": "Financial Services",
+				"country": "Germany",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "FRSYN0000060",
+				"name": "France Treasury 2.5% 2034",
+				"sector": "Financial Services",
+				"country": "France",
+				"assetClass": "equities"
+			}
+		],
+		"fundOverrides": [
+			{
+				"isin": "USSYN0000155",
+				"assetClass": "commodities",
+				"heldWhole": true
+			}
+		]
+	}
+}

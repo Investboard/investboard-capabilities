@@ -1,0 +1,7 @@
+as_of,base_currency,holding_id,holding_name,holding_type,portfolio_weight_pct,value,isin,ticker,asset_class,listing_currency
+2026-10-30,EUR,world,Synthetic All-World UCITS ETF,fund,45,4500,IESYN0000110,WRLD,equities,EUR
+2026-10-30,EUR,tech,Synthetic Technology UCITS ETF,fund,20,2000,IESYN0000210,TECH,equities,EUR
+2026-10-30,EUR,smallcap,Synthetic Small Cap UCITS ETF,fund,10,1000,IESYN0000170,SMLL,equities,EUR
+2026-10-30,EUR,bonds,Synthetic Euro Government Bond UCITS ETF,fund,15,1500,IESYN0000220,EGOV,bonds,EUR
+2026-10-30,EUR,alder,Alder Inc.,stock,5,500,US1111110005,ALDR,equities,USD
+2026-10-30,EUR,cash,Cash,cash,5,500,,,cash,EUR

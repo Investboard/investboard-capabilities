@@ -1,0 +1,160 @@
+{
+	"name": "issuers",
+	"description": "Two share classes of one company, a receipt and a bond of companies also held as shares.",
+	"basisParity": true,
+	"request": {
+		"asOf": "2026-10-30",
+		"baseCurrency": "EUR",
+		"holdings": [
+			{
+				"id": "alpn",
+				"kind": "security",
+				"name": "Alphanumeric Inc. Class A",
+				"isin": "US2222221079",
+				"ticker": "ALPN",
+				"value": 1000,
+				"listingCurrency": "USD",
+				"assetClass": "equities"
+			},
+			{
+				"id": "alpc",
+				"kind": "security",
+				"name": "Alphanumeric Inc. Class C",
+				"isin": "US2222223059",
+				"ticker": "ALPC",
+				"value": 1000,
+				"listingCurrency": "USD",
+				"assetClass": "equities"
+			},
+			{
+				"id": "maple",
+				"kind": "security",
+				"name": "Maple SE",
+				"isin": "DESYN0000010",
+				"ticker": "MAPLE",
+				"value": 1000,
+				"listingCurrency": "EUR",
+				"assetClass": "equities"
+			},
+			{
+				"id": "maple-adr",
+				"kind": "security",
+				"name": "Maple SE Sponsored ADR",
+				"isin": "US6666662042",
+				"ticker": "MPLA",
+				"value": 500,
+				"listingCurrency": "USD",
+				"assetClass": "equities"
+			},
+			{
+				"id": "oak",
+				"kind": "security",
+				"name": "Oakfield SE",
+				"isin": "DESYN0000020",
+				"ticker": "OAK",
+				"value": 1000,
+				"listingCurrency": "EUR",
+				"assetClass": "equities"
+			},
+			{
+				"id": "oak-bond",
+				"kind": "security",
+				"name": "Oakfield SE 1.5% 2030",
+				"isin": "DESYN0000021",
+				"ticker": "OAKB",
+				"value": 500,
+				"listingCurrency": "EUR",
+				"assetClass": "bonds"
+			},
+			{
+				"id": "world",
+				"kind": "fund",
+				"name": "Synthetic All-World UCITS ETF",
+				"isin": "IESYN0000110",
+				"ticker": "WRLD",
+				"value": 5000,
+				"listingCurrency": "EUR",
+				"assetClass": "equities"
+			}
+		],
+		"funds": [
+			{
+				"holdingId": "world",
+				"holdings": {
+					"status": "listed",
+					"asOf": "2026-09-30",
+					"constituents": [
+						{
+							"id": "ALPN",
+							"isin": "US2222221079",
+							"name": "Alphanumeric Inc. Class A",
+							"weight": 0.04
+						},
+						{
+							"id": "ALPC",
+							"isin": "US2222223059",
+							"name": "Alphanumeric Inc. Class C",
+							"weight": 0.03
+						},
+						{
+							"id": "MAPLE",
+							"isin": "DESYN0000010",
+							"name": "Maple SE",
+							"weight": 0.02
+						},
+						{
+							"id": "ALDR",
+							"isin": "US1111110005",
+							"name": "Alder Inc.",
+							"weight": 0.05
+						}
+					]
+				}
+			}
+		],
+		"securities": [
+			{
+				"isin": "US2222221079",
+				"name": "Alphanumeric Inc. Class A",
+				"sector": "Communication Services",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US2222223059",
+				"name": "Alphanumeric Inc. Class C",
+				"sector": "Communication Services",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "DESYN0000010",
+				"name": "Maple SE",
+				"sector": "Technology",
+				"country": "Germany",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US6666662042",
+				"name": "Maple SE Sponsored ADR",
+				"sector": "Technology",
+				"country": "Germany",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "DESYN0000020",
+				"name": "Oakfield SE",
+				"sector": "Financial Services",
+				"country": "Germany",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US1111110005",
+				"name": "Alder Inc.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			}
+		]
+	}
+}

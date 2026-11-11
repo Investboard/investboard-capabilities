@@ -1,0 +1,36 @@
+{
+	"name": "@investboard/portfolio-intelligence",
+	"version": "0.1.0",
+	"description": "See what a portfolio really owns: equity look-through of funds, exposures, fund overlap, concentration, coverage and historical correlations from data you supply",
+	"type": "module",
+	"license": "Apache-2.0",
+	"files": [
+		"dist",
+		"README.md",
+		"CHANGELOG.md",
+		"LICENSE",
+		"NOTICE"
+	],
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"scripts": {
+		"prepack": "pnpm --silent build",
+		"build": "tsc -p tsconfig.json",
+		"typecheck": "tsc -p tsconfig.json --noEmit"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Investboard/investboard-capabilities.git",
+		"directory": "packages/portfolio-intelligence"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

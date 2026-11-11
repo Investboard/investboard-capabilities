@@ -55,6 +55,21 @@
 			"methodologyVersion": "instrument-research-v2",
 			"description": "Inspect exact-listing history, dated FX, reported statement ratios and common-week pair comparisons using caller-supplied evidence and reproducible replay.",
 			"documentation": "packages/instrument-research/README.md"
+		},
+		{
+			"id": "portfolio-intelligence",
+			"name": "Portfolio look-through and diversification",
+			"version": "0.1.0",
+			"package": "@investboard/portfolio-intelligence",
+			"path": "packages/portfolio-intelligence",
+			"license": "Apache-2.0",
+			"methodologyVersion": "portfolio-intelligence-v1",
+			"description": "See what a portfolio really owns: look through equity funds, measure exposures, fund overlap, company concentration and coverage, read historical correlations, and replay saved analyses.",
+			"documentation": "packages/portfolio-intelligence/README.md",
+			"appParity": {
+				"app": "investboard",
+				"commit": "e47f299efaa508011a9d0d7a7b1194883addf417"
+			}
 		}
 	]
 }

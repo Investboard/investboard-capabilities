@@ -1,0 +1,7 @@
+interface:
+  display_name: "Portfolio Intelligence engine"
+  short_description: "Run the open-source look-through engine on your files"
+  default_prompt: "Use $portfolio-intelligence-engine to run the Portfolio Intelligence engine on my portfolio and fund holdings files and explain what I really own."
+
+policy:
+  allow_implicit_invocation: true
