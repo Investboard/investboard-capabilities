@@ -98,7 +98,8 @@ describe("public scenario boundary", () => {
 		];
 		const result = evaluateStressScenario(input);
 		expect(result.status).toBe("available");
-		expect(result.calculation?.postStressTotal).toBe(92);
+		// gfc_2008, EUR base: USD moved +0.12 against the euro, so EUR 100 of USD cash ends at EUR 112.
+		expect(result.calculation?.postStressTotal).toBe(112);
 		expect(
 			result.calculation?.coverage.currencyDecompositionValueFraction,
 		).toBe(1);
@@ -120,7 +121,7 @@ describe("public scenario boundary", () => {
 		const result = evaluateStressScenario(input);
 		expect(result.status).toBe("available");
 		expect(result.calculation?.postStressTotal).toBe(
-			hedge === "hedged" ? 43 : 39.56,
+			hedge === "hedged" ? 43 : 48.16,
 		);
 	});
 	it.each([
@@ -274,6 +275,7 @@ describe("validation and immutable replay", () => {
 		"non_json",
 		"scenario_summary",
 		"malformed_exposure",
+		"currency_review_date",
 	])("rejects %s inputs at the public boundary", (kind) => {
 		const input = request();
 		if (kind === "unknown_field")
@@ -309,6 +311,10 @@ describe("validation and immutable replay", () => {
 		if (kind === "scenario_date") input.scenario.dateTo = "2009-02-30";
 		if (kind === "missing_provenance")
 			Object.assign(input.scenario, { provenance: undefined });
+		if (kind === "currency_review_date" && input.scenario.provenance)
+			Object.assign(input.scenario.provenance, {
+				currencyReviewedAt: "2026-13-01",
+			});
 		if (kind === "invalid_isin") input.holdings[0] = { ...share, isin: "" };
 		if (kind === "null_history") Object.assign(input, { histories: [null] });
 		expect(() => evaluateStressScenario(input)).toThrow(StressInputError);
@@ -403,6 +409,35 @@ describe("validation and immutable replay", () => {
 		expect(
 			replayStressScenario(JSON.parse(JSON.stringify(result.snapshot))),
 		).toEqual(result);
+	});
+	it("replays a saved snapshot with the scenario figures it was saved with", () => {
+		// A 0.1.0 snapshot carries the earlier hand-entered gfc_2008 USD move
+		// (-0.08) and no currency review date. Replay must keep its result.
+		const input = request();
+		input.holdings = [
+			{
+				...share,
+				isin: null,
+				assetClass: "cash",
+				instrumentType: "cash",
+				priceSource: "manual",
+			},
+		];
+		input.scenario.currencyShocks.USD = -0.08;
+		if (input.scenario.provenance) {
+			const { currencyReviewedAt: _, ...earlier } = input.scenario.provenance;
+			input.scenario.provenance = earlier;
+		}
+		const saved = JSON.parse(
+			JSON.stringify(evaluateStressScenario(input).snapshot),
+		);
+		const replayed = replayStressScenario(saved);
+		expect(replayed.calculation?.postStressTotal).toBe(92);
+		expect(replayed.snapshot.request.scenario.currencyShocks.USD).toBe(-0.08);
+		expect(
+			evaluateStressScenario(request()).snapshot.request.scenario.currencyShocks
+				.USD,
+		).toBe(0.12);
 	});
 	it("refuses an unsupported historical methodology instead of silently recomputing it", () => {
 		const result = evaluateStressScenario(request());

@@ -1,5 +1,8 @@
 import type { CrisisDefinition } from "./crisis-definitions.js";
-import { EXTENDED_PROVENANCE_REVIEWED_AT } from "./crisis-definitions-1987-2001.js";
+import {
+	EXTENDED_PROVENANCE_REVIEWED_AT,
+	SCENARIO_CURRENCY_REVIEWED_AT,
+} from "./crisis-definitions-1987-2001.js";
 export const CHINA_SHOCK_2015: CrisisDefinition = {
 	key: "china_shock_2015",
 	name: {
@@ -40,21 +43,23 @@ export const CHINA_SHOCK_2015: CrisisDefinition = {
 	},
 	currencyShocks: {
 		EUR: 0,
-		USD: 0.02,
-		GBP: -0.05,
-		CHF: 0.02,
-		JPY: 0.08,
+		USD: -0.03,
+		GBP: -0.1,
+		CHF: -0.02,
+		JPY: 0.07,
 	},
 	provenance: {
 		approximate: true,
 		methodology:
-			"Window runs from the last close before the PBoC devaluation (2015-08-10) to the S&P 500 trough (2016-02-11, 1829.08; ≈ −13.1% from 2104.18). Energy/Materials worst on oil near 26 USD; Utilities positive as rates fell; gold +0.15 approximates its early-2016 rally. Crypto +0.40 approximates bitcoin's rise over the window (≈ 264 → 378 USD), a reminder that it decoupled from this equity episode. Not a backtest of the user's holdings.",
+			"Window runs from the last close before the PBoC devaluation (2015-08-10) to the S&P 500 trough (2016-02-11, 1829.08; ≈ −13.1% from 2104.18). Energy/Materials worst on oil near 26 USD; Utilities positive as rates fell; gold +0.15 approximates its early-2016 rally. Crypto +0.40 approximates bitcoin's rise over the window (≈ 264 → 378 USD), a reminder that it decoupled from this equity episode. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2015-08-10 and 2016-02-11 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, 2015-08-10 → 2016-02-11 trough (≈ −13%) · https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"PBoC yuan fixing devaluation 2015-08-11 · https://www.bis.org/publ/qtrpdf/r_qt1509.htm",
 			"Bitcoin price history Aug 2015 – Feb 2016 · https://coinmarketcap.com/currencies/bitcoin/",
+			"ECB euro foreign exchange reference rates, 2015-08-10 and 2016-02-11 (currency moves against the euro) · https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
 		],
 		reviewedAt: EXTENDED_PROVENANCE_REVIEWED_AT,
+		currencyReviewedAt: SCENARIO_CURRENCY_REVIEWED_AT,
 	},
 };
 export const Q4_2018: CrisisDefinition = {
@@ -97,21 +102,23 @@ export const Q4_2018: CrisisDefinition = {
 	},
 	currencyShocks: {
 		EUR: 0,
-		USD: 0.02,
+		USD: 0.03,
 		GBP: -0.02,
-		CHF: 0.02,
+		CHF: 0,
 		JPY: 0.04,
 	},
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.20 is the S&P 500 peak-to-trough (2018-09-20 close 2930.75 → 2018-12-24 close 2351.10, ≈ −19.8%). Energy worst on the concurrent ≈ −40% oil slide; Utilities nearly flat. Crypto −0.50 approximates bitcoin's November–December 2018 break (≈ 6,400 → 3,200 USD). Not a backtest of the user's holdings.",
+			"Headline −0.20 is the S&P 500 peak-to-trough (2018-09-20 close 2930.75 → 2018-12-24 close 2351.10, ≈ −19.8%). Energy worst on the concurrent ≈ −40% oil slide; Utilities nearly flat. Crypto −0.50 approximates bitcoin's November–December 2018 break (≈ 6,400 → 3,200 USD). Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2018-09-20 and 2018-12-24 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, peak 2018-09-20 → trough 2018-12-24 (≈ −19.8%) · https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"WTI crude Oct–Dec 2018 slide (≈ −40%) · https://www.eia.gov/dnav/pet/hist/RWTCD.htm",
 			"Bitcoin price history Nov–Dec 2018 · https://coinmarketcap.com/currencies/bitcoin/",
+			"ECB euro foreign exchange reference rates, 2018-09-20 and 2018-12-24 (currency moves against the euro) · https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
 		],
 		reviewedAt: EXTENDED_PROVENANCE_REVIEWED_AT,
+		currencyReviewedAt: SCENARIO_CURRENCY_REVIEWED_AT,
 	},
 };
 export const BANKING_STRESS_2023: CrisisDefinition = {
@@ -154,21 +161,23 @@ export const BANKING_STRESS_2023: CrisisDefinition = {
 	},
 	currencyShocks: {
 		EUR: 0,
-		USD: -0.03,
-		GBP: 0.02,
-		CHF: -0.02,
-		JPY: 0.03,
+		USD: -0.04,
+		GBP: 0.01,
+		CHF: 0.01,
+		JPY: -0.03,
 	},
 	provenance: {
 		approximate: true,
 		methodology:
-			"Window dated by the US regional-bank index (last close before the SVB run, 2023-03-06, to the post-First-Republic trough, 2023-05-04; KBW regional banking index ≈ −35% over the span), not by a broad-market trough. Headline −0.07 approximates the S&P 500's worst drawdown inside the window; Financials −0.30 and Real Estate −0.15 carry the stress, mega-cap Technology was positive as yields fell. Gold +0.10 and crypto +0.30 approximate their rallies over the same span. Not a backtest of the user's holdings.",
+			"Window dated by the US regional-bank index (last close before the SVB run, 2023-03-06, to the post-First-Republic trough, 2023-05-04; KBW regional banking index ≈ −35% over the span), not by a broad-market trough. Headline −0.07 approximates the S&P 500's worst drawdown inside the window; Financials −0.30 and Real Estate −0.15 carry the stress, mega-cap Technology was positive as yields fell. Gold +0.10 and crypto +0.30 approximate their rallies over the same span. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2023-03-06 and 2023-05-04 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
 		sources: [
 			"FDIC, failure of Silicon Valley Bank (2023-03-10) and First Republic (2023-05-01) · https://www.fdic.gov/bank-failures/failed-bank-list",
 			"KBW Nasdaq Regional Banking Index, Mar–May 2023 drawdown · https://indexes.nasdaqomx.com/Index/Overview/KRX",
 			"Swiss authorities, Credit Suisse takeover by UBS (2023-03-19) · https://www.snb.ch/en/mmr/reference/pre_20230319/source/pre_20230319.en.pdf",
+			"ECB euro foreign exchange reference rates, 2023-03-06 and 2023-05-04 (currency moves against the euro) · https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
 		],
 		reviewedAt: EXTENDED_PROVENANCE_REVIEWED_AT,
+		currencyReviewedAt: SCENARIO_CURRENCY_REVIEWED_AT,
 	},
 };
 export const YEN_CARRY_2024: CrisisDefinition = {
@@ -211,20 +220,22 @@ export const YEN_CARRY_2024: CrisisDefinition = {
 	},
 	currencyShocks: {
 		EUR: 0,
-		USD: -0.04,
+		USD: -0.01,
 		GBP: -0.02,
-		CHF: 0.03,
-		JPY: 0.1,
+		CHF: 0.05,
+		JPY: 0.11,
 	},
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.09 is the S&P 500 peak-to-trough (2024-07-16 close 5667.20 → 2024-08-05 close 5186.33, ≈ −8.5%); the Nikkei 225 fell −12.4% on 2024-08-05 alone. Semiconductor-heavy Technology worst; defensives nearly flat. JPY +0.10 approximates the yen's surge (USD/JPY ≈ 161 → 142); crypto −0.25 approximates bitcoin's drop over the window. Not a backtest of the user's holdings.",
+			"Headline −0.09 is the S&P 500 peak-to-trough (2024-07-16 close 5667.20 → 2024-08-05 close 5186.33, ≈ −8.5%); the Nikkei 225 fell −12.4% on 2024-08-05 alone. Semiconductor-heavy Technology worst; defensives nearly flat. JPY +0.11 is the yen's surge against the euro; crypto −0.25 approximates bitcoin's drop over the window. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2024-07-16 and 2024-08-05 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, peak 2024-07-16 → trough 2024-08-05 (≈ −8.5%) · https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"Nikkei 225, 2024-08-05 session (−12.4%) · https://indexes.nikkei.co.jp/en/nkave",
 			"Bank of Japan policy rate decision 2024-07-31 · https://www.boj.or.jp/en/mopo/mpmdeci/index.htm",
+			"ECB euro foreign exchange reference rates, 2024-07-16 and 2024-08-05 (currency moves against the euro) · https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
 		],
 		reviewedAt: EXTENDED_PROVENANCE_REVIEWED_AT,
+		currencyReviewedAt: SCENARIO_CURRENCY_REVIEWED_AT,
 	},
 };

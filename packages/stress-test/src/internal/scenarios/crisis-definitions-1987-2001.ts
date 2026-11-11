@@ -1,5 +1,11 @@
 import type { CrisisDefinition } from "./crisis-definitions.js";
 export const EXTENDED_PROVENANCE_REVIEWED_AT = "2026-07-20" as const;
+/**
+ * The day the USD, GBP, CHF and JPY moves of the ten scenarios since 1999 were
+ * computed from the ECB euro foreign exchange reference rates. The five
+ * scenarios before the euro have no euro reference rate and carry no such date.
+ */
+export const SCENARIO_CURRENCY_REVIEWED_AT = "2026-11-11" as const;
 export const BLACK_MONDAY_1987: CrisisDefinition = {
 	key: "black_monday_1987",
 	name: {
@@ -321,19 +327,21 @@ export const SEPTEMBER_2001: CrisisDefinition = {
 	},
 	currencyShocks: {
 		EUR: 0,
-		USD: -0.03,
-		GBP: 0.01,
-		CHF: 0.03,
+		USD: -0.02,
+		GBP: -0.02,
+		CHF: 0.05,
 		JPY: 0.02,
 	},
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.12 is the S&P 500 move from the last pre-attack close (2001-09-10, 1092.54) to the post-reopening trough (2001-09-21, 965.80, ≈ −11.6%). Industrials worst on airlines, Financials on insurers; defensive Staples nearly flat. Gold and CHF positive as classic haven moves. Not a backtest of the user's holdings.",
+			"Headline −0.12 is the S&P 500 move from the last pre-attack close (2001-09-10, 1092.54) to the post-reopening trough (2001-09-21, 965.80, ≈ −11.6%). Industrials worst on airlines, Financials on insurers; defensive Staples nearly flat. Gold and CHF positive as classic haven moves. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2001-09-10 and 2001-09-21 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, 2001-09-10 → 2001-09-21 (≈ −11.6%) · https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"NYSE closure 2001-09-11 → 2001-09-17 (longest since 1933) · https://www.federalreservehistory.org/essays/september-11-attacks",
+			"ECB euro foreign exchange reference rates, 2001-09-10 and 2001-09-21 (currency moves against the euro) · https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
 		],
 		reviewedAt: EXTENDED_PROVENANCE_REVIEWED_AT,
+		currencyReviewedAt: SCENARIO_CURRENCY_REVIEWED_AT,
 	},
 };

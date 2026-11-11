@@ -73,8 +73,9 @@ describe("economic exposure is independent of quote convention", () => {
 					crisis,
 				).holdingImpacts[0],
 			).toMatchObject({
-				postStressValue: 39.56,
-				fxShockApplied: -0.08,
+				// -0.57 equity move compounded with the +0.12 USD move: 100 x 0.43 x 1.12.
+				postStressValue: 48.16,
+				fxShockApplied: 0.12,
 				currencyMethod: "economic_exposure",
 			});
 	});
@@ -130,7 +131,7 @@ describe("economic exposure is independent of quote convention", () => {
 				crisis,
 			).holdingImpacts[0],
 		).toMatchObject({
-			fxShockApplied: -0.08,
+			fxShockApplied: 0.12,
 			currencyMethod: "economic_exposure",
 		});
 	});
@@ -165,11 +166,14 @@ describe("economic exposure is independent of quote convention", () => {
 			priceSource: "manual",
 			currency: "USD",
 		};
+		// gfc_2008 with a EUR base: USD rose against the euro (ECB 1.4037 on
+		// 2007-10-09, 1.2565 on 2009-03-09, a move of +0.12), so EUR 100 of
+		// USD cash ends at EUR 112.00, not EUR 92.00.
 		expect(
 			computePortfolioImpact([cash], crisis).holdingImpacts[0],
 		).toMatchObject({
-			postStressValue: 92,
-			fxShockApplied: -0.08,
+			postStressValue: 112,
+			fxShockApplied: 0.12,
 			currencyMethod: "economic_exposure",
 		});
 		for (const security of [
