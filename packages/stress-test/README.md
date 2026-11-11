@@ -66,7 +66,7 @@ const result = evaluateStressScenario({
 // illustration produces EUR43; its currency contribution remains null.
 ```
 
-Every `currentValue` must already be in the selected reporting currency, rounded to cents. Quote currency does not convert the starting capital. Inputs must contain 1–200 uniquely identified holdings with finite, nonnegative values and positive total wealth. Total wealth before and after the scenario is capped at 1 billion reporting-currency units (`MAX_SUPPORTED_WEALTH`); this conservative bound keeps cent reconciliation reliable across 200 holdings. Inputs or outcomes above it raise `StressInputError`. Unknown fields and non-JSON metadata are rejected so snapshots retain only the documented inputs. Built-in scenarios are frozen; clone one to edit custom assumptions. Invalid inputs raise `StressInputError`.
+Every `currentValue` must already be in the selected reporting currency, rounded to cents. Quote currency does not convert the starting capital. Inputs must contain 1–200 uniquely identified holdings with finite, nonnegative values and positive total wealth. Total wealth before and after the scenario is capped at 1 billion reporting-currency units (`MAX_SUPPORTED_WEALTH`), and at 100 billion for JPY, whose unit is worth about a hundredth of the others (`maxSupportedWealth(baseCurrency)` returns the bound for a currency); this conservative bound keeps cent reconciliation reliable across 200 holdings. Inputs or outcomes above it raise `StressInputError`. Unknown fields and non-JSON metadata are rejected so snapshots retain only the documented inputs. Built-in scenarios are frozen; clone one to edit custom assumptions. Invalid inputs raise `StressInputError`.
 
 ## Reporting currencies
 

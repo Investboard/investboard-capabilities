@@ -10,8 +10,8 @@ import {
 	V5_ASSET_CLASS_SHOCK_PROXY,
 } from "./internal/shock-applicator.js";
 import { withHistory } from "./history.js";
-import { MAX_SUPPORTED_WEALTH } from "./limits.js";
-export { MAX_SUPPORTED_WEALTH } from "./limits.js";
+import { maxSupportedWealth } from "./limits.js";
+export { MAX_SUPPORTED_WEALTH, maxSupportedWealth } from "./limits.js";
 import { StressInputError, validateRequest } from "./validation.js";
 import type {
 	HoldingImpact,
@@ -95,7 +95,7 @@ function evaluate(
 	let impacts: HoldingImpact[] = allImpacts;
 	let excluded: StressExcludedHolding[] = [];
 	if (v5) {
-		requireWealthLimit(allImpacts);
+		requireWealthLimit(allImpacts, request.baseCurrency);
 		if (
 			!isStressScenarioCovered(
 				request.holdings,
@@ -124,7 +124,7 @@ function evaluate(
 			value: holding.currentValue,
 			reason,
 		}));
-		requireWealthLimit(impacts);
+		requireWealthLimit(impacts, request.baseCurrency);
 		if (excluded.length) reasons.add("unmodeled_holdings_excluded");
 	}
 	const attribution = summarizeStressImpacts(impacts);
@@ -183,14 +183,17 @@ function evaluate(
 	};
 }
 
-function requireWealthLimit(impacts: readonly HoldingImpact[]): void {
+function requireWealthLimit(
+	impacts: readonly HoldingImpact[],
+	base: string,
+): void {
 	const postCents = impacts.reduce(
 		(sum, holding) => sum + Math.round(holding.postStressValue * 100),
 		0,
 	);
 	if (
 		!Number.isSafeInteger(postCents) ||
-		postCents > MAX_SUPPORTED_WEALTH * 100
+		postCents > maxSupportedWealth(base) * 100
 	)
 		throw new StressInputError("Calculated wealth exceeds the supported limit");
 }

@@ -34,6 +34,14 @@ export function scenarioCarriesBase(
 
 export const MAX_STRESS_WEALTH = 1_000_000_000;
 
+/** The bound in a reporting currency’s own units. It guards digits of
+ * precision, not wealth: a yen is worth about a hundredth of the other
+ * reporting currencies’ units, so yen wealth is bounded at 100 billion
+ * (1e13 cents, still exact as an integer). */
+export function maxStressWealth(base: string): number {
+	return base === "JPY" ? MAX_STRESS_WEALTH * 100 : MAX_STRESS_WEALTH;
+}
+
 function roundProductCents(value: number) {
 	const scaled = value * 100;
 	const midpoint = Math.floor(scaled) + 0.5;

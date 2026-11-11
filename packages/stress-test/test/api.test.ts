@@ -391,6 +391,31 @@ describe("validation and immutable replay", () => {
 		];
 		expect(() => evaluateStressScenario(input)).toThrow(StressInputError);
 	});
+	it("bounds yen wealth in yen-sized units, not at a billion yen", () => {
+		// The bound guards cent precision; a yen is worth about a hundredth of the
+		// other reporting currencies’ units. 1.5 billion yen (about EUR 9 million)
+		// runs; past 100 billion yen it is refused.
+		const yen = (currentValue: number): StressRequest => ({
+			...request(),
+			baseCurrency: "JPY",
+			holdings: [
+				{
+					...share,
+					isin: null,
+					assetClass: "cash",
+					instrumentType: "cash",
+					currency: "JPY",
+					currentValue,
+				},
+			],
+		});
+		expect(evaluateStressScenario(yen(1_500_000_000)).status).not.toBe(
+			"unavailable",
+		);
+		expect(() => evaluateStressScenario(yen(100_000_000_000.01))).toThrow(
+			StressInputError,
+		);
+	});
 	it("protects built-in assumptions against mutation", () => {
 		expect(Object.isFrozen(scenario)).toBe(true);
 		expect(Object.isFrozen(scenario.assetClassShocks)).toBe(true);

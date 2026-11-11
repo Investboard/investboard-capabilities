@@ -3,7 +3,7 @@ import type {
 	StressMethodologyVersion,
 	StressRequest,
 } from "./types.js";
-import { MAX_SUPPORTED_WEALTH } from "./limits.js";
+import { maxSupportedWealth } from "./limits.js";
 
 export class StressInputError extends Error {
 	constructor(message: string) {
@@ -203,7 +203,7 @@ export function validateRequest(
 		totalCents += Math.round(holding.currentValue * 100);
 		requireInput(
 			Number.isSafeInteger(totalCents) &&
-				totalCents <= MAX_SUPPORTED_WEALTH * 100,
+				totalCents <= maxSupportedWealth(input.baseCurrency) * 100,
 			"Portfolio exceeds the supported wealth limit",
 		);
 		if (holding.economicCurrency != null) {
