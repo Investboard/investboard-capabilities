@@ -5,7 +5,13 @@
 //
 //   node run.mjs --portfolio portfolio.csv [--fund-holdings fund-holdings.csv]
 //                [--securities securities.csv] [--out output-directory]
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	realpathSync,
+	writeFileSync,
+} from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -116,6 +122,15 @@ export function buildRequestFromCsv(
 				? "cash"
 				: "security";
 		const stated = (r.asset_class ?? "").toLowerCase();
+		const reported = (r.reported_class ?? "").toLowerCase();
+		if (
+			kind === "fund" &&
+			!ASSET_CLASSES.has(stated) &&
+			!ASSET_CLASSES.has(reported)
+		)
+			throw new Error(
+				`Fund ${r.holding_id} needs an asset_class or reported_class: a bond, cash, gold or crypto fund must never be looked through as equities`,
+			);
 		const assetClass = ASSET_CLASSES.has(stated)
 			? stated
 			: (CLASS_BY_TYPE[type] ?? "unknown");
@@ -140,9 +155,7 @@ export function buildRequestFromCsv(
 			sector: text(r.sector),
 			industry: text(r.industry),
 			country: text(r.country),
-			...(r.asset_class !== undefined
-				? { assetClass: text(r.asset_class) }
-				: {}),
+			...(text(r.asset_class) !== null ? { assetClass: r.asset_class } : {}),
 		});
 	}
 
@@ -161,14 +174,38 @@ export function buildRequestFromCsv(
 			});
 	}
 
+	const fundIds = new Set(
+		holdings.filter((h) => h.kind === "fund").map((h) => h.id),
+	);
+	const unknown = [...byFund.keys()].filter((id) => !fundIds.has(id));
+	if (unknown.length > 0)
+		throw new Error(
+			`The fund-holdings file names funds that are not fund holdings in the portfolio: ${unknown.join(", ")}`,
+		);
+	const reportedOf = new Map(
+		portfolio.map((r) => [
+			r.holding_id,
+			(r.reported_class ?? "").toLowerCase(),
+		]),
+	);
 	const funds = holdings
 		.filter((h) => h.kind === "fund")
 		.map((h) => {
 			const rows = byFund.get(h.id);
+			const reported = reportedOf.get(h.id);
+			const reportedClass =
+				ASSET_CLASSES.has(reported) && reported !== "unknown"
+					? { reportedClass: reported }
+					: {};
 			if (!rows || rows.length === 0)
-				return { holdingId: h.id, holdings: { status: "missing" } };
+				return {
+					holdingId: h.id,
+					...reportedClass,
+					holdings: { status: "missing" },
+				};
 			return {
 				holdingId: h.id,
+				...reportedClass,
 				holdings: {
 					status: "listed",
 					asOf: rows[0].as_of || asOf,
@@ -176,7 +213,7 @@ export function buildRequestFromCsv(
 						id: r.company_id,
 						isin: text(r.isin),
 						name: r.company_name || r.company_id,
-						weight: (number(r.fund_weight_pct) ?? 0) / 100,
+						weight: weightOf(r),
 					})),
 				},
 			};
@@ -189,6 +226,15 @@ export function buildRequestFromCsv(
 		funds,
 		securities: [...profiles.values()],
 	};
+}
+
+function weightOf(row) {
+	const pctValue = number(row.fund_weight_pct);
+	if (pctValue === null)
+		throw new Error(
+			`Fund ${row.fund_id}: constituent ${row.company_id} has no fund_weight_pct weight`,
+		);
+	return pctValue / 100;
 }
 
 const pct = (weight) => `${(weight * 100).toFixed(1)}%`;
@@ -302,8 +348,14 @@ async function main() {
 	);
 }
 
-if (
-	process.argv[1] &&
-	import.meta.url === pathToFileURL(resolve(process.argv[1])).href
-)
-	await main();
+/** True when `argv1` (the path Node was asked to run) is this module, symlinks resolved. */
+export function isEntry(argv1, moduleUrl) {
+	if (!argv1) return false;
+	try {
+		return pathToFileURL(realpathSync(resolve(argv1))).href === moduleUrl;
+	} catch {
+		return false;
+	}
+}
+
+if (isEntry(process.argv[1], import.meta.url)) await main();

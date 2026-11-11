@@ -45,17 +45,10 @@ import type {
 	PortfolioResult,
 	Position,
 } from "./types.js";
+import { freeze } from "./internal/freeze.js";
 import { validatePortfolioRequest } from "./validation.js";
 
 export const METHODOLOGY_VERSION = "portfolio-intelligence-v1" as const;
-
-function freeze<T>(value: T): T {
-	if (value && typeof value === "object") {
-		for (const child of Object.values(value)) freeze(child);
-		Object.freeze(value);
-	}
-	return value;
-}
 
 function fundKey(isin: string | null | undefined, ticker: string): string {
 	return positionIdentity(normalizeIsin(isin), ticker) ?? ticker;
@@ -173,10 +166,7 @@ function emptyResult(
 export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 	validatePortfolioRequest(input);
 	const request = structuredClone(input);
-	const snapshot = {
-		methodologyVersion: METHODOLOGY_VERSION,
-		request: structuredClone(input),
-	};
+	const snapshot = { methodologyVersion: METHODOLOGY_VERSION, request };
 
 	const unvalued = request.holdings
 		.filter((h) => h.value === null)
@@ -206,14 +196,8 @@ export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 		const key = fundKey(h.isin, h.ticker ?? h.id);
 		if (!holdingByFund.has(key)) holdingByFund.set(key, h.id);
 	}
-	const isinHolding = new Map<string, string>();
-	for (const h of fundHoldings) {
-		const isin = normalizeIsin(h.isin);
-		if (isin && !isinHolding.has(isin)) isinHolding.set(isin, h.id);
-	}
 	const holdingOf = (fundId: string | undefined, etf: string): string =>
 		(fundId && holdingByFund.get(fundId)) ||
-		(fundId?.startsWith("isin:") && isinHolding.get(fundId.slice(5))) ||
 		holdingByFund.get(fundKey(null, etf)) ||
 		etf;
 

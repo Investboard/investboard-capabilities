@@ -4,6 +4,7 @@
  * pair, Pearson coefficients with 95% intervals, over windows of 1, 3, 5 and
  * 10 years ending on the last Friday before the analysis date.
  */
+import { freeze } from "./internal/freeze.js";
 import { readDiversification } from "./internal/correlation/reading.js";
 import type {
 	DatedValue,
@@ -29,14 +30,6 @@ export interface CorrelationResult {
 	/** 1y, 3y, 5y and 10y, in that order. */
 	windows: CorrelationWindow[];
 	snapshot: CorrelationSnapshot;
-}
-
-function freeze<T>(value: T): T {
-	if (value && typeof value === "object") {
-		for (const child of Object.values(value)) freeze(child);
-		Object.freeze(value);
-	}
-	return value;
 }
 
 function seriesBy<T extends { date: string }>(
