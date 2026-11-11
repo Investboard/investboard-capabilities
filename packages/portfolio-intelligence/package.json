@@ -1,6 +1,6 @@
 {
 	"name": "@investboard/portfolio-intelligence",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "See what a portfolio really owns: equity look-through of funds, exposures, fund overlap, concentration, coverage and historical correlations from data you supply",
 	"type": "module",
 	"license": "Apache-2.0",

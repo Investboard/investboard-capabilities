@@ -1,3 +1,4 @@
+/** Sector and region for each position from its security profile. */
 import { normalizeCountry } from "./country.js";
 import { countryToRegion } from "./region.js";
 import { normalizeSector } from "./sector.js";
@@ -13,7 +14,11 @@ export function classifyExposures<
 		sektor: string | null;
 		region: string | null;
 	},
->(positions: T[], lookup: ProfileLookup, limit: number): T[] {
+>(
+	positions: T[],
+	lookup: (isin: string, position: T) => ExposureProfile | null,
+	limit: number,
+): T[] {
 	const out = positions.map((p) => ({ ...p }));
 	if (limit <= 0) return out;
 	const toClassify = out
@@ -22,7 +27,7 @@ export function classifyExposures<
 		.sort((a, b) => b.p.value - a.p.value)
 		.slice(0, limit);
 	for (const { p } of toClassify) {
-		const profile = lookup(p.isin as string);
+		const profile = lookup(p.isin as string, p);
 		if (!profile) continue;
 		const sektor = normalizeSector(profile.sector);
 		if (sektor !== null) p.sektor = sektor;

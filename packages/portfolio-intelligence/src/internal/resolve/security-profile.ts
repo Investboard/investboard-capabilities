@@ -1,7 +1,6 @@
 /** Classifying securities from caller-supplied profiles, with the rules for what a profile may say about a position. */
 import type { HoldingInput, SecurityProfile } from "../../types.js";
-import { UNKNOWN_HOLDING_CLASS } from "../contracts.js";
-import { normalizeAssetClass } from "../xray/asset-class.js";
+import { directHoldingClass } from "../xray/asset-class.js";
 import { normalizeCountry } from "../xray/country.js";
 import { isEquityAxisDirect } from "../xray/equity-axis.js";
 import { normalizeSector, type XraySector } from "../xray/sector.js";
@@ -63,10 +62,7 @@ export function toEngineDirectHoldings(
 	profiles: ReadonlyMap<string, SecurityProfile>,
 ): EngineDirectHolding[] {
 	return holdings.map((holding) => {
-		const assetClass =
-			holding.assetClass === UNKNOWN_HOLDING_CLASS
-				? UNKNOWN_HOLDING_CLASS
-				: normalizeAssetClass(holding.assetClass);
+		const assetClass = directHoldingClass(holding.assetClass);
 		const isin = normalizeIsin(holding.isin);
 		return {
 			ticker: holding.ticker ?? holding.id,

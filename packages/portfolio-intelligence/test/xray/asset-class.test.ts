@@ -32,7 +32,7 @@ describe("mapReportedFundClass", () => {
 		expect(mapReportedFundClass("Equity")).toBe("equities");
 		expect(mapReportedFundClass("Fixed Income")).toBe("bonds");
 		expect(mapReportedFundClass("Commodity")).toBe("commodities");
-		expect(mapReportedFundClass("Real Estate")).toBe("real_estate");
+		expect(mapReportedFundClass("Real Estate")).toBe("equities");
 		expect(mapReportedFundClass("Money Market")).toBe("cash");
 		expect(mapReportedFundClass("Digital Assets")).toBe("crypto");
 		expect(mapReportedFundClass("Alternative")).toBe("alternatives");

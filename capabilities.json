@@ -59,16 +59,16 @@
 		{
 			"id": "portfolio-intelligence",
 			"name": "Portfolio look-through and diversification",
-			"version": "0.1.0",
+			"version": "0.2.0",
 			"package": "@investboard/portfolio-intelligence",
 			"path": "packages/portfolio-intelligence",
 			"license": "Apache-2.0",
-			"methodologyVersion": "portfolio-intelligence-v1",
+			"methodologyVersion": "portfolio-intelligence-v2",
 			"description": "See what a portfolio really owns: look through equity funds, measure exposures, fund overlap, company concentration and coverage, read historical correlations, and replay saved analyses.",
 			"documentation": "packages/portfolio-intelligence/README.md",
 			"appParity": {
 				"app": "investboard",
-				"commit": "e47f299efaa508011a9d0d7a7b1194883addf417"
+				"commit": "6c48b02978b712a45b9b79481666c8f7e3b31ef0"
 			}
 		}
 	]

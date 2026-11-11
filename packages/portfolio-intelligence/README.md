@@ -23,7 +23,7 @@ Build a source tarball; registry publication is a separate release step:
 pnpm --filter @investboard/portfolio-intelligence build
 pnpm --dir packages/portfolio-intelligence pack --pack-destination /tmp
 # In your application:
-pnpm add /tmp/investboard-portfolio-intelligence-0.1.0.tgz
+pnpm add /tmp/investboard-portfolio-intelligence-0.2.0.tgz
 ```
 
 The ESM package exports these functions and their TypeScript request and result types:
@@ -62,9 +62,9 @@ Only funds that can hold listed companies are looked through. **A cash, bond, go
 | Listed, resolved class cash, bonds, gold or crypto | Held whole in the resolved class |
 | Listed, otherwise | Looked through |
 
-The resolved class takes a specific stated class (cash, bonds, gold, crypto, real estate, commodities) over the reported one; a stated `equities`, `alternatives` or `unknown` gives way to the class the fund reports. A fund's own listed constituents always win over a read-through list.
+The resolved class takes a specific stated class (cash, bonds, gold, crypto, real estate, commodities) over the reported one; a stated `equities`, `alternatives` or `unknown` gives way to the class the fund reports. Real estate is for holdings that own buildings: an ETF of real-estate companies is a stock fund, and a fund labeled "Real Estate" reads as equities. A fund's own listed constituents always win over a read-through list.
 
-A looked-through fund contributes each constituent at fund value × constituent weight. Constituent weights above a total of 1 are scaled down; the uncovered remainder stays as one residual row in the fund's class, and a fund is fully covered at 98%. Constituents and direct holdings with the same identity merge into one position whose provenance lists the direct share and each fund's share. A fund held by a fund stays one position: there is no recursive look-through.
+A looked-through fund contributes each constituent at fund value × constituent weight. Constituent weights above a total of 1 are scaled down; the uncovered remainder stays as one residual row in the fund's class, and a fund is fully covered at 98%. Constituents and direct holdings with the same identity and class merge into one position whose provenance lists the direct share and each fund's share. A company held through an equity fund and through a fund of another class (real estate, commodities) is one position per class: the equity part carries the sector and region, the other part stays in its class without them. Issuer groups and concentration still count one company. A fund held by a fund stays one position: there is no recursive look-through.
 
 ## Exposures
 

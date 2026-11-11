@@ -1,13 +1,9 @@
 /** Joining fund inputs with their dissolution results for coverage and sleeves. */
-import { normalizeAssetClass } from "./asset-class.js";
 import type { CoverageEtfInput } from "./coverage.js";
+import { fundAssetClass } from "./dissolve.js";
 import type { OpaqueSleeveInput } from "./opaque-sleeves.js";
 import type { EngineEtfInput, EtfDissolution } from "./types.js";
-function underlyingClassOf(etf: EngineEtfInput): string {
-	return etf.underlyingAssetClass
-		? normalizeAssetClass(etf.underlyingAssetClass)
-		: "equities";
-}
+const underlyingClassOf = fundAssetClass;
 export function joinSleeves(
 	etfInputs: readonly EngineEtfInput[],
 	dissolutions: readonly EtfDissolution[],
