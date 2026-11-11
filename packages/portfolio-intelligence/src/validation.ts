@@ -135,10 +135,6 @@ export function validatePortfolioRequest(request: PortfolioRequest): void {
 		if (holding.value !== null) amount(holding.value, `Holding ${holding.id}:`);
 		currency(holding.listingCurrency, `Holding ${holding.id}: listingCurrency`);
 		assetClass(holding.assetClass, `Holding ${holding.id}`, true);
-		require(holding.assetClassSource === undefined ||
-			holding.assetClassSource === "declared" ||
-			holding.assetClassSource ===
-				"defaulted", `Holding ${holding.id}: assetClassSource must be declared or defaulted`);
 	}
 
 	const funds = request.funds ?? [];

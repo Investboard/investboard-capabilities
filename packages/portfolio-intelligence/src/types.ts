@@ -39,8 +39,6 @@ export interface HoldingInput {
 	value: number | null;
 	listingCurrency: string;
 	assetClass: HoldingClass;
-	/** Whether the class was stated for this holding or filled in by default. Default "declared". */
-	assetClassSource?: "declared" | "defaulted";
 }
 
 export interface ConstituentInput {
