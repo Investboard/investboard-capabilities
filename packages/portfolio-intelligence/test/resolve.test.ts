@@ -194,6 +194,16 @@ describe("resolveFundInput: the app's fund matrix on caller input", () => {
 		expect(input.underlyingAssetClass).toBe("bonds");
 	});
 
+	it("reads a reported real-estate class as equities, like the app reads a Real Estate label", () => {
+		const input = resolveFundInput(
+			fundHolding(),
+			fund({ reportedClass: "real_estate" }),
+			NO_OVERRIDES,
+		);
+		expect(input.underlyingAssetClass).toBe("equities");
+		expect(input.constituents).toHaveLength(2);
+	});
+
 	it("keeps a stated real-estate class over a reported equities class", () => {
 		const input = resolveFundInput(
 			fundHolding({ assetClass: "real_estate" }),
