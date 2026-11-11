@@ -52,9 +52,11 @@ function moneyWeighted(
 }
 
 /** Fractional units; no fees, taxes, spreads, rounding or unobserved executions. */
+/** `zeroReturn` keeps version 1's 0 for a zero-contribution return. */
 export function investmentReading(
 	points: Point[],
 	investment: Investment,
+	zeroReturn: 0 | null = null,
 ): InvestmentReading {
 	const first = points[0]!;
 	const last = points.at(-1)!;
@@ -97,7 +99,7 @@ export function investmentReading(
 	return {
 		totalContributed: total,
 		endingValue,
-		contributionReturn: total > 0 ? endingValue / total - 1 : 0,
+		contributionReturn: total > 0 ? endingValue / total - 1 : zeroReturn,
 		annualizedMoneyWeightedReturn: mwr.value,
 		moneyWeightedReason: mwr.reason,
 		contributions,

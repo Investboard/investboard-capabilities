@@ -1,4 +1,8 @@
-import type { StressRequest } from "./types.js";
+import type {
+	ReportingCurrency,
+	StressMethodologyVersion,
+	StressRequest,
+} from "./types.js";
 import { MAX_SUPPORTED_WEALTH } from "./limits.js";
 
 export class StressInputError extends Error {
@@ -91,15 +95,35 @@ export function validDate(value: unknown): value is string {
 	);
 }
 
-export function validateRequest(input: StressRequest): void {
+const REPORTING_CURRENCIES: readonly string[] = [
+	"EUR",
+	"USD",
+	"GBP",
+	"CHF",
+	"JPY",
+] satisfies ReportingCurrency[];
+/** The reporting currencies of `whole-wealth-currency-replay-v5`. */
+const V5_REPORTING_CURRENCIES: readonly string[] = [
+	"EUR",
+	"USD",
+] satisfies ReportingCurrency[];
+
+export function validateRequest(
+	input: StressRequest,
+	methodologyVersion: StressMethodologyVersion = "whole-wealth-currency-replay-v6",
+): void {
 	requireShape(
 		input,
 		["holdings", "scenario", "baseCurrency", "histories"],
 		"Request",
 	);
+	const supported =
+		methodologyVersion === "whole-wealth-currency-replay-v5"
+			? V5_REPORTING_CURRENCIES
+			: REPORTING_CURRENCIES;
 	requireInput(
-		input.baseCurrency === "EUR" || input.baseCurrency === "USD",
-		"Reporting currency must be EUR or USD",
+		supported.includes(input.baseCurrency),
+		`Reporting currency must be one of ${supported.join(", ")}`,
 	);
 	requireInput(
 		Array.isArray(input.holdings) &&

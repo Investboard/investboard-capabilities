@@ -298,7 +298,7 @@ describe("validation and immutable replay", () => {
 		if (kind === "subcent")
 			input.holdings[0] = { ...share, currentValue: 0.105 };
 		if (kind === "reporting_currency")
-			Object.assign(input, { baseCurrency: "GBP" });
+			Object.assign(input, { baseCurrency: "SEK" });
 		if (kind === "economic_source")
 			input.holdings[0] = {
 				...share,

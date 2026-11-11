@@ -17,6 +17,23 @@ describe("exact-listing common weekly observations", () => {
 		expect(c.interval95?.[0]).toBeGreaterThan(0.99);
 		expect(result.interpretation).toBe("descriptive_pair_not_portfolio_risk");
 	});
+	it("warns when a price-only series is compared with a distribution-adjusted series", () => {
+		const same = evaluateInstrumentPair(pair());
+		expect(same.reasons).not.toContain("mixed_return_basis");
+		const input = pair();
+		input.series[0].basis = "price";
+		const mixed = evaluateInstrumentPair(input);
+		expect(mixed.reasons).toContain("mixed_return_basis");
+		expect(mixed.correlations[0]).toMatchObject({
+			leftBasis: "price",
+			rightBasis: "distribution_adjusted",
+		});
+		expect(mixed.correlations[0]!.coefficient).toBeCloseTo(1, 12);
+		input.series[1].basis = "price";
+		expect(evaluateInstrumentPair(input).reasons).not.toContain(
+			"mixed_return_basis",
+		);
+	});
 	it("allows a shared ticker on different exact venues and rejects a different-venue history", () => {
 		const input = pair();
 		input.listings[1].symbol = input.listings[0].symbol;

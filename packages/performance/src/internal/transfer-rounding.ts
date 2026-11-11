@@ -2,9 +2,12 @@ import { asCents, sumCents, sumMoneyToCents, toEuros } from "./money/cents.js";
 
 /** Round a signed transfer total once and allocate its cent grain. The input
  * order resolves equal remainders; callers supply stable effect-ID order. */
-export function allocateTransferRounding(amounts: readonly number[]): number[] {
+export function allocateTransferRounding(
+	amounts: readonly number[],
+	noise: "addends" | "total" = "addends",
+): number[] {
 	// The funding target comes from the original amounts, never rounded parts.
-	const target = sumMoneyToCents(amounts);
+	const target = sumMoneyToCents(amounts, noise);
 	const parts = amounts.map((amount, index) => {
 		const raw = amount * 100;
 		const cents = asCents(Math.floor(raw));

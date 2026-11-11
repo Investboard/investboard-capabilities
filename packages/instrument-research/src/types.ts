@@ -137,7 +137,8 @@ export type Correlation = {
 export type InvestmentReading = {
 	totalContributed: number;
 	endingValue: number;
-	contributionReturn: number;
+	/** Null when nothing was contributed: a return on zero money is undefined. */
+	contributionReturn: number | null;
 	annualizedMoneyWeightedReturn: number | null;
 	moneyWeightedReason: string | null;
 	/** Actual execution dates; monthly anniversaries clamp at month end. */
@@ -160,8 +161,12 @@ export type FundamentalPeriod = {
 	statements: Statement[];
 	reasons: string[];
 };
+/** New calculations pin v2; saved v1 snapshots replay under version 1 rules. */
+export type MethodologyVersion =
+	| "instrument-research-v1"
+	| "instrument-research-v2";
 export type Snapshot<T> = {
-	methodologyVersion: "instrument-research-v1";
+	methodologyVersion: MethodologyVersion;
 	request: T;
 };
 export type ResearchResult = {

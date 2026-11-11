@@ -37,12 +37,19 @@ describe("cash evidence and public input boundary", () => {
 	it.each([
 		"deadline",
 		"monthlyContribution",
-	] as const)("withholds a shared ledger when a goal's %s is unknown", (field) => {
+	] as const)("replays a version 1 ledger withheld for an unknown goal %s", (field) => {
 		const input = request();
 		input.goals[0]![field] = null;
-		const result = planGoalCash(input);
+		const result = replayGoalCash({
+			methodologyVersion: "goal-cash-schedule-v1",
+			request: input,
+		});
 		expect(result.status).toBe("incomplete");
+		expect(result.rows).toEqual([]);
 		expect(result.reasonCodes).toContain("goal_commitment_missing");
+		expect(planGoalCash(input).reasonCodes).toEqual([
+			"partial_schedule_goals_left_out",
+		]);
 	});
 
 	it("admits a known zero goal contribution", () => {

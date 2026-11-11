@@ -21,6 +21,8 @@ export interface AttributionContext {
 	netFlowByDate: ReadonlyMap<string, number>;
 	externalFlows: AttributedCashFlow[];
 	dividendFlows: AttributedCashFlow[];
+	/** Fees booked on their own: money paid in at portfolio level that bought nothing. */
+	recordedCostFlows: AttributedCashFlow[];
 }
 function signedExternalAmount(flow: CashFlow): number {
 	return flow.type === "buy" ? Math.abs(flow.amount) : -Math.abs(flow.amount);
@@ -89,7 +91,48 @@ export function buildAttributionContext(
 		netFlowByDate,
 		externalFlows,
 		dividendFlows: filteredFlows.filter((flow) => flow.type === "dividend"),
+		recordedCostFlows: externalFlows.filter(
+			(flow) => flow.recordedCost === true,
+		),
 	};
+}
+
+/**
+ * The signed standalone fees a period realizes: one dated on the period's
+ * close when that close strips the day's flows, and one dated on its open
+ * when that open folds the day's flows in. These are the boundary rules of
+ * `openingNav` and `terminalHoldingValue`, so a fee lands in exactly the
+ * period whose return it lowered (by fee / opening NAV).
+ */
+export function recordedCostInPeriod(
+	context: AttributionContext,
+	interval: { from: string; to: string },
+): number {
+	if (context.recordedCostFlows.length === 0) return 0;
+	const foldsOpen =
+		classifyOpeningBoundary(interval, {
+			firstDate: context.firstDate,
+			boundaryDatesSet: context.boundaryDates,
+			snapshotMap: context.snapshotMap,
+		}) === "boundary-folded-carry";
+	const closeKind = classifyTerminalBoundary(interval, {
+		lastDate: context.lastDate,
+		boundaryDatesSet: context.boundaryDates,
+		snapshotMap: context.snapshotMap,
+		sorted: context.snapshots,
+	});
+	const stripsClose =
+		closeKind === "terminal-flow-stripped" ||
+		closeKind === "mid-boundary-snapshot-stripped";
+	let cost = 0;
+	for (const flow of context.recordedCostFlows) {
+		if (
+			(foldsOpen && flow.date === interval.from) ||
+			(stripsClose && flow.date === interval.to)
+		)
+			cost += signedExternalAmount(flow);
+	}
+	return cost;
 }
 function portfolioValueAtOrBefore(
 	context: AttributionContext,

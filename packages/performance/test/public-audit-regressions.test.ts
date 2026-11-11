@@ -295,7 +295,7 @@ describe("public audit regressions", () => {
 	])("requires explicit recalculation of %s inputs", (methodologyVersion) => {
 		const result = evaluatePerformance(incoming(1.005, 1.01));
 		expect(result.snapshot.methodologyVersion).toBe(
-			"actual-position-performance-v3",
+			"actual-position-performance-v4",
 		);
 		const legacy = {
 			...result.snapshot,

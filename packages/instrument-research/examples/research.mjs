@@ -138,6 +138,8 @@ assert.equal(research.fundamentals.periods[0].valuation.priceToEarnings, 20);
 assert.equal(research.fundamentals.periods[0].currency, "USD");
 assert.notEqual(comparison.correlations[0].coefficient, null);
 assert.equal(comparison.correlations[1].coefficient, null);
+// The second listing is price-only while the first is distribution-adjusted.
+assert.ok(comparison.reasons.includes("mixed_return_basis"));
 console.log(
 	JSON.stringify(
 		{
@@ -146,6 +148,7 @@ console.log(
 			history: research.history,
 			reportedPeriod: research.fundamentals.periods[0],
 			pair: comparison.correlations,
+			pairReasons: comparison.reasons,
 			replayVerified: true,
 		},
 		null,

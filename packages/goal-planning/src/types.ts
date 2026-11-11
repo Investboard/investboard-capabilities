@@ -54,12 +54,19 @@ export type PlanReason =
 	| "monthly_capacity_missing"
 	| "payment_netting_unknown"
 	| "recurring_payment_missing"
-	| "goal_commitment_missing"
 	| "amounts_exceed_supported_range"
-	| "reserve_underfunded";
+	| "reserve_underfunded"
+	/** Version 1 only: an unknown goal deadline or contribution withheld the ledger. */
+	| "goal_commitment_missing"
+	/** The schedule covers only the goals listed outside `leftOutGoals`. */
+	| "partial_schedule_goals_left_out"
+	/** A request, payment or reserve is constrained within a partial schedule. */
+	| "partial_schedule_constrained";
 
 export type GoalReason =
 	| "deadline_missing"
+	| "deadline_passed"
+	| "deadline_before_first_savings_date"
 	| "contribution_missing"
 	| "target_missing"
 	| "starting_capital_missing"
@@ -77,6 +84,22 @@ export interface GoalFundingOutcome {
 	noGrowthOutcome: number | null;
 	targetGap: number | null;
 	reasonCodes: GoalReason[];
+}
+
+/** Why a goal cannot enter the cash schedule. */
+export type LeftOutReason = Extract<
+	GoalReason,
+	| "deadline_missing"
+	| "deadline_passed"
+	| "deadline_before_first_savings_date"
+	| "contribution_missing"
+	| "amounts_exceed_supported_range"
+>;
+
+/** A goal the schedule leaves out: never allocated cash, never counted as funded. */
+export interface LeftOutGoal {
+	goalId: string;
+	reasonCodes: LeftOutReason[];
 }
 
 export interface GoalAllocation {
@@ -103,7 +126,8 @@ export interface CashScheduleRow {
 }
 
 export interface GoalCashSnapshot {
-	methodologyVersion: "goal-cash-schedule-v1";
+	/** New calculations pin v2; saved v1 snapshots replay under version 1 rules. */
+	methodologyVersion: "goal-cash-schedule-v1" | "goal-cash-schedule-v2";
 	request: GoalCashRequest;
 }
 
@@ -115,4 +139,6 @@ export interface GoalCashResult {
 	reasonCodes: PlanReason[];
 	rows: CashScheduleRow[];
 	goals: GoalFundingOutcome[];
+	/** Present only when at least one goal is left out of the schedule (v2). */
+	leftOutGoals?: LeftOutGoal[];
 }

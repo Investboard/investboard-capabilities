@@ -1,0 +1,764 @@
+{
+	"window_of_365_days": {
+		"status": "partial",
+		"reportingCurrency": "EUR",
+		"snapshot": {
+			"methodologyVersion": "actual-position-performance-v3",
+			"request": {
+				"reportingCurrency": "EUR",
+				"asOfDate": "2026-01-01",
+				"ledgerComplete": true,
+				"snapshots": [
+					{ "date": "2025-01-01", "value": 1000 },
+					{ "date": "2026-01-01", "value": 1100 }
+				],
+				"positions": [],
+				"effects": [],
+				"cashFlows": [],
+				"recordedCosts": []
+			}
+		},
+		"reasonCodes": [
+			"coverage_incomplete",
+			"unexplained_return",
+			"sparse_snapshot_history",
+			"fund_cost_coverage_incomplete",
+			"wealth_bridge_incomplete"
+		],
+		"calculation": {
+			"scope": { "holdingIds": [], "navBasis": "supplied" },
+			"window": { "from": "2025-01-01", "to": "2026-01-01" },
+			"timeWeightedReturn": {
+				"twr": 0.10000000000000009,
+				"annualizedTwr": null,
+				"subPeriodReturns": [
+					{ "from": "2025-01-01", "to": "2026-01-01", "return": 0.1 }
+				],
+				"timeSeries": [
+					{ "date": "2025-01-01", "return": 0 },
+					{ "date": "2026-01-01", "return": 0.10000000000000009 }
+				],
+				"snapshotCount": 2,
+				"dateRange": { "from": "2025-01-01", "to": "2026-01-01" },
+				"effectiveStartDate": "2025-01-01",
+				"confidence": "low",
+				"dataQuality": "stale_pricing_gaps",
+				"maxCarryForwardDays": 365,
+				"shallowHistoryWarning": false
+			},
+			"moneyWeightedReturn": {
+				"mwr": 0.09999999999999988,
+				"mwrError": null,
+				"iterations": 1,
+				"isAnnualized": true
+			},
+			"attribution": {
+				"methodology": "modified_dietz_frongello",
+				"totalReturn": 0.10000000000000009,
+				"periodCount": 1,
+				"status": "ready",
+				"withheldReason": null,
+				"holdings": [],
+				"residualContribution": 0.10000000000000009,
+				"residualContributionPp": 10.000000000000009,
+				"attributedPeriodCount": 0,
+				"rawReconciliationGap": 8.326672684688674e-17,
+				"reconciliationGap": 0,
+				"fxAttribution": null
+			},
+			"currencyAttribution": {
+				"methodology": "attributed_price_series_currency",
+				"rows": [],
+				"reconciliationGap": 0
+			},
+			"coverage": { "fraction": 0, "basis": "historical_capital_days" },
+			"fundCostEstimate": {
+				"amount": 0,
+				"currency": "EUR",
+				"coverageFraction": 0,
+				"basis": "current_recorded_rates_historical_positions",
+				"confidence": null,
+				"deductedFromReturn": false
+			},
+			"wealthBridge": {
+				"currency": "EUR",
+				"openingWealth": 1000,
+				"closingWealth": 1100,
+				"securityFunding": 0,
+				"distributedIncome": 0,
+				"netExternalFlows": 0,
+				"investmentResult": 100,
+				"localPrice": null,
+				"quoteFx": null,
+				"recordedFees": 0,
+				"recordedTaxes": 0,
+				"residual": 100,
+				"reconciliationGap": 0,
+				"unvaluedIntervalCount": 1,
+				"fundExpensesEmbedded": true
+			},
+			"positions": [],
+			"replay": [],
+			"transfers": []
+		}
+	},
+	"half_cent_transfer_net": {
+		"status": "partial",
+		"reportingCurrency": "EUR",
+		"snapshot": {
+			"methodologyVersion": "actual-position-performance-v3",
+			"request": {
+				"reportingCurrency": "EUR",
+				"asOfDate": "2026-01-05",
+				"ledgerComplete": true,
+				"snapshots": [
+					{ "date": "2026-01-01", "value": 99 },
+					{ "date": "2026-01-03", "value": 100.01 },
+					{ "date": "2026-01-05", "value": 100.01 }
+				],
+				"positions": [
+					{
+						"id": "position-0",
+						"label": "Synthetic precise transfer",
+						"quoteCurrency": "EUR",
+						"currentQuantity": 1,
+						"anchorDate": "2026-01-01",
+						"priceSource": "Synthetic unadjusted prices",
+						"annualExpenseRatio": 0,
+						"prices": [
+							{ "date": "2026-01-01", "value": 100.005 },
+							{ "date": "2026-01-03", "value": 100.005 },
+							{ "date": "2026-01-05", "value": 100.005 }
+						]
+					},
+					{
+						"id": "position-1",
+						"label": "Synthetic precise transfer",
+						"quoteCurrency": "EUR",
+						"currentQuantity": 0,
+						"anchorDate": "2026-01-01",
+						"priceSource": "Synthetic unadjusted prices",
+						"annualExpenseRatio": 0,
+						"prices": [
+							{ "date": "2026-01-01", "value": 99 },
+							{ "date": "2026-01-03", "value": 99 },
+							{ "date": "2026-01-05", "value": 99 }
+						]
+					}
+				],
+				"effects": [
+					{
+						"id": "transfer-0",
+						"holdingId": "position-0",
+						"date": "2026-01-03",
+						"type": "transfer",
+						"quantity": 1
+					},
+					{
+						"id": "opening-1",
+						"holdingId": "position-1",
+						"date": "2026-01-01",
+						"type": "buy",
+						"quantity": 1
+					},
+					{
+						"id": "transfer-1",
+						"holdingId": "position-1",
+						"date": "2026-01-03",
+						"type": "transfer",
+						"quantity": -1
+					}
+				],
+				"cashFlows": [],
+				"recordedCosts": []
+			}
+		},
+		"reasonCodes": ["unexplained_return"],
+		"calculation": {
+			"scope": {
+				"holdingIds": ["position-0", "position-1"],
+				"navBasis": "supplied"
+			},
+			"window": { "from": "2026-01-01", "to": "2026-01-05" },
+			"timeWeightedReturn": {
+				"twr": 0.00010101010101015717,
+				"annualizedTwr": null,
+				"subPeriodReturns": [
+					{
+						"from": "2026-01-01",
+						"to": "2026-01-03",
+						"return": 0.00010101010101015269
+					},
+					{ "from": "2026-01-03", "to": "2026-01-05", "return": 0 }
+				],
+				"timeSeries": [
+					{ "date": "2026-01-01", "return": 0 },
+					{ "date": "2026-01-03", "return": 0.00010101010101015717 },
+					{ "date": "2026-01-05", "return": 0.00010101010101015717 }
+				],
+				"snapshotCount": 3,
+				"dateRange": { "from": "2026-01-01", "to": "2026-01-05" },
+				"effectiveStartDate": "2026-01-01",
+				"confidence": "low",
+				"dataQuality": "ok",
+				"maxCarryForwardDays": 2,
+				"shallowHistoryWarning": false
+			},
+			"moneyWeightedReturn": {
+				"mwr": null,
+				"mwrError": null,
+				"iterations": 0,
+				"isAnnualized": false
+			},
+			"attribution": {
+				"methodology": "modified_dietz_frongello",
+				"totalReturn": 0.00010101010101015717,
+				"periodCount": 2,
+				"status": "ready",
+				"withheldReason": null,
+				"holdings": [
+					{
+						"id": "position-0",
+						"label": "Synthetic precise transfer",
+						"startWeightPct": 0,
+						"endWeightPct": 99.99500049995,
+						"contribution": 0.00005050505050500457,
+						"contributionPp": 0.0050505050505004565
+					},
+					{
+						"id": "position-1",
+						"label": "Synthetic precise transfer",
+						"startWeightPct": 100,
+						"endWeightPct": 0,
+						"contribution": 0,
+						"contributionPp": 0
+					}
+				],
+				"residualContribution": 0.0000505050505051526,
+				"residualContributionPp": 0.005050505050515261,
+				"attributedPeriodCount": 2,
+				"rawReconciliationGap": 4.4858864886587746e-18,
+				"reconciliationGap": 0,
+				"fxAttribution": {
+					"methodology": "symmetric_quote_currency_fx_frongello",
+					"baseCurrency": "EUR",
+					"rows": [
+						{
+							"key": "EUR",
+							"holdingCount": 2,
+							"startWeightPct": 100,
+							"endWeightPct": 99.99500049995,
+							"localContribution": 0.00005050505050500457,
+							"localContributionPp": 0.0050505050505004565,
+							"fxContribution": 0,
+							"fxContributionPp": 0,
+							"combinedContribution": 0.00005050505050500457,
+							"combinedContributionPp": 0.0050505050505004565
+						}
+					],
+					"localContribution": 0.00005050505050500457,
+					"localContributionPp": 0.0050505050505004565,
+					"fxContribution": 0,
+					"fxContributionPp": 0,
+					"reconciliationGap": 0
+				}
+			},
+			"currencyAttribution": {
+				"methodology": "attributed_price_series_currency",
+				"rows": [
+					{
+						"key": "EUR",
+						"kind": "currency",
+						"holdingCount": 2,
+						"startWeightPct": 100,
+						"endWeightPct": 99.99500049995,
+						"contribution": 0.00005050505050500457,
+						"contributionPp": 0.0050505050505004565
+					}
+				],
+				"reconciliationGap": 0
+			},
+			"coverage": { "fraction": 1, "basis": "historical_capital_days" },
+			"fundCostEstimate": {
+				"amount": 0,
+				"currency": "EUR",
+				"coverageFraction": 1,
+				"basis": "current_recorded_rates_historical_positions",
+				"confidence": "medium",
+				"deductedFromReturn": false
+			},
+			"wealthBridge": {
+				"currency": "EUR",
+				"openingWealth": 99,
+				"closingWealth": 100.01,
+				"securityFunding": 1,
+				"distributedIncome": 0,
+				"netExternalFlows": 1,
+				"investmentResult": 0.010000000000005116,
+				"localPrice": 0,
+				"quoteFx": 0,
+				"recordedFees": 0,
+				"recordedTaxes": 0,
+				"residual": 0.010000000000005116,
+				"reconciliationGap": 0,
+				"unvaluedIntervalCount": 0,
+				"fundExpensesEmbedded": true
+			},
+			"positions": [
+				{
+					"id": "position-0",
+					"source": "ledger",
+					"status": "included",
+					"reason": null,
+					"missingValuationCount": 0
+				},
+				{
+					"id": "position-1",
+					"source": "ledger",
+					"status": "included",
+					"reason": null,
+					"missingValuationCount": 0
+				}
+			],
+			"replay": [
+				{
+					"id": "position-0",
+					"label": "Synthetic precise transfer",
+					"source": "ledger",
+					"openingQuantity": 0,
+					"effectiveFrom": "2026-01-01",
+					"points": [
+						{ "date": "2026-01-01", "quantity": 0 },
+						{ "date": "2026-01-03", "quantity": 1 },
+						{ "date": "2026-01-05", "quantity": 1 }
+					],
+					"finalQuantity": 1,
+					"minimumQuantity": 0,
+					"wentNegative": false,
+					"reconcilesToCurrent": true
+				},
+				{
+					"id": "position-1",
+					"label": "Synthetic precise transfer",
+					"source": "ledger",
+					"openingQuantity": 0,
+					"effectiveFrom": "2026-01-01",
+					"points": [
+						{ "date": "2026-01-01", "quantity": 1 },
+						{ "date": "2026-01-03", "quantity": 0 },
+						{ "date": "2026-01-05", "quantity": 0 }
+					],
+					"finalQuantity": 0,
+					"minimumQuantity": 0,
+					"wentNegative": false,
+					"reconcilesToCurrent": true
+				}
+			],
+			"transfers": [
+				{
+					"effectIds": ["transfer-0"],
+					"date": "2026-01-03",
+					"internal": false,
+					"value": 100,
+					"roundingAdjustment": -0.01,
+					"price": 100.005,
+					"fxRate": 1,
+					"quoteCurrency": "EUR"
+				},
+				{
+					"effectIds": ["transfer-1"],
+					"date": "2026-01-03",
+					"internal": false,
+					"value": 99,
+					"roundingAdjustment": 0,
+					"price": 99,
+					"fxRate": 1,
+					"quoteCurrency": "EUR"
+				}
+			]
+		}
+	},
+	"recorded_fee_without_flow": {
+		"status": "available",
+		"reportingCurrency": "EUR",
+		"snapshot": {
+			"methodologyVersion": "actual-position-performance-v3",
+			"request": {
+				"reportingCurrency": "EUR",
+				"asOfDate": "2026-01-05",
+				"ledgerComplete": true,
+				"snapshots": [
+					{ "date": "2026-01-01", "value": 10000 },
+					{ "date": "2026-01-03", "value": 10000 },
+					{ "date": "2026-01-05", "value": 11000 }
+				],
+				"positions": [
+					{
+						"id": "fund",
+						"label": "Synthetic fund",
+						"quoteCurrency": "EUR",
+						"currentQuantity": 100,
+						"anchorDate": "2026-01-01",
+						"priceSource": "Synthetic test fixture",
+						"annualExpenseRatio": 0.01,
+						"prices": [
+							{ "date": "2026-01-01", "value": 100 },
+							{ "date": "2026-01-03", "value": 100 },
+							{ "date": "2026-01-05", "value": 110 }
+						]
+					}
+				],
+				"effects": [
+					{
+						"id": "initial",
+						"holdingId": "fund",
+						"date": "2026-01-01",
+						"type": "buy",
+						"quantity": 100
+					}
+				],
+				"cashFlows": [],
+				"recordedCosts": [
+					{
+						"date": "2026-01-03",
+						"holdingId": "fund",
+						"fees": 5,
+						"taxes": null
+					}
+				]
+			}
+		},
+		"reasonCodes": [],
+		"calculation": {
+			"scope": { "holdingIds": ["fund"], "navBasis": "supplied" },
+			"window": { "from": "2026-01-01", "to": "2026-01-05" },
+			"timeWeightedReturn": {
+				"twr": 0.10000000000000009,
+				"annualizedTwr": null,
+				"subPeriodReturns": [
+					{ "from": "2026-01-01", "to": "2026-01-05", "return": 0.1 }
+				],
+				"timeSeries": [
+					{ "date": "2026-01-01", "return": 0 },
+					{ "date": "2026-01-03", "return": 0 },
+					{ "date": "2026-01-05", "return": 0.10000000000000009 }
+				],
+				"snapshotCount": 3,
+				"dateRange": { "from": "2026-01-01", "to": "2026-01-05" },
+				"effectiveStartDate": "2026-01-01",
+				"confidence": "low",
+				"dataQuality": "ok",
+				"maxCarryForwardDays": 2,
+				"shallowHistoryWarning": false
+			},
+			"moneyWeightedReturn": {
+				"mwr": null,
+				"mwrError": null,
+				"iterations": 0,
+				"isAnnualized": false
+			},
+			"attribution": {
+				"methodology": "modified_dietz_frongello",
+				"totalReturn": 0.10000000000000009,
+				"periodCount": 1,
+				"status": "ready",
+				"withheldReason": null,
+				"holdings": [
+					{
+						"id": "fund",
+						"label": "Synthetic fund",
+						"startWeightPct": 100,
+						"endWeightPct": 100,
+						"contribution": 0.1,
+						"contributionPp": 10
+					}
+				],
+				"residualContribution": 8.326672684688674e-17,
+				"residualContributionPp": 8.326672684688674e-15,
+				"attributedPeriodCount": 1,
+				"rawReconciliationGap": 8.326672684688674e-17,
+				"reconciliationGap": 0,
+				"fxAttribution": {
+					"methodology": "symmetric_quote_currency_fx_frongello",
+					"baseCurrency": "EUR",
+					"rows": [
+						{
+							"key": "EUR",
+							"holdingCount": 1,
+							"startWeightPct": 100,
+							"endWeightPct": 100,
+							"localContribution": 0.1,
+							"localContributionPp": 10,
+							"fxContribution": 0,
+							"fxContributionPp": 0,
+							"combinedContribution": 0.1,
+							"combinedContributionPp": 10
+						}
+					],
+					"localContribution": 0.1,
+					"localContributionPp": 10,
+					"fxContribution": 0,
+					"fxContributionPp": 0,
+					"reconciliationGap": 0
+				}
+			},
+			"currencyAttribution": {
+				"methodology": "attributed_price_series_currency",
+				"rows": [
+					{
+						"key": "EUR",
+						"kind": "currency",
+						"holdingCount": 1,
+						"startWeightPct": 100,
+						"endWeightPct": 100,
+						"contribution": 0.1,
+						"contributionPp": 10
+					}
+				],
+				"reconciliationGap": 0
+			},
+			"coverage": { "fraction": 1, "basis": "historical_capital_days" },
+			"fundCostEstimate": {
+				"amount": 1.095890410958904,
+				"currency": "EUR",
+				"coverageFraction": 1,
+				"basis": "current_recorded_rates_historical_positions",
+				"confidence": "medium",
+				"deductedFromReturn": false
+			},
+			"wealthBridge": {
+				"currency": "EUR",
+				"openingWealth": 10000,
+				"closingWealth": 11000,
+				"securityFunding": 0,
+				"distributedIncome": 0,
+				"netExternalFlows": 0,
+				"investmentResult": 1000,
+				"localPrice": 1000,
+				"quoteFx": 0,
+				"recordedFees": 5,
+				"recordedTaxes": null,
+				"residual": 5,
+				"reconciliationGap": 0,
+				"unvaluedIntervalCount": 0,
+				"fundExpensesEmbedded": true
+			},
+			"positions": [
+				{
+					"id": "fund",
+					"source": "ledger",
+					"status": "included",
+					"reason": null,
+					"missingValuationCount": 0
+				}
+			],
+			"replay": [
+				{
+					"id": "fund",
+					"label": "Synthetic fund",
+					"source": "ledger",
+					"openingQuantity": 0,
+					"effectiveFrom": "2026-01-01",
+					"points": [
+						{ "date": "2026-01-01", "quantity": 100 },
+						{ "date": "2026-01-03", "quantity": 100 },
+						{ "date": "2026-01-05", "quantity": 100 }
+					],
+					"finalQuantity": 100,
+					"minimumQuantity": 0,
+					"wentNegative": false,
+					"reconcilesToCurrent": true
+				}
+			],
+			"transfers": []
+		}
+	},
+	"plain_book": {
+		"status": "available",
+		"reportingCurrency": "EUR",
+		"snapshot": {
+			"methodologyVersion": "actual-position-performance-v3",
+			"request": {
+				"reportingCurrency": "EUR",
+				"asOfDate": "2026-01-05",
+				"ledgerComplete": true,
+				"snapshots": [
+					{ "date": "2026-01-01", "value": 10000 },
+					{ "date": "2026-01-03", "value": 10000 },
+					{ "date": "2026-01-05", "value": 11000 }
+				],
+				"positions": [
+					{
+						"id": "fund",
+						"label": "Synthetic fund",
+						"quoteCurrency": "EUR",
+						"currentQuantity": 100,
+						"anchorDate": "2026-01-01",
+						"priceSource": "Synthetic test fixture",
+						"annualExpenseRatio": 0.01,
+						"prices": [
+							{ "date": "2026-01-01", "value": 100 },
+							{ "date": "2026-01-03", "value": 100 },
+							{ "date": "2026-01-05", "value": 110 }
+						]
+					}
+				],
+				"effects": [
+					{
+						"id": "initial",
+						"holdingId": "fund",
+						"date": "2026-01-01",
+						"type": "buy",
+						"quantity": 100
+					}
+				],
+				"cashFlows": [],
+				"recordedCosts": []
+			}
+		},
+		"reasonCodes": [],
+		"calculation": {
+			"scope": { "holdingIds": ["fund"], "navBasis": "supplied" },
+			"window": { "from": "2026-01-01", "to": "2026-01-05" },
+			"timeWeightedReturn": {
+				"twr": 0.10000000000000009,
+				"annualizedTwr": null,
+				"subPeriodReturns": [
+					{ "from": "2026-01-01", "to": "2026-01-05", "return": 0.1 }
+				],
+				"timeSeries": [
+					{ "date": "2026-01-01", "return": 0 },
+					{ "date": "2026-01-03", "return": 0 },
+					{ "date": "2026-01-05", "return": 0.10000000000000009 }
+				],
+				"snapshotCount": 3,
+				"dateRange": { "from": "2026-01-01", "to": "2026-01-05" },
+				"effectiveStartDate": "2026-01-01",
+				"confidence": "low",
+				"dataQuality": "ok",
+				"maxCarryForwardDays": 2,
+				"shallowHistoryWarning": false
+			},
+			"moneyWeightedReturn": {
+				"mwr": null,
+				"mwrError": null,
+				"iterations": 0,
+				"isAnnualized": false
+			},
+			"attribution": {
+				"methodology": "modified_dietz_frongello",
+				"totalReturn": 0.10000000000000009,
+				"periodCount": 1,
+				"status": "ready",
+				"withheldReason": null,
+				"holdings": [
+					{
+						"id": "fund",
+						"label": "Synthetic fund",
+						"startWeightPct": 100,
+						"endWeightPct": 100,
+						"contribution": 0.1,
+						"contributionPp": 10
+					}
+				],
+				"residualContribution": 8.326672684688674e-17,
+				"residualContributionPp": 8.326672684688674e-15,
+				"attributedPeriodCount": 1,
+				"rawReconciliationGap": 8.326672684688674e-17,
+				"reconciliationGap": 0,
+				"fxAttribution": {
+					"methodology": "symmetric_quote_currency_fx_frongello",
+					"baseCurrency": "EUR",
+					"rows": [
+						{
+							"key": "EUR",
+							"holdingCount": 1,
+							"startWeightPct": 100,
+							"endWeightPct": 100,
+							"localContribution": 0.1,
+							"localContributionPp": 10,
+							"fxContribution": 0,
+							"fxContributionPp": 0,
+							"combinedContribution": 0.1,
+							"combinedContributionPp": 10
+						}
+					],
+					"localContribution": 0.1,
+					"localContributionPp": 10,
+					"fxContribution": 0,
+					"fxContributionPp": 0,
+					"reconciliationGap": 0
+				}
+			},
+			"currencyAttribution": {
+				"methodology": "attributed_price_series_currency",
+				"rows": [
+					{
+						"key": "EUR",
+						"kind": "currency",
+						"holdingCount": 1,
+						"startWeightPct": 100,
+						"endWeightPct": 100,
+						"contribution": 0.1,
+						"contributionPp": 10
+					}
+				],
+				"reconciliationGap": 0
+			},
+			"coverage": { "fraction": 1, "basis": "historical_capital_days" },
+			"fundCostEstimate": {
+				"amount": 1.095890410958904,
+				"currency": "EUR",
+				"coverageFraction": 1,
+				"basis": "current_recorded_rates_historical_positions",
+				"confidence": "medium",
+				"deductedFromReturn": false
+			},
+			"wealthBridge": {
+				"currency": "EUR",
+				"openingWealth": 10000,
+				"closingWealth": 11000,
+				"securityFunding": 0,
+				"distributedIncome": 0,
+				"netExternalFlows": 0,
+				"investmentResult": 1000,
+				"localPrice": 1000,
+				"quoteFx": 0,
+				"recordedFees": 0,
+				"recordedTaxes": 0,
+				"residual": 0,
+				"reconciliationGap": 0,
+				"unvaluedIntervalCount": 0,
+				"fundExpensesEmbedded": true
+			},
+			"positions": [
+				{
+					"id": "fund",
+					"source": "ledger",
+					"status": "included",
+					"reason": null,
+					"missingValuationCount": 0
+				}
+			],
+			"replay": [
+				{
+					"id": "fund",
+					"label": "Synthetic fund",
+					"source": "ledger",
+					"openingQuantity": 0,
+					"effectiveFrom": "2026-01-01",
+					"points": [
+						{ "date": "2026-01-01", "quantity": 100 },
+						{ "date": "2026-01-03", "quantity": 100 },
+						{ "date": "2026-01-05", "quantity": 100 }
+					],
+					"finalQuantity": 100,
+					"minimumQuantity": 0,
+					"wentNegative": false,
+					"reconcilesToCurrent": true
+				}
+			],
+			"transfers": []
+		}
+	}
+}

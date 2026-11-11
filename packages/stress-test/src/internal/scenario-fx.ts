@@ -1,9 +1,10 @@
 import type { CrisisDefinition } from "./scenarios/crisis-definitions.js";
 
+/** Scenario currency moves are quoted against EUR; a cross rate divides the two gross factors. */
 export function scenarioFxRatio(
-	crisis: CrisisDefinition,
+	crisis: Pick<CrisisDefinition, "currencyShocks">,
 	currency: string,
-	base: "EUR" | "USD",
+	base: string,
 ) {
 	if (currency === base) return 1;
 	const factor = (code: string) => {
@@ -18,6 +19,17 @@ export function scenarioFxRatio(
 	const source = factor(currency),
 		target = factor(base);
 	return source !== null && target !== null ? source / target : null;
+}
+
+/**
+ * A scenario reports in the euro or in a currency it carries a move against
+ * the euro for; any other base has no cross rate and is never read at 1.0.
+ */
+export function scenarioCarriesBase(
+	crisis: Pick<CrisisDefinition, "currencyShocks">,
+	base: string,
+): boolean {
+	return scenarioFxRatio(crisis, "EUR", base) !== null;
 }
 
 export const MAX_STRESS_WEALTH = 1_000_000_000;
