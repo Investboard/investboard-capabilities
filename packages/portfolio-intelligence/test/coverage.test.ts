@@ -243,6 +243,38 @@ describe("classificationGate", () => {
 		expect(gate).toEqual({ degraded: true, reason: "classification_degraded" });
 	});
 
+	it("counts named equity only within the base it divides by", () => {
+		// A fund constituent whose profile carries a sector but no asset class
+		// (the shape of a fund's own profile) is named by classification, yet
+		// the gate leaves it out of the classifiable base. It must not raise the
+		// named share either: 30 of the base's 30 cannot be named here, so 0%.
+		const profiles = profileMap([
+			{
+				isin: "IESYN0000038",
+				name: "Synthetic Holding",
+				sector: "Technology",
+				assetClass: null,
+			},
+		]);
+		const classified = classifyPositions(
+			[
+				position({
+					id: "isin:IESYN0000038",
+					isin: "IESYN0000038",
+					value: 30,
+					provenance: { direct: 0, viaFunds: [] },
+				}),
+				position({ id: "isin:US2222220002", isin: "US2222220002", value: 30 }),
+			],
+			profiles,
+		);
+		expect(classified[0]?.sektor).not.toBeNull();
+		expect(classificationGate(classified, 100, profiles)).toEqual({
+			degraded: true,
+			reason: "classification_degraded",
+		});
+	});
+
 	it("passes a book whose equity is mostly named", () => {
 		const gate = classificationGate(
 			[
