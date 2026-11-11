@@ -13,7 +13,7 @@ See the platform's [stress-test methodology and evidence limits](https://investb
 - A research workflow using price and FX history from your own data sources.
 - A saved analysis you can reproduce from its original inputs.
 
-Built-in scenarios contain sourced, rounded approximations. Results are hypothetical replays, with explicit coverage and unknown states. They do not estimate the probability of a future loss or reproduce your own past investment performance.
+Built-in scenarios contain sourced, rounded approximations. In the ten scenarios since 1999, the USD, GBP, CHF and JPY moves are each currency's move against the euro, computed from the [ECB euro foreign exchange reference rates](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html) on the window's first and last day; sector and asset-class figures remain approximations. Results are hypothetical replays, with explicit coverage and unknown states. They do not estimate the probability of a future loss or reproduce your own past investment performance.
 
 ## Run from this repository
 
@@ -41,7 +41,7 @@ npm pack
 Then install the generated tarball from your own project, using the path to your checkout:
 
 ```sh
-npm install /path/to/investboard-capabilities/packages/stress-test/investboard-stress-test-0.1.0.tgz
+npm install /path/to/investboard-capabilities/packages/stress-test/investboard-stress-test-0.2.0.tgz
 ```
 
 The module is distributed as source and buildable packages in this repository. It is not currently published to the npm registry.
@@ -92,12 +92,12 @@ Missing, mismatched, ambiguous or invalid direct evidence never becomes an inven
 
 ## Replay and scope
 
-`result.snapshot` is a defensive copy of the original request plus the methodology version. Serialize it and pass it to `replayStressScenario` to reproduce the calculation without current holdings or providers. An unsupported methodology is refused. The snapshot is not signed; a hosting application must authenticate and protect stored evidence and implement retention and authorization.
+`result.snapshot` is a defensive copy of the original request plus the methodology version. Serialize it and pass it to `replayStressScenario` to reproduce the calculation without current holdings or providers. An unsupported methodology is refused. The snapshot contains the complete scenario, so a snapshot saved with earlier built-in figures replays with those figures; to use the current built-in figures, evaluate the saved holdings again with the current `BUILT_IN_SCENARIOS` entry and store the new snapshot. The snapshot is not signed; a hosting application must authenticate and protect stored evidence and implement retention and authorization.
 
 Your application supplies data, renders the results, and manages any storage or account access. The package calculates scenarios and attribution; tax calculations, data fetching and forecasts belong to other tools.
 
 ## Assumptions and license
 
-The calculation methodology is versioned as `whole-wealth-currency-replay-v5`. Each built-in scenario includes its assumptions, source links and the date those assumptions were assessed. You can inspect them in the [scenario catalogue](src/internal/scenarios/crisis-definitions.ts), or clone a scenario and supply your own assumptions.
+The calculation methodology is versioned as `whole-wealth-currency-replay-v5`. Each built-in scenario includes its assumptions, source links and the date those assumptions were assessed; `provenance.currencyReviewedAt` dates the ECB-derived currency moves where they apply. Changes to built-in figures are listed in the [changelog](CHANGELOG.md). You can inspect them in the [scenario catalogue](src/internal/scenarios/crisis-definitions.ts), or clone a scenario and supply your own assumptions.
 
 Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

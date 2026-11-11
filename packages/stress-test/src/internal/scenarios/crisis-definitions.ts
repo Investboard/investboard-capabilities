@@ -1,9 +1,16 @@
 import type { StressTestSector } from "./sector-enum.js";
+import { SCENARIO_CURRENCY_REVIEWED_AT } from "./crisis-definitions-1987-2001.js";
 export interface ScenarioProvenance {
 	readonly approximate: boolean;
 	readonly methodology: string;
 	readonly sources: readonly string[];
 	readonly reviewedAt: `${number}-${number}-${number}`;
+	/**
+	 * Date the USD, GBP, CHF and JPY `currencyShocks` were computed from the ECB
+	 * euro foreign exchange reference rates on the window's first and last day.
+	 * Absent where no euro rate exists (the scenarios before 1999).
+	 */
+	readonly currencyReviewedAt?: `${number}-${number}-${number}`;
 }
 export interface CrisisDefinition {
 	key: string; // stable identifier, e.g., "gfc_2008"
@@ -60,21 +67,23 @@ const GFC_2008: CrisisDefinition = {
 	},
 	currencyShocks: {
 		EUR: 0,
-		USD: -0.08,
-		GBP: -0.25,
-		CHF: 0.05,
-		JPY: 0.2,
+		USD: 0.12,
+		GBP: -0.24,
+		CHF: 0.14,
+		JPY: 0.32,
 	},
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.57 is the S&P 500 peak-to-trough (2007-10-09 close 1565.15 → 2009-03-09 close 676.53, ≈ −56.8%). Sector shocks are rounded approximations of MSCI/GICS sector index peak-to-trough over the same window; asset-class and currency shocks are rounded directional approximations from published cross-asset and FX moves. Not a backtest of the user's holdings.",
+			"Headline −0.57 is the S&P 500 peak-to-trough (2007-10-09 close 1565.15 → 2009-03-09 close 676.53, ≈ −56.8%). Sector shocks are rounded approximations of MSCI/GICS sector index peak-to-trough over the same window; asset-class shocks are rounded directional approximations from published cross-asset moves. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2007-10-09 and 2009-03-09 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, peak 2007-10-09 → trough 2009-03-09 (≈ −56.8%) — https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"MSCI World / GICS sector indices, 2007–2009 drawdown — https://www.msci.com/end-of-day-data-search",
 			"NBER US recession dating, Dec 2007 – Jun 2009 — https://www.nber.org/research/business-cycle-dating",
+			"ECB euro foreign exchange reference rates, 2007-10-09 and 2009-03-09 (currency moves against the euro) · https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
 		],
 		reviewedAt: SCENARIO_PROVENANCE_REVIEWED_AT,
+		currencyReviewedAt: SCENARIO_CURRENCY_REVIEWED_AT,
 	},
 };
 const COVID_2020: CrisisDefinition = {
@@ -117,21 +126,23 @@ const COVID_2020: CrisisDefinition = {
 	},
 	currencyShocks: {
 		EUR: 0,
-		USD: 0.05,
-		GBP: -0.06,
-		CHF: 0.02,
-		JPY: 0.03,
+		USD: 0,
+		GBP: -0.11,
+		CHF: 0,
+		JPY: 0,
 	},
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.34 is the S&P 500 peak-to-trough (2020-02-19 close 3386.15 → 2020-03-23 close 2237.40, ≈ −33.9%). Sector shocks are rounded approximations of the GICS sector index drops over the same five-week window (Energy worst on the oil-price collapse); asset-class and currency shocks are rounded directional approximations. Not a backtest of the user's holdings.",
+			"Headline −0.34 is the S&P 500 peak-to-trough (2020-02-19 close 3386.15 → 2020-03-23 close 2237.40, ≈ −33.9%). Sector shocks are rounded approximations of the GICS sector index drops over the same five-week window (Energy worst on the oil-price collapse); asset-class shocks are rounded directional approximations. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2020-02-19 and 2020-03-23 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, peak 2020-02-19 → trough 2020-03-23 (≈ −33.9%) — https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"S&P 500 GICS sector total returns, Feb–Mar 2020 — https://www.spglobal.com/spdji/en/index-family/equity/us-equity/sp-sectors/",
 			"WTI crude collapse, Mar 2020 (Energy sector driver) — https://www.eia.gov/dnav/pet/hist/RWTCD.htm",
+			"ECB euro foreign exchange reference rates, 2020-02-19 and 2020-03-23 (currency moves against the euro) · https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
 		],
 		reviewedAt: SCENARIO_PROVENANCE_REVIEWED_AT,
+		currencyReviewedAt: SCENARIO_CURRENCY_REVIEWED_AT,
 	},
 };
 const RATE_HIKE_2022: CrisisDefinition = {
@@ -174,21 +185,23 @@ const RATE_HIKE_2022: CrisisDefinition = {
 	},
 	currencyShocks: {
 		EUR: -0.12,
-		USD: 0.15,
-		GBP: -0.1,
-		CHF: 0.02,
-		JPY: -0.2,
+		USD: 0.17,
+		GBP: -0.04,
+		CHF: 0.07,
+		JPY: -0.08,
 	},
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.25 is the S&P 500 peak-to-trough (2022-01-03 close 4796.56 → 2022-10-12 close 3577.03, ≈ −25.4%). Sector shocks are rounded approximations reflecting the rate-shock dispersion (long-duration Technology/Communication worst, Energy positive); bonds −0.15 approximates the Bloomberg US Aggregate's record 2022 drawdown; FX shocks approximate the EUR/USD slide below parity. Not a backtest of the user's holdings.",
+			"Headline −0.25 is the S&P 500 peak-to-trough (2022-01-03 close 4796.56 → 2022-10-12 close 3577.03, ≈ −25.4%). Sector shocks are rounded approximations reflecting the rate-shock dispersion (long-duration Technology/Communication worst, Energy positive); bonds −0.15 approximates the Bloomberg US Aggregate's record 2022 drawdown; the USD move reflects the EUR/USD slide below parity. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2022-01-03 and 2022-10-12 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, peak 2022-01-03 → trough 2022-10-12 (≈ −25.4%) — https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"Bloomberg US Aggregate Bond Index 2022 total return ≈ −13% (worst on record) — https://www.bloomberg.com/markets/rates-bonds",
 			"EUR/USD fell below parity, Sep 2022 — https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/eurofxref-graph-usd.en.html",
+			"ECB euro foreign exchange reference rates, 2022-01-03 and 2022-10-12 (currency moves against the euro) · https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
 		],
 		reviewedAt: SCENARIO_PROVENANCE_REVIEWED_AT,
+		currencyReviewedAt: SCENARIO_CURRENCY_REVIEWED_AT,
 	},
 };
 const EURO_CRISIS_2011: CrisisDefinition = {
@@ -231,21 +244,23 @@ const EURO_CRISIS_2011: CrisisDefinition = {
 	},
 	currencyShocks: {
 		EUR: -0.1,
-		USD: 0.08,
-		GBP: -0.02,
-		CHF: 0.18,
-		JPY: 0.05,
+		USD: 0.13,
+		GBP: 0.04,
+		CHF: 0.06,
+		JPY: 0.2,
 	},
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.22 approximates the broad European equity peak-to-trough over the 2011 sovereign-debt sell-off (EURO STOXX 50 ≈ −28% intra-year; S&P 500 ≈ −19% 2011-05-02→2011-10-04). Financials worst on bank/sovereign contagion; CHF strongly positive (safe-haven, pre-SNB-floor). Asset-class and currency shocks are rounded directional approximations. Not a backtest of the user's holdings.",
+			"Headline −0.22 approximates the broad European equity peak-to-trough over the 2011 sovereign-debt sell-off (EURO STOXX 50 ≈ −28% intra-year; S&P 500 ≈ −19% 2011-05-02→2011-10-04). Financials worst on bank/sovereign contagion; CHF positive (safe-haven, pre-SNB-floor). Asset-class shocks are rounded directional approximations. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2011-05-02 and 2011-10-04 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
 		sources: [
 			"EURO STOXX 50 index, 2011 drawdown — https://www.stoxx.com/index-details?symbol=SX5E",
 			"S&P 500 index, peak 2011-05-02 → trough 2011-10-04 (≈ −19%) — https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"SNB EUR/CHF 1.20 floor announced 2011-09-06 (CHF safe-haven strength) — https://www.snb.ch/en/mmr/reference/pre_20110906/source/pre_20110906.en.pdf",
+			"ECB euro foreign exchange reference rates, 2011-05-02 and 2011-10-04 (currency moves against the euro) · https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
 		],
 		reviewedAt: SCENARIO_PROVENANCE_REVIEWED_AT,
+		currencyReviewedAt: SCENARIO_CURRENCY_REVIEWED_AT,
 	},
 };
 const DOTCOM_2000: CrisisDefinition = {
@@ -288,20 +303,22 @@ const DOTCOM_2000: CrisisDefinition = {
 	},
 	currencyShocks: {
 		EUR: 0,
-		USD: -0.05,
-		GBP: -0.02,
-		CHF: 0.03,
-		JPY: 0.05,
+		USD: -0.02,
+		GBP: -0.04,
+		CHF: 0.1,
+		JPY: -0.16,
 	},
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.49 is the S&P 500 peak-to-trough (2000-03-24 close 1527.46 → 2002-10-09 close 776.76, ≈ −49.1%). Technology −0.78 approximates the NASDAQ Composite's ≈ −78% collapse (5048.62 → 1114.11); other sector shocks are rounded approximations of the dispersion over the bubble unwind. Slowest recovery in the catalog. Not a backtest of the user's holdings.",
+			"Headline −0.49 is the S&P 500 peak-to-trough (2000-03-24 close 1527.46 → 2002-10-09 close 776.76, ≈ −49.1%). Technology −0.78 approximates the NASDAQ Composite's ≈ −78% collapse (5048.62 → 1114.11); other sector shocks are rounded approximations of the dispersion over the bubble unwind. Slowest recovery in the catalog. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2000-03-10 and 2002-10-09 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, peak 2000-03-24 → trough 2002-10-09 (≈ −49%) — https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"NASDAQ Composite, peak 2000-03-10 5048.62 → trough 2002-10-09 1114.11 (≈ −78%) — https://www.nasdaq.com/market-activity/index/comp",
+			"ECB euro foreign exchange reference rates, 2000-03-10 and 2002-10-09 (currency moves against the euro) · https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html",
 		],
 		reviewedAt: SCENARIO_PROVENANCE_REVIEWED_AT,
+		currencyReviewedAt: SCENARIO_CURRENCY_REVIEWED_AT,
 	},
 };
 import { EXTENDED_SCENARIOS } from "./crisis-definitions-extended.js";

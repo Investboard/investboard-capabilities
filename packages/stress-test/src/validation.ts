@@ -268,7 +268,13 @@ export function validateRequest(input: StressRequest): void {
 	}
 	requireShape(
 		scenario.provenance,
-		["approximate", "methodology", "sources", "reviewedAt"],
+		[
+			"approximate",
+			"methodology",
+			"sources",
+			"reviewedAt",
+			"currencyReviewedAt",
+		],
 		"Scenario provenance",
 	);
 	requireInput(
@@ -281,7 +287,9 @@ export function validateRequest(input: StressRequest): void {
 			scenario.provenance.sources.every(
 				(s) => typeof s === "string" && s.trim(),
 			) &&
-			validDate(scenario.provenance.reviewedAt),
+			validDate(scenario.provenance.reviewedAt) &&
+			(scenario.provenance.currencyReviewedAt === undefined ||
+				validDate(scenario.provenance.currencyReviewedAt)),
 		"Scenario methodology, source provenance and review date are required",
 	);
 	requireInput(
