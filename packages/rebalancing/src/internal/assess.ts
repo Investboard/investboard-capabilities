@@ -66,6 +66,13 @@ function admissionReasons(
 	return [...reasons];
 }
 
+/** Comparison rules: v4 replays saved results; v5 adds the leftover and reserve rules. */
+export interface AssessRules {
+	legacy: boolean;
+	/** Money meant for generated orders that no order could take (v5). */
+	uninvested?: { units: number; reasons: ReasonCode[] };
+}
+
 export function assess(
 	request: RebalanceRequest,
 	kind: AlternativeKind,
@@ -74,6 +81,7 @@ export function assess(
 	purchases: Purchase[],
 	ctx: CalculationContext,
 	cashReleases: CashRelease[],
+	rules: AssessRules,
 ): RebalanceAlternative {
 	const { money, configuration } = ctx;
 	const evidence = fundingEvidence(
@@ -88,6 +96,11 @@ export function assess(
 		...admissionReasons(request, sales, purchases, ctx),
 		...evidence.reasons,
 	];
+	const uninvested =
+		!rules.legacy && rules.uninvested && rules.uninvested.units > 0
+			? rules.uninvested
+			: null;
+	if (uninvested) reasons.push(...uninvested.reasons);
 	const feeCost = evidence.funding.some((f) => f.fees === null)
 		? null
 		: money.amount(evidence.knownFeeUnits);
@@ -118,6 +131,7 @@ export function assess(
 		ctx,
 	);
 	const byId = new Map(request.holdings.map((h) => [h.holdingId, h]));
+	const reserveBefore = values.get(configuration.cashAssetClass) ?? 0;
 	for (const cash of cashReleases)
 		values.set(
 			configuration.cashAssetClass,
@@ -145,8 +159,15 @@ export function assess(
 		values.get(configuration.cashAssetClass) ?? 0,
 		Math.max(0, maximumRetainedUnits),
 	]);
-	if (maximumReserveUnits < money.units(request.cashFloor ?? 0))
-		reasons.push("reserve_shortfall");
+	const floorUnits = money.units(request.cashFloor ?? 0);
+	// v5: a reserve already below its floor that this scenario does not lower
+	// is stated, not refused; keeping the book needs no execution.
+	if (maximumReserveUnits < floorUnits)
+		reasons.push(
+			rules.legacy || maximumReserveUnits < reserveBefore
+				? "reserve_shortfall"
+				: "reserve_floor_not_reached",
+		);
 	if (retained !== null && retained >= 0)
 		values.set(
 			configuration.cashAssetClass,
@@ -174,6 +195,11 @@ export function assess(
 		rows === null
 			? null
 			: money.amount(money.sum(rows.map((r) => money.units(r.value))));
+	const reserveUnits = values.get(configuration.cashAssetClass) ?? 0;
+	const shortfall =
+		!rules.legacy && available && reserveUnits < floorUnits
+			? { reserveShortfall: money.amount(floorUnits - reserveUnits) }
+			: {};
 	return {
 		existingCashReleased: money.amount(released),
 		cashReleases,
@@ -195,8 +221,10 @@ export function assess(
 					? "unknown"
 					: "supplied",
 		cashRetained: available ? money.amount(retained) : null,
+		...(uninvested ? { uninvestedCash: money.amount(uninvested.units) } : {}),
 		valueAfter,
 		reserveAfter: available ? reserve : null,
+		...shortfall,
 		residualDrift:
 			rows === null || valueAfter === 0
 				? null

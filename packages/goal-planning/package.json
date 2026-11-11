@@ -1,12 +1,13 @@
 {
 	"name": "@investboard/goal-planning",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Deadline-aware cash feasibility for competing goals, protected reserves and dated obligations with reproducible inputs",
 	"type": "module",
 	"license": "Apache-2.0",
 	"files": [
 		"dist",
 		"README.md",
+		"CHANGELOG.md",
 		"LICENSE",
 		"NOTICE"
 	],

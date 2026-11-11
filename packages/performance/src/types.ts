@@ -70,6 +70,13 @@ export interface RecordedCost {
 	readonly holdingId: string | null;
 	readonly fees: number;
 	readonly taxes: number | null;
+	/**
+	 * True when `fees` were booked on their own, paid into the book without
+	 * buying anything; such a fee enters the returns as money paid in on its
+	 * date. False or omitted means the fee sits inside a trade's funding
+	 * amount. Taxes never become return flows.
+	 */
+	readonly standalone?: boolean;
 }
 
 export interface PerformanceRequest {
@@ -91,8 +98,13 @@ export interface PerformanceRequest {
 	readonly scopeHoldingIds?: readonly string[];
 }
 
+/** v4 is pinned by new evaluations; a saved v3 snapshot replays under its own rules. */
+export type PerformanceMethodologyVersion =
+	| "actual-position-performance-v3"
+	| "actual-position-performance-v4";
+
 export interface PerformanceSnapshot {
-	readonly methodologyVersion: "actual-position-performance-v3";
+	readonly methodologyVersion: PerformanceMethodologyVersion;
 	readonly request: PerformanceRequest;
 }
 
@@ -125,6 +137,7 @@ export interface PerformanceWealthBridge {
 	readonly currency: string;
 	readonly openingWealth: number;
 	readonly closingWealth: number;
+	/** Funding into (+) and out of (-) the book, including standalone fees paid in. */
 	readonly securityFunding: number;
 	readonly distributedIncome: number;
 	readonly netExternalFlows: number;

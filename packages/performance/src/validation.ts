@@ -1,5 +1,8 @@
 import { LIMITS } from "./limits.js";
-import type { PerformanceRequest } from "./types.js";
+import type {
+	PerformanceMethodologyVersion,
+	PerformanceRequest,
+} from "./types.js";
 
 export class PerformanceInputError extends Error {
 	constructor(message: string) {
@@ -143,6 +146,7 @@ function array(value: unknown, max: number): asserts value is unknown[] {
 
 export function validateRequest(
 	input: unknown,
+	methodologyVersion: PerformanceMethodologyVersion = "actual-position-performance-v4",
 ): asserts input is PerformanceRequest {
 	requireJson(input);
 	shape(
@@ -422,8 +426,17 @@ export function validateRequest(
 				"Each in-window trade needs a matching funding flow with the same ID",
 			);
 	}
+	// Methodology v3 had no standalone fees, so its snapshots cannot declare one.
+	const costFields =
+		methodologyVersion === "actual-position-performance-v3"
+			? ["date", "holdingId", "fees", "taxes"]
+			: ["date", "holdingId", "fees", "taxes", "standalone"];
 	for (const cost of input.recordedCosts ?? []) {
-		shape(cost, ["date", "holdingId", "fees", "taxes"], "Recorded cost");
+		shape(cost, costFields, "Recorded cost");
+		requireInput(
+			cost.standalone === undefined || typeof cost.standalone === "boolean",
+			"standalone must be a boolean",
+		);
 		date(cost.date);
 		money(cost.fees);
 		requireInput(cost.date <= input.asOfDate, "Cost cannot follow asOfDate");

@@ -61,7 +61,6 @@ const GFC_2008: CrisisDefinition = {
 		etf: -0.57, // Most retail ETFs are equity-heavy; mirror equities baseline when no sector look-through is available
 		bonds: -0.05,
 		gold: 0.25,
-		crypto: 0,
 		cash: 0,
 		alternatives: -0.25,
 	},
@@ -75,7 +74,7 @@ const GFC_2008: CrisisDefinition = {
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.57 is the S&P 500 peak-to-trough (2007-10-09 close 1565.15 → 2009-03-09 close 676.53, ≈ −56.8%). Sector shocks are rounded approximations of MSCI/GICS sector index peak-to-trough over the same window; asset-class shocks are rounded directional approximations from published cross-asset moves. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2007-10-09 and 2009-03-09 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
+			"Headline −0.57 is the S&P 500 peak-to-trough (2007-10-09 close 1565.15 → 2009-03-09 close 676.53, ≈ −56.8%). Sector shocks are rounded approximations of MSCI/GICS sector index peak-to-trough over the same window; asset-class shocks are rounded directional approximations from published cross-asset moves. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2007-10-09 and 2009-03-09 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Crypto has no figure of its own in this window and takes the shares figure as a stand-in, a scenario assumption rather than a measured crypto move. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, peak 2007-10-09 → trough 2009-03-09 (≈ −56.8%) — https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"MSCI World / GICS sector indices, 2007–2009 drawdown — https://www.msci.com/end-of-day-data-search",
@@ -238,7 +237,6 @@ const EURO_CRISIS_2011: CrisisDefinition = {
 		etf: -0.22, // Most retail ETFs are equity-heavy; mirror equities baseline when no sector look-through is available
 		bonds: -0.08,
 		gold: 0.15,
-		crypto: 0,
 		cash: 0,
 		alternatives: -0.1,
 	},
@@ -252,7 +250,7 @@ const EURO_CRISIS_2011: CrisisDefinition = {
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.22 approximates the broad European equity peak-to-trough over the 2011 sovereign-debt sell-off (EURO STOXX 50 ≈ −28% intra-year; S&P 500 ≈ −19% 2011-05-02→2011-10-04). Financials worst on bank/sovereign contagion; CHF positive (safe-haven, pre-SNB-floor). Asset-class shocks are rounded directional approximations. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2011-05-02 and 2011-10-04 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
+			"Headline −0.22 approximates the broad European equity peak-to-trough over the 2011 sovereign-debt sell-off (EURO STOXX 50 ≈ −28% intra-year; S&P 500 ≈ −19% 2011-05-02→2011-10-04). Financials worst on bank/sovereign contagion; CHF positive (safe-haven, pre-SNB-floor). Asset-class shocks are rounded directional approximations. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2011-05-02 and 2011-10-04 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Crypto has no figure of its own in this window and takes the shares figure as a stand-in, a scenario assumption rather than a measured crypto move. Not a backtest of the user's holdings.",
 		sources: [
 			"EURO STOXX 50 index, 2011 drawdown — https://www.stoxx.com/index-details?symbol=SX5E",
 			"S&P 500 index, peak 2011-05-02 → trough 2011-10-04 (≈ −19%) — https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
@@ -297,7 +295,6 @@ const DOTCOM_2000: CrisisDefinition = {
 		etf: -0.49, // Most retail ETFs are equity-heavy; mirror equities baseline when no sector look-through is available
 		bonds: 0.15,
 		gold: 0.05,
-		crypto: 0,
 		cash: 0,
 		alternatives: -0.05,
 	},
@@ -311,7 +308,7 @@ const DOTCOM_2000: CrisisDefinition = {
 	provenance: {
 		approximate: true,
 		methodology:
-			"Headline −0.49 is the S&P 500 peak-to-trough (2000-03-24 close 1527.46 → 2002-10-09 close 776.76, ≈ −49.1%). Technology −0.78 approximates the NASDAQ Composite's ≈ −78% collapse (5048.62 → 1114.11); other sector shocks are rounded approximations of the dispersion over the bubble unwind. Slowest recovery in the catalog. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2000-03-10 and 2002-10-09 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Not a backtest of the user's holdings.",
+			"Headline −0.49 is the S&P 500 peak-to-trough (2000-03-24 close 1527.46 → 2002-10-09 close 776.76, ≈ −49.1%). Technology −0.78 approximates the NASDAQ Composite's ≈ −78% collapse (5048.62 → 1114.11); other sector shocks are rounded approximations of the dispersion over the bubble unwind. Slowest recovery in the catalog. Currency moves are each currency's move against the euro, computed from the ECB euro foreign exchange reference rates on 2000-03-10 and 2002-10-09 (start rate / end rate - 1, rounded to two decimals; checked 2026-11-11). Sector and asset-class figures remain approximations. Crypto has no figure of its own in this window and takes the shares figure as a stand-in, a scenario assumption rather than a measured crypto move. Not a backtest of the user's holdings.",
 		sources: [
 			"S&P 500 index, peak 2000-03-24 → trough 2002-10-09 (≈ −49%) — https://www.spglobal.com/spdji/en/indices/equity/sp-500/",
 			"NASDAQ Composite, peak 2000-03-10 5048.62 → trough 2002-10-09 1114.11 (≈ −78%) — https://www.nasdaq.com/market-activity/index/comp",

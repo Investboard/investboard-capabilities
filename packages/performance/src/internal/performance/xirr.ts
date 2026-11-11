@@ -1,6 +1,7 @@
 // Copyright 2026 Investboard GmbH. SPDX-License-Identifier: Apache-2.0
 import type { CashFlow, XirrResult } from "./types.js";
 import { fromEuros, sumCents, toEuros, type Cents } from "../money/cents.js";
+import { ANNUALIZATION_MIN_DAYS } from "./twr.js";
 const MAX_ITERATIONS = 100;
 const TOLERANCE = 1e-7;
 const RATE_LOWER_BOUND = -0.999;
@@ -54,8 +55,9 @@ export function calculateXirr(
 			amount: toEuros(amount),
 			fraction: daysBetween(firstDate, date) / DAYS_PER_YEAR,
 		}));
+	// One threshold with `calculateTwr`: a window of at least 365 days annualizes.
 	const totalDays = daysBetween(firstDate, valuationDate);
-	if (totalDays < DAYS_PER_YEAR) {
+	if (totalDays < ANNUALIZATION_MIN_DAYS) {
 		const totalBuyAmount = sorted
 			.filter((cf) => cf.type === "buy")
 			.reduce((sum, cf) => sum + Math.abs(cf.amount), 0);

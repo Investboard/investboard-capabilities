@@ -28,7 +28,7 @@ npm pack
 Install the generated tarball in your project:
 
 ```sh
-npm install /path/to/investboard-capabilities/packages/rebalancing/investboard-rebalancing-0.4.1.tgz
+npm install /path/to/investboard-capabilities/packages/rebalancing/investboard-rebalancing-0.5.0.tgz
 ```
 
 This is a source distribution and buildable package, not a published npm release or an Investboard hosted API. Normal `npm pack` rebuilds JavaScript and declarations from source.
@@ -113,11 +113,20 @@ Funded scenarios may override `fundingDepotId`. A plan may have zero sales or co
 
 Every monetary value is already in `baseCurrency`. The engine performs no FX conversion. Any holding with another currency or `value: null` withholds the whole comparison denominator and all calculated alternatives. Measured zero and a complete empty book are valid, including an initial contribution. Holding IDs must be unique; the host supplies the complete book and classifications.
 
+A holding may also declare `fund: true` for a fund or ETF and `priced: true` when the host holds a usable current price to buy more of it. Both are optional booleans; an omitted `fund` ranks the holding with single shares and an omitted `priced` ranks it as unpriced. They only choose which holding receives a class purchase; they never change values or targets.
+
 Policy targets are fractions summing to one within `1e-9`, with `0 <= min <= target <= max <= 1`. Unlisted classes have zero target/corridor. Zero total wealth has unknown percentages, represented by `null`.
 
-Positive shortfalls use `target × (current wealth + new net cash) − current class value`. A constrained budget shares them proportionally; largest remainders reconcile minor units. The configured cash class, reserve gaps, skipped minimums and rounding remainders stay in cash. The host chooses whether existing cash remains in the reserve book or is available to fund allocations, as described below.
+Positive shortfalls use `target × (current wealth + new net cash) − current class value`. A constrained budget shares them proportionally; largest remainders reconcile minor units. The configured cash class, reserve gaps, skipped minimums and rounding remainders stay in cash. In a comparison, a class share below the smallest order its accounts admit is first consolidated into other orders, as described under [consolidation and routing](#consolidate-small-amounts-and-route-orders). The host chooses whether existing cash remains in the reserve book or is available to fund allocations, as described below.
 
-`cashFloor` defaults to zero, `minTradeSize` to one configured minor unit and `maxTrades` to `configuration.limits.orders`. Account caps and increments are applied before the selected placement policy orders surviving purchases and applies the order-count cap. Largest-holding mode uses largest-amount admission with deterministic class-name ties. With `purchasePlacement: { mode: "largest_holding" }`, the selected holding is the largest in its class, then the smallest holding ID. Unheld classes use `holdingId: null`. No ticker, price or share quantity is invented.
+`cashFloor` defaults to zero, `minTradeSize` to one configured minor unit and `maxTrades` to `configuration.limits.orders`. Account caps and increments are applied before the selected placement policy orders surviving purchases and applies the order-count cap. Largest-holding mode uses largest-amount admission with deterministic class-name ties. With `purchasePlacement: { mode: "largest_holding" }`, the holding that receives a class purchase is ranked, independent of input order:
+
+1. A holding declared `priced: true` before one without a usable price.
+2. A holding declared `fund: true` before a single share.
+3. The larger value.
+4. The smaller holding ID, in code-unit order. IDs are unique, so this settles every tie.
+
+Without declarations this is the largest holding, then the smallest holding ID. Unheld classes use `holdingId: null`. No ticker, price or share quantity is invented.
 
 ### Choose purchase placement
 
@@ -136,6 +145,17 @@ purchasePlacement: {
 
 Routes bind to matching held class/depot identities, or use `null` for a class allocation. For each class, rejected, capped and rounded amounts spill to its next route. Across classes, route order controls admission under `maxTrades`. Unrouted classes and amounts beyond all route capacities stay cash. Largest-holding mode keeps largest-amount order admission. Account `maximum` remains a per-order cap; routing can create multiple orders in one class, each with its own fee.
 
+### Consolidate small amounts and route orders
+
+Generated contributions avoid leaving cash idle that an order could take:
+
+- **Admission.** An account admits an order amount that is a multiple of its `increment`, at least its `minimum` and `minTradeSize`, within its `maximum`, and larger than its known buy fee: an order may not cost what it buys. An unknown fee does not block admission; it keeps the scenario conditional.
+- **Consolidation.** When a class share is below the smallest order any account for that class admits, the stranded share with the smallest need leaves the split (on equal need, the later class name) and the budget is split again over the remaining classes. This repeats until every share forms an order or no class is left. The consolidated orders replace the plain split only when they do not move the book further from target, measured as the sum of absolute deviations from target values with retained money counted as cash.
+- **Routing.** In largest-holding mode the class purchase first goes to the account of the ranked holding. Amounts that account refuses or caps continue to the other accounts that hold the class: declared accounts by their buy fee for that amount, lowest first, then by depot ID, and accounts without declared rules last. Each account buys its own best-ranked holding of the class. A purchase in an account without declared rules stays conditional (`account_rules_unknown`). Ordered routes keep the host's order and add only the fee rule.
+- **Leftover.** Only money that no admissible order can take after consolidation and routing is reported, as `uninvestedCash` (part of `cashRetained`) with `uninvested_below_order_minimum` and/or `uninvested_above_order_maximum`. Such a scenario is `conditional`, never `feasible`. The reserve top-up, a target cash share, reserved fees, increment rounding below one step after an order, classes the host routes nowhere and orders beyond `maxTrades` are host policy or rounding, not a leftover.
+
+For example, with holdings of 5,000 equities, 1,000 bonds and 1,000 gold, a 50/25/25 target and a 500 account minimum, a contribution of 600 splits into 300 for bonds and 300 for gold. Neither forms an order, so the engine buys 600 of bonds instead. A contribution of 400 forms no order under that minimum; it is reported as 400 of `uninvestedCash`.
+
 ### Choose existing-cash funding
 
 Every comparison declares `cashDeployment`. `{ mode: "preserve" }` keeps existing cash outside the funding budget. Alternatively:
@@ -148,7 +168,7 @@ The ordered, unique source IDs must name cash holdings. Only these sources can r
 
 `cashReleases` records each source amount and `existingCashReleased` reports its sum, separately from `externalCash` and gross sales. Released cash enters the scenario's funding budget without a security order, sale tax or withdrawal fee. Unspent released amounts remain cash. The ledger records budget availability, not executed withdrawals. Sources declare spendable cash balances; model securities that need liquidation and their costs as explicit sales. Depot funding and required transfers include these amounts; cross-depot funding still requires transfer confirmation.
 
-Corridors are descriptive: affordable partial progress may be feasible while outside a corridor. The cash floor is a hard funding constraint.
+Corridors are descriptive: affordable partial progress may be feasible while outside a corridor. The cash floor is a hard funding constraint for every scenario that would lower the reserve: if even the largest possible reserve after a scenario is below the floor and below the reserve before it, the scenario is `unavailable` (`reserve_shortfall`). A reserve that already sits below the floor does not make the book unusable: a `keep` scenario, or fresh cash that raises the reserve without reaching the floor, is `conditional` (`reserve_floor_not_reached`) and states `reserveShortfall`, the floor minus `reserveAfter`, when the reserve is known.
 
 ## Declare fees and amount rules
 
@@ -201,7 +221,7 @@ valueAfter = valueBefore + externalCash - feeCost - taxCost
 
 Explicit orders are never silently rounded or resized after tax/fee estimates have been supplied. Amount-rule or preference violations make a scenario unavailable. An input exceeding configured structural capacities is rejected.
 
-`feasible` means declared modeled constraints and reserve are satisfied with known costs and confirmed required transfers. Unknown rules/costs produce `conditional`; unknown costs withhold after-wealth, retained cash, rows and reserve outcomes. Guaranteed funding/reserve failures remain `unavailable`, even with other unknown costs: known nonnegative cost components establish a lower bound. Actual incomplete totals remain `null`.
+`feasible` means declared modeled constraints and reserve are satisfied with known costs and confirmed required transfers, and no generated order amount stays uninvested. Unknown rules/costs produce `conditional`; unknown costs withhold after-wealth, retained cash, rows and reserve outcomes. Guaranteed funding/reserve failures remain `unavailable`, even with other unknown costs: known nonnegative cost components establish a lower bound. Actual incomplete totals remain `null`.
 
 ## Allocate and project directly
 
@@ -237,7 +257,9 @@ const saved = JSON.stringify(result.snapshot);
 const reproduced = replayRebalanceComparison(JSON.parse(saved));
 ```
 
-Comparisons use `rebalance-comparison-v4`; projections use `contribution-projection-v3`. Snapshots defensively copy all inputs, including host configuration, fee declarations and scenario choices. They are not signed or independently verified. Your host owns access, storage and review workflows.
+Comparisons use `rebalance-comparison-v5`; projections use `contribution-projection-v3`. Snapshots defensively copy all inputs, including host configuration, fee declarations and scenario choices. They are not signed or independently verified. Your host owns access, storage and review workflows.
+
+A saved `rebalance-comparison-v4` snapshot replays under the rules it was saved with and returns its original v4 result: no consolidation, routing to other accounts, fee admission rule, leftover report or reserve shortfall statement. It cannot carry `fund` or `priced` declarations. To apply the current rules, call `compareRebalance(savedSnapshot.request)` and store the new v5 snapshot separately.
 
 Inputs must be plain JSON data: no functions, accessors, symbols, dates, cycles, sparse arrays or non-finite numbers. Omit optional fields instead of passing `undefined`. Invalid inputs raise `RebalanceInputError`. Incomplete supported evidence produces conditional/unavailable results.
 
@@ -245,7 +267,7 @@ Inputs must be plain JSON data: no functions, accessors, symbols, dates, cycles,
 
 Rename configured `limits.projectionMonths` to `limits.projectionPeriods`. Map projection `months` to `periods`, `monthlyContribution` to `contributions`, and set `periodsPerYear: 12` to preserve monthly cadence. Rename timeline `month` to `period`. Single return maps remain supported, alongside period paths.
 
-Comparison v1/v2/v3 replay is refused. Explicitly migrate the stored request, choose policies, calculate and review a new v4 result, and store it separately. Keep original results and the exact prior package for historical reproduction. For 0.1/0.2 requests, also supply a host configuration and map old root contribution/cashLimit/salePlan fields to explicit scenarios. See [CHANGELOG.md](CHANGELOG.md).
+Comparison v1/v2/v3 replay is refused. Explicitly migrate the stored request, choose policies, calculate and review a new v5 result, and store it separately. Keep original results and the exact prior package for historical reproduction. For 0.1/0.2 requests, also supply a host configuration and map old root contribution/cashLimit/salePlan fields to explicit scenarios. See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

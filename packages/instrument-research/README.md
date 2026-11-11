@@ -13,7 +13,7 @@ pnpm install --frozen-lockfile
 pnpm example:research
 ```
 
-The example uses synthetic GBP and CHF listings, direct GBP-to-CHF FX, and USD financial reports. It illustrates why a statement's reporting currency remains distinct from the security's quote currency and the caller's presentation currency. It also shows incomplete longer-horizon pair coverage and verifies exact JSON replay.
+The example uses synthetic GBP and CHF listings, direct GBP-to-CHF FX, and USD financial reports. It illustrates why a statement's reporting currency remains distinct from the security's quote currency and the caller's presentation currency. It also shows incomplete longer-horizon pair coverage, flags the pair's mixed return basis and verifies exact JSON replay.
 
 ## Use it in your project
 
@@ -23,7 +23,7 @@ Build a source tarball; registry publication is a separate release step:
 pnpm --filter @investboard/instrument-research build
 pnpm --dir packages/instrument-research pack --pack-destination /tmp
 # In your application:
-pnpm add /tmp/investboard-instrument-research-0.1.0.tgz
+pnpm add /tmp/investboard-instrument-research-0.2.0.tgz
 ```
 
 The ESM package exports these functions and their TypeScript request/result types:
@@ -57,13 +57,13 @@ For a different reporting currency, supply `fx` with `baseCurrency` equal to lis
 
 History calculations use observations inside `[from, to]` only. Actual first and last dates remain visible; a requested non-trading day may shift execution forward by up to seven days. Full-period metrics are withheld when the boundary lag exceeds seven days, an interior gap exceeds seven days, there are fewer than two observations, or the sample has fewer than `200 × requested calendar years` observations. Coverage describes the supplied daily series, not whether a provider has delivered every exchange session. This is not a weekly/monthly-price calculator.
 
-Available metrics include cumulative return, CAGR after at least 365 observed calendar days, annualized sample volatility scaled to actual observation frequency, and maximum peak-to-trough drawdown with recovery. A zero drawdown has no episode dates. Return, volatility, yield and ratio outputs are **fractions**: `0.1` means 10%. CAGR uses actual days / 365.2425. `price` excludes distributions; `distribution_adjusted` trusts the caller's consistent reinvestment-adjusted series. Neither implies after-tax returns or current-rate fee deductions.
+Available metrics include cumulative return, CAGR after at least 365 observed calendar days, annualized sample volatility scaled to actual observation frequency, and maximum peak-to-trough drawdown with recovery. Sample volatility needs at least two returns (three observations); a valid two-observation window reports its return and drawdown and leaves volatility null. A zero drawdown has no episode dates. Return, volatility, yield and ratio outputs are **fractions**: `0.1` means 10%. CAGR uses actual days / 365.2425. `price` excludes distributions; `distribution_adjusted` trusts the caller's consistent reinvestment-adjusted series. Neither implies after-tax returns or current-rate fee deductions.
 
 ## Contribution illustration
 
 An optional `{ lumpSum, monthlyContribution }` overlays fractional-unit purchases on covered reporting-currency history. The lump sum executes on the first observed date. Monthly contributions begin on that same date (month zero), then use anniversaries clamped at month end, executing on the first observation on/after each anniversary, at most seven days later. The output lists actual execution dates and amounts. It withholds the illustration when full-period history coverage is insufficient.
 
-This is a historical illustration with no fees, taxes, spreads, minimum trades, account cash, lot rounding or prediction. Amounts use the reporting currency's units without an imposed cent or euro precision. The total-contribution return is ending value / total contributions − 1 and is not a timing-adjusted return. Zero contributions yield zero ending value and an explicit missing money-weighted rate.
+This is a historical illustration with no fees, taxes, spreads, minimum trades, account cash, lot rounding or prediction. Amounts use the reporting currency's units without an imposed cent or euro precision. The total-contribution return is ending value / total contributions − 1 and is not a timing-adjusted return. Zero contributions yield zero ending value, a null total-contribution return (a return on no money is undefined, not 0%) and an explicit missing money-weighted rate.
 
 Annualized money-weighted return solves buy-only XIRR with Actual/365 fixed day count and the terminal value. It is null below 365 days from the first actual contribution, or when a verified root is unavailable within the supported `[-0.999, 10]` annual-rate bracket. Bisection checks the NPV residual instead of accepting a rate clamped to the bracket. Historical price-only illustrations retain their price-only basis.
 
@@ -87,6 +87,8 @@ Statements are grouped only when period end, fiscal year, period and reported cu
 
 For each requested horizon, the engine samples completed Friday closes. A close can carry at most three calendar days within that week. A missing weekly close invalidates both the return into that week and the next return; the engine never bridges the hole. It then computes Pearson correlation on **common observed weekly returns** in the same reporting currency. The result retains each side's basis, common count, expected Friday-grid count, coverage, first/last shared dates, reasons and a Fisher 95% interval.
 
+When one series declares `price` and the other `distribution_adjusted`, the result carries the pair-level reason `mixed_return_basis`. The coefficient is still calculated, but the price-only side omits the distributions the adjusted side reinvests, so the two return series are not like for like. Supply both sides on one basis to compare them without this warning.
+
 A coefficient is withheld below 40 common returns, below 80% common coverage, for a boundary gap over 14 days, for over three consecutive missing common weeks, or for zero variance. Longer horizons do not backfill pre-inception history. The interval is a descriptive approximation; the inputs do not establish independence, stationarity or predictive validity. A pair coefficient is not holdings overlap, whole-portfolio covariance, economic currency exposure, suitability or a forecast.
 
 ## Retained evidence and replay
@@ -95,7 +97,7 @@ Use `vintage: "retained"` for the input snapshot known to your application by `a
 
 `vintage: "original_public"` always returns an explicit unavailable reason. This package supplies no original-filing archive or public-information-time reconstruction. An application must obtain genuine archives and define that separate methodology before making such claims.
 
-Snapshots carry methodology `instrument-research-v1` and complete validated input data, including source revisions and FX. They are cloned independently of original inputs and result fragments. Replay validates the saved request and refuses an unknown methodology. It reproduces the supplied calculation; it does not prove authenticity, source rights, immutable storage, or compatibility with a future methodology. Your application controls persistence, access, authentication and retrieval.
+Snapshots carry methodology `instrument-research-v2` and complete validated input data, including source revisions and FX. They are cloned independently of original inputs and result fragments. Replay validates the saved request and refuses an unknown methodology. A saved `instrument-research-v1` snapshot replays under version 1 rules and returns the result it was saved with: a zero-contribution return of `0` and no `mixed_return_basis` reason. To apply version 2, evaluate the saved request again and store the new snapshot. See the [changelog](CHANGELOG.md). It reproduces the supplied calculation; it does not prove authenticity, source rights, immutable storage, or compatibility with a future methodology. Your application controls persistence, access, authentication and retrieval.
 
 ## Bounds and verification
 

@@ -94,9 +94,20 @@ function projection(): ProjectionRequest {
 describe("host-selected purchase placement", () => {
 	it("preserves largest-holding placement only when explicitly requested", () => {
 		const r = request();
-		expect(first(r).invested).toBe(1);
-		expect(first(r).cashRetained).toBe(99);
-		expect(first(r).purchases[0]!.holdingId).toBe("large");
+		// v5 spills the capped amount to the other account holding the class.
+		expect(first(r).invested).toBe(100);
+		expect(first(r).cashRetained).toBe(0);
+		expect(first(r).purchases.map((p) => [p.holdingId, p.amount])).toEqual([
+			["small", 99],
+			["large", 1],
+		]);
+		const v4 = replayRebalanceComparison({
+			methodologyVersion: "rebalance-comparison-v4",
+			request: compareRebalance(r).snapshot.request,
+		}).alternatives[0]!;
+		expect(v4.invested).toBe(1);
+		expect(v4.cashRetained).toBe(99);
+		expect(v4.purchases[0]!.holdingId).toBe("large");
 		r.purchasePlacement = {
 			mode: "ordered_routes",
 			routes: [{ assetClass: "stocks", holdingId: "small", depotId: "B" }],

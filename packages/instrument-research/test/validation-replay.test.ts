@@ -3,10 +3,12 @@ import {
 	evaluateInstrumentPair,
 	evaluateInstrumentResearch,
 	LIMITS,
+	METHODOLOGY_VERSION,
 	replayInstrumentPair,
 	replayInstrumentResearch,
 	ResearchInputError,
 } from "../src/index.js";
+import type { PairRequest, ResearchRequest, Snapshot } from "../src/index.js";
 import { pair, research, statement } from "./fixtures.js";
 
 describe("public JSON boundary and retained replay", () => {
@@ -116,6 +118,37 @@ describe("public JSON boundary and retained replay", () => {
 		expect(() => evaluateInstrumentResearch(undefinedField)).toThrow(
 			ResearchInputError,
 		);
+	});
+	it("replays instrument-research-v1 snapshots as they were saved", () => {
+		const input = research();
+		input.investment = { lumpSum: 0, monthlyContribution: 0 };
+		const saved: Snapshot<ResearchRequest> = {
+			methodologyVersion: "instrument-research-v1",
+			request: input,
+		};
+		const replayed = replayInstrumentResearch(saved);
+		expect(replayed.snapshot.methodologyVersion).toBe("instrument-research-v1");
+		expect(replayed.history.investment?.contributionReturn).toBe(0);
+		const current = evaluateInstrumentResearch(input);
+		expect(current.snapshot.methodologyVersion).toBe(METHODOLOGY_VERSION);
+		expect(current.history.investment?.contributionReturn).toBeNull();
+		const mixed = pair();
+		mixed.series[1].basis = "price";
+		const savedPair: Snapshot<PairRequest> = {
+			methodologyVersion: "instrument-research-v1",
+			request: mixed,
+		};
+		const legacyPair = replayInstrumentPair(savedPair);
+		expect(legacyPair.reasons).not.toContain("mixed_return_basis");
+		expect(legacyPair.snapshot.methodologyVersion).toBe(
+			"instrument-research-v1",
+		);
+		const currentPair = evaluateInstrumentPair(mixed);
+		expect({
+			...currentPair,
+			snapshot: legacyPair.snapshot,
+			reasons: legacyPair.reasons,
+		}).toEqual(legacyPair);
 	});
 	it("rejects unsupported snapshot versions and tampered saved listing identities", () => {
 		const output = evaluateInstrumentResearch(research());

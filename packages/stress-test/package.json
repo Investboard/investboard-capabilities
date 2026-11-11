@@ -1,6 +1,6 @@
 {
 	"name": "@investboard/stress-test",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Portfolio stress testing for your own investing engine: historical scenarios, holding-level impacts and reproducible replays",
 	"type": "module",
 	"license": "Apache-2.0",

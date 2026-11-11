@@ -13,7 +13,11 @@ export function firstUnlinkedCapitalDate(
 	return flows
 		.filter(
 			(flow) =>
-				flow.holdingId === null && flow.type !== "dividend" && flow.date <= to,
+				flow.holdingId === null &&
+				flow.type !== "dividend" &&
+				// A standalone fee is known money that bought nothing, never unlinked capital.
+				flow.recordedCost !== true &&
+				flow.date <= to,
 		)
 		.map((flow) => flow.date)
 		.sort()[0];

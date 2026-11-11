@@ -13,17 +13,31 @@ export interface ShockResult {
 	fxShockApplied: number | null;
 	currencyMethod: "unknown" | "economic_exposure" | "hedged";
 }
+/**
+ * Classes a scenario may carry no figure for, read through a named stand-in
+ * class. A figure the scenario names for the class itself is read first. A
+ * stand-in figure is a scenario assumption (`asset_class_default`), never
+ * direct history. Crypto takes the shares figure: a crisis before crypto
+ * existed has no crypto figure, and a zero would claim it was untouched.
+ */
 export const ASSET_CLASS_SHOCK_PROXY: ReadonlyMap<string, string> = new Map([
+	["real_estate", "alternatives"],
+	["commodities", "alternatives"],
+	["crypto", "equities"],
+]);
+/** The stand-ins of `whole-wealth-currency-replay-v5`, kept for its replay. */
+export const V5_ASSET_CLASS_SHOCK_PROXY: ReadonlyMap<string, string> = new Map([
 	["real_estate", "alternatives"],
 	["commodities", "alternatives"],
 ]);
 export function assetClassShock(
 	crisis: Pick<CrisisDefinition, "assetClassShocks">,
 	assetClass: string,
+	standIns: ReadonlyMap<string, string> = ASSET_CLASS_SHOCK_PROXY,
 ): number | undefined {
 	const shocks = crisis.assetClassShocks;
 	if (Object.hasOwn(shocks, assetClass)) return shocks[assetClass];
-	const proxy = ASSET_CLASS_SHOCK_PROXY.get(assetClass);
+	const proxy = standIns.get(assetClass);
 	return proxy !== undefined && Object.hasOwn(shocks, proxy)
 		? shocks[proxy]
 		: undefined;
@@ -31,12 +45,13 @@ export function assetClassShock(
 export function applyShock(
 	holding: StressHoldingInput,
 	crisis: CrisisDefinition,
-	baseCurrency: "EUR" | "USD" = "EUR",
+	baseCurrency: string = "EUR",
+	standIns: ReadonlyMap<string, string> = ASSET_CLASS_SHOCK_PROXY,
 ): ShockResult {
 	let shock: number;
 	let source: ShockResult["shockSource"];
 	if (holding.assetClass !== "equities") {
-		shock = assetClassShock(crisis, holding.assetClass) ?? 0;
+		shock = assetClassShock(crisis, holding.assetClass, standIns) ?? 0;
 		source = "asset_class_default";
 	} else {
 		const resolvedSector = resolveStressTestSector(

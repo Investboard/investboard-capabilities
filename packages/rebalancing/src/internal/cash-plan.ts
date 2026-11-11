@@ -1,15 +1,32 @@
 import type { CashRelease, Purchase, RebalanceRequest } from "../types.js";
 import type { CalculationContext } from "../configuration.js";
-import { planContribution } from "../contribution.js";
-import { placePurchases } from "./placement.js";
+import { planConsolidated } from "../contribution.js";
+import {
+	classMinimum,
+	placePurchases,
+	type UninvestedReason,
+} from "./placement.js";
 import { operationFee } from "./fees.js";
 
+/** Generated purchases plus money meant for orders that no order could take. */
+export interface CashPurchases {
+	purchases: Purchase[];
+	uninvestedUnits: number;
+	reasons: UninvestedReason[];
+}
+
+/**
+ * Under v5 (`legacy` false) shares below their class's smallest admissible
+ * order are consolidated before placement, and leftovers are reported. Under
+ * v4 the earlier rules apply unchanged and nothing is reported.
+ */
 export function cashPurchases(
 	request: RebalanceRequest,
 	externalCash: number,
 	ctx: CalculationContext,
 	cashReleases: CashRelease[],
-): Purchase[] {
+	legacy: boolean,
+): CashPurchases {
 	const { money, configuration } = ctx;
 	const released = new Map(
 		cashReleases.map((c) => [c.holdingId, money.units(c.amount)]),
@@ -18,9 +35,9 @@ export function cashPurchases(
 		money.units(externalCash),
 		...released.values(),
 	]);
-	const build = (budget: number) => {
+	const build = (budget: number): CashPurchases => {
 		// Admit all candidates before ranking and applying the caller's order limit.
-		const planned = planContribution(
+		const planned = planConsolidated(
 			{
 				configuration,
 				// Existing cash has already entered this budget through cashReleases.
@@ -38,8 +55,23 @@ export function cashPurchases(
 			},
 			ctx,
 			false,
+			legacy
+				? undefined
+				: { minimumFor: classMinimum(request, money.units(budget), ctx) },
 		);
-		return placePurchases(request, planned.allocations, ctx);
+		const placed = placePurchases(
+			request,
+			planned.result.allocations,
+			ctx,
+			legacy,
+		);
+		const reasons = new Set(placed.reasons);
+		if (planned.blockedUnits > 0) reasons.add("uninvested_below_order_minimum");
+		return {
+			purchases: placed.purchases,
+			uninvestedUnits: planned.blockedUnits + placed.uninvestedUnits,
+			reasons: [...reasons].sort(),
+		};
 	};
 	let feeReserve = 0;
 	let result = build(money.amount(available));
@@ -51,10 +83,13 @@ export function cashPurchases(
 		Object.keys(request.policy).length +
 			(request.purchasePlacement.mode === "ordered_routes"
 				? request.purchasePlacement.routes.length
-				: 0);
+				: legacy
+					? 0
+					: // v5 can route one class through every depot that holds it.
+						request.holdings.length);
 		step++
 	) {
-		const fees = result.map((p) =>
+		const fees = result.purchases.map((p) =>
 			operationFee(
 				p,
 				"buy",

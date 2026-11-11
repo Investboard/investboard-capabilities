@@ -1,0 +1,1089 @@
+{
+	"capSpill": {
+		"methodologyVersion": "rebalance-comparison-v4",
+		"baseCurrency": "EUR",
+		"priority": "input_order",
+		"valueBefore": 100,
+		"rowsBefore": [
+			{
+				"assetClass": "stocks",
+				"value": 100,
+				"current": 1,
+				"target": 1,
+				"minimum": 0,
+				"maximum": 1,
+				"deviation": 0,
+				"inRange": true
+			}
+		],
+		"alternatives": [
+			{
+				"existingCashReleased": 0,
+				"cashReleases": [],
+				"kind": "addition",
+				"feasibility": "feasible",
+				"reasonCodes": [],
+				"externalCash": 100,
+				"invested": 1,
+				"feeCost": 0,
+				"taxCost": 0,
+				"taxCoverage": "no_sales",
+				"cashRetained": 99,
+				"valueAfter": 200,
+				"reserveAfter": 99,
+				"residualDrift": 0.495,
+				"rows": [
+					{
+						"assetClass": "cash",
+						"value": 99,
+						"current": 0.495,
+						"target": 0,
+						"minimum": 0,
+						"maximum": 0,
+						"deviation": 0.495,
+						"inRange": false
+					},
+					{
+						"assetClass": "stocks",
+						"value": 101,
+						"current": 0.505,
+						"target": 1,
+						"minimum": 0,
+						"maximum": 1,
+						"deviation": -0.495,
+						"inRange": true
+					}
+				],
+				"funding": [
+					{
+						"depotId": "A",
+						"existingCashReleased": 0,
+						"externalCash": 0,
+						"grossSales": 0,
+						"taxCost": 0,
+						"fees": 0,
+						"purchases": 1,
+						"netInflow": 0,
+						"transferRequired": 1
+					},
+					{
+						"depotId": "B",
+						"existingCashReleased": 0,
+						"externalCash": 100,
+						"grossSales": 0,
+						"taxCost": 0,
+						"fees": 0,
+						"purchases": 0,
+						"netInflow": 100,
+						"transferRequired": 0
+					}
+				],
+				"purchases": [
+					{
+						"assetClass": "stocks",
+						"holdingId": "large",
+						"depotId": "A",
+						"amount": 1
+					}
+				],
+				"sales": []
+			}
+		],
+		"snapshot": {
+			"methodologyVersion": "rebalance-comparison-v4",
+			"request": {
+				"configuration": {
+					"money": {
+						"decimalPlaces": 2,
+						"maximumAmount": 1000000000
+					},
+					"limits": {
+						"holdings": 200,
+						"assetClasses": 32,
+						"accounts": 100,
+						"orders": 100,
+						"projectionPeriods": 600,
+						"scenarios": 100,
+						"jsonNodes": 10000,
+						"jsonDepth": 16,
+						"collectionEntries": 2000,
+						"textLength": 128
+					},
+					"cashAssetClass": "cash"
+				},
+				"baseCurrency": "EUR",
+				"purchasePlacement": {
+					"mode": "largest_holding"
+				},
+				"cashDeployment": {
+					"mode": "preserve"
+				},
+				"fundingDepotId": "B",
+				"policy": {
+					"stocks": {
+						"min": 0,
+						"target": 1,
+						"max": 1
+					}
+				},
+				"transfersConfirmed": true,
+				"holdings": [
+					{
+						"holdingId": "large",
+						"depotId": "A",
+						"assetClass": "stocks",
+						"value": 90,
+						"currency": "EUR"
+					},
+					{
+						"holdingId": "small",
+						"depotId": "B",
+						"assetClass": "stocks",
+						"value": 10,
+						"currency": "EUR"
+					}
+				],
+				"accounts": [
+					{
+						"depotId": "A",
+						"feePerTrade": 0,
+						"minimum": 0,
+						"maximum": 1,
+						"increment": 0.01
+					},
+					{
+						"depotId": "B",
+						"feePerTrade": 0,
+						"minimum": 0,
+						"maximum": 0,
+						"increment": 0.01
+					}
+				],
+				"scenarios": [
+					{
+						"kind": "addition",
+						"mode": "contribution",
+						"externalCash": 100
+					}
+				]
+			}
+		}
+	},
+	"feeStranded": {
+		"methodologyVersion": "rebalance-comparison-v4",
+		"baseCurrency": "EUR",
+		"priority": "input_order",
+		"valueBefore": 100,
+		"rowsBefore": [
+			{
+				"assetClass": "bonds",
+				"value": 40,
+				"current": 0.4,
+				"target": 0.4,
+				"minimum": 0.35,
+				"maximum": 0.45,
+				"deviation": 0,
+				"inRange": true
+			},
+			{
+				"assetClass": "equities",
+				"value": 60,
+				"current": 0.6,
+				"target": 0.6,
+				"minimum": 0.55,
+				"maximum": 0.65,
+				"deviation": 0,
+				"inRange": true
+			}
+		],
+		"alternatives": [
+			{
+				"existingCashReleased": 0,
+				"cashReleases": [],
+				"kind": "fresh_cash",
+				"feasibility": "feasible",
+				"reasonCodes": [],
+				"externalCash": 100,
+				"invested": 38,
+				"feeCost": 5,
+				"taxCost": 0,
+				"taxCoverage": "no_sales",
+				"cashRetained": 57,
+				"valueAfter": 195,
+				"reserveAfter": 57,
+				"residualDrift": 0.29230769230769227,
+				"rows": [
+					{
+						"assetClass": "bonds",
+						"value": 78,
+						"current": 0.4,
+						"target": 0.4,
+						"minimum": 0.35,
+						"maximum": 0.45,
+						"deviation": 0,
+						"inRange": true
+					},
+					{
+						"assetClass": "cash",
+						"value": 57,
+						"current": 0.2923076923076923,
+						"target": 0,
+						"minimum": 0,
+						"maximum": 0,
+						"deviation": 0.2923076923076923,
+						"inRange": false
+					},
+					{
+						"assetClass": "equities",
+						"value": 60,
+						"current": 0.3076923076923077,
+						"target": 0.6,
+						"minimum": 0.55,
+						"maximum": 0.65,
+						"deviation": -0.29230769230769227,
+						"inRange": false
+					}
+				],
+				"funding": [
+					{
+						"depotId": "B",
+						"existingCashReleased": 0,
+						"externalCash": 100,
+						"grossSales": 0,
+						"taxCost": 0,
+						"fees": 5,
+						"purchases": 38,
+						"netInflow": 100,
+						"transferRequired": 0
+					}
+				],
+				"purchases": [
+					{
+						"assetClass": "bonds",
+						"holdingId": "synthetic-bond",
+						"depotId": "B",
+						"amount": 38
+					}
+				],
+				"sales": []
+			}
+		],
+		"snapshot": {
+			"methodologyVersion": "rebalance-comparison-v4",
+			"request": {
+				"configuration": {
+					"money": {
+						"decimalPlaces": 2,
+						"maximumAmount": 1000000000
+					},
+					"limits": {
+						"holdings": 200,
+						"assetClasses": 32,
+						"accounts": 100,
+						"orders": 100,
+						"projectionPeriods": 600,
+						"scenarios": 100,
+						"jsonNodes": 10000,
+						"jsonDepth": 16,
+						"collectionEntries": 2000,
+						"textLength": 128
+					},
+					"cashAssetClass": "cash"
+				},
+				"baseCurrency": "EUR",
+				"purchasePlacement": {
+					"mode": "largest_holding"
+				},
+				"cashDeployment": {
+					"mode": "preserve"
+				},
+				"fundingDepotId": "B",
+				"policy": {
+					"equities": {
+						"min": 0.55,
+						"target": 0.6,
+						"max": 0.65
+					},
+					"bonds": {
+						"min": 0.35,
+						"target": 0.4,
+						"max": 0.45
+					}
+				},
+				"maxTrades": 1,
+				"holdings": [
+					{
+						"holdingId": "synthetic-equity",
+						"depotId": "A",
+						"assetClass": "equities",
+						"value": 60,
+						"currency": "EUR"
+					},
+					{
+						"holdingId": "synthetic-bond",
+						"depotId": "B",
+						"assetClass": "bonds",
+						"value": 40,
+						"currency": "EUR"
+					}
+				],
+				"accounts": [
+					{
+						"depotId": "A",
+						"feePerTrade": 1000,
+						"minimum": 100,
+						"maximum": 0,
+						"increment": 0.01
+					},
+					{
+						"depotId": "B",
+						"feePerTrade": 5,
+						"minimum": 1,
+						"maximum": 0,
+						"increment": 0.01
+					}
+				],
+				"scenarios": [
+					{
+						"kind": "fresh_cash",
+						"mode": "contribution",
+						"externalCash": 100
+					}
+				]
+			}
+		}
+	},
+	"feeAboveOrder": {
+		"methodologyVersion": "rebalance-comparison-v4",
+		"baseCurrency": "EUR",
+		"priority": "input_order",
+		"valueBefore": 100000,
+		"rowsBefore": [
+			{
+				"assetClass": "bonds",
+				"value": 30000,
+				"current": 0.3,
+				"target": 0.4,
+				"minimum": 0.35,
+				"maximum": 0.45,
+				"deviation": -0.10000000000000003,
+				"inRange": false
+			},
+			{
+				"assetClass": "equities",
+				"value": 70000,
+				"current": 0.7,
+				"target": 0.6,
+				"minimum": 0.55,
+				"maximum": 0.65,
+				"deviation": 0.09999999999999998,
+				"inRange": false
+			}
+		],
+		"alternatives": [
+			{
+				"existingCashReleased": 0,
+				"cashReleases": [],
+				"kind": "fresh_cash",
+				"feasibility": "feasible",
+				"reasonCodes": [],
+				"externalCash": 50,
+				"invested": 0,
+				"feeCost": 0,
+				"taxCost": 0,
+				"taxCoverage": "no_sales",
+				"cashRetained": 50,
+				"valueAfter": 100050,
+				"reserveAfter": 50,
+				"residualDrift": 0.1001499250374813,
+				"rows": [
+					{
+						"assetClass": "bonds",
+						"value": 30000,
+						"current": 0.29985007496251875,
+						"target": 0.4,
+						"minimum": 0.35,
+						"maximum": 0.45,
+						"deviation": -0.10014992503748127,
+						"inRange": false
+					},
+					{
+						"assetClass": "cash",
+						"value": 50,
+						"current": 0.0004997501249375312,
+						"target": 0,
+						"minimum": 0,
+						"maximum": 0,
+						"deviation": 0.0004997501249375312,
+						"inRange": false
+					},
+					{
+						"assetClass": "equities",
+						"value": 70000,
+						"current": 0.6996501749125438,
+						"target": 0.6,
+						"minimum": 0.55,
+						"maximum": 0.65,
+						"deviation": 0.0996501749125438,
+						"inRange": false
+					}
+				],
+				"funding": [
+					{
+						"depotId": "A",
+						"existingCashReleased": 0,
+						"externalCash": 50,
+						"grossSales": 0,
+						"taxCost": 0,
+						"fees": 0,
+						"purchases": 0,
+						"netInflow": 50,
+						"transferRequired": 0
+					}
+				],
+				"purchases": [],
+				"sales": []
+			}
+		],
+		"snapshot": {
+			"methodologyVersion": "rebalance-comparison-v4",
+			"request": {
+				"configuration": {
+					"money": {
+						"decimalPlaces": 2,
+						"maximumAmount": 1000000000
+					},
+					"limits": {
+						"holdings": 200,
+						"assetClasses": 32,
+						"accounts": 100,
+						"orders": 100,
+						"projectionPeriods": 600,
+						"scenarios": 100,
+						"jsonNodes": 10000,
+						"jsonDepth": 16,
+						"collectionEntries": 2000,
+						"textLength": 128
+					},
+					"cashAssetClass": "cash"
+				},
+				"baseCurrency": "EUR",
+				"purchasePlacement": {
+					"mode": "largest_holding"
+				},
+				"cashDeployment": {
+					"mode": "preserve"
+				},
+				"fundingDepotId": "A",
+				"policy": {
+					"equities": {
+						"min": 0.55,
+						"target": 0.6,
+						"max": 0.65
+					},
+					"bonds": {
+						"min": 0.35,
+						"target": 0.4,
+						"max": 0.45
+					}
+				},
+				"transfersConfirmed": true,
+				"holdings": [
+					{
+						"holdingId": "eq",
+						"depotId": "A",
+						"assetClass": "equities",
+						"value": 70000,
+						"currency": "EUR"
+					},
+					{
+						"holdingId": "bond-a",
+						"depotId": "A",
+						"assetClass": "bonds",
+						"value": 25000,
+						"currency": "EUR"
+					},
+					{
+						"holdingId": "bond-b",
+						"depotId": "B",
+						"assetClass": "bonds",
+						"value": 5000,
+						"currency": "EUR"
+					}
+				],
+				"accounts": [
+					{
+						"depotId": "A",
+						"feePerTrade": 60,
+						"minimum": 0,
+						"maximum": 0,
+						"increment": 0.01
+					},
+					{
+						"depotId": "B",
+						"feePerTrade": 0,
+						"minimum": 0,
+						"maximum": 0,
+						"increment": 0.01
+					}
+				],
+				"scenarios": [
+					{
+						"kind": "fresh_cash",
+						"mode": "contribution",
+						"externalCash": 50
+					}
+				]
+			}
+		}
+	},
+	"minimumConsolidation": {
+		"methodologyVersion": "rebalance-comparison-v4",
+		"baseCurrency": "EUR",
+		"priority": "input_order",
+		"valueBefore": 7000,
+		"rowsBefore": [
+			{
+				"assetClass": "bonds",
+				"value": 1000,
+				"current": 0.14285714285714285,
+				"target": 0.25,
+				"minimum": 0.2,
+				"maximum": 0.3,
+				"deviation": -0.10714285714285715,
+				"inRange": false
+			},
+			{
+				"assetClass": "equities",
+				"value": 5000,
+				"current": 0.7142857142857143,
+				"target": 0.5,
+				"minimum": 0.4,
+				"maximum": 0.6,
+				"deviation": 0.2142857142857143,
+				"inRange": false
+			},
+			{
+				"assetClass": "gold",
+				"value": 1000,
+				"current": 0.14285714285714285,
+				"target": 0.25,
+				"minimum": 0.2,
+				"maximum": 0.3,
+				"deviation": -0.10714285714285715,
+				"inRange": false
+			}
+		],
+		"alternatives": [
+			{
+				"existingCashReleased": 0,
+				"cashReleases": [],
+				"kind": "consolidated",
+				"feasibility": "feasible",
+				"reasonCodes": [],
+				"externalCash": 600,
+				"invested": 0,
+				"feeCost": 0,
+				"taxCost": 0,
+				"taxCoverage": "no_sales",
+				"cashRetained": 600,
+				"valueAfter": 7600,
+				"reserveAfter": 600,
+				"residualDrift": 0.2368421052631579,
+				"rows": [
+					{
+						"assetClass": "bonds",
+						"value": 1000,
+						"current": 0.13157894736842105,
+						"target": 0.25,
+						"minimum": 0.2,
+						"maximum": 0.3,
+						"deviation": -0.11842105263157895,
+						"inRange": false
+					},
+					{
+						"assetClass": "cash",
+						"value": 600,
+						"current": 0.07894736842105263,
+						"target": 0,
+						"minimum": 0,
+						"maximum": 0,
+						"deviation": 0.07894736842105263,
+						"inRange": false
+					},
+					{
+						"assetClass": "equities",
+						"value": 5000,
+						"current": 0.6578947368421053,
+						"target": 0.5,
+						"minimum": 0.4,
+						"maximum": 0.6,
+						"deviation": 0.1578947368421053,
+						"inRange": false
+					},
+					{
+						"assetClass": "gold",
+						"value": 1000,
+						"current": 0.13157894736842105,
+						"target": 0.25,
+						"minimum": 0.2,
+						"maximum": 0.3,
+						"deviation": -0.11842105263157895,
+						"inRange": false
+					}
+				],
+				"funding": [
+					{
+						"depotId": "A",
+						"existingCashReleased": 0,
+						"externalCash": 600,
+						"grossSales": 0,
+						"taxCost": 0,
+						"fees": 0,
+						"purchases": 0,
+						"netInflow": 600,
+						"transferRequired": 0
+					}
+				],
+				"purchases": [],
+				"sales": []
+			},
+			{
+				"existingCashReleased": 0,
+				"cashReleases": [],
+				"kind": "below_every_minimum",
+				"feasibility": "feasible",
+				"reasonCodes": [],
+				"externalCash": 400,
+				"invested": 0,
+				"feeCost": 0,
+				"taxCost": 0,
+				"taxCoverage": "no_sales",
+				"cashRetained": 400,
+				"valueAfter": 7400,
+				"reserveAfter": 400,
+				"residualDrift": 0.22972972972972971,
+				"rows": [
+					{
+						"assetClass": "bonds",
+						"value": 1000,
+						"current": 0.13513513513513514,
+						"target": 0.25,
+						"minimum": 0.2,
+						"maximum": 0.3,
+						"deviation": -0.11486486486486486,
+						"inRange": false
+					},
+					{
+						"assetClass": "cash",
+						"value": 400,
+						"current": 0.05405405405405406,
+						"target": 0,
+						"minimum": 0,
+						"maximum": 0,
+						"deviation": 0.05405405405405406,
+						"inRange": false
+					},
+					{
+						"assetClass": "equities",
+						"value": 5000,
+						"current": 0.6756756756756757,
+						"target": 0.5,
+						"minimum": 0.4,
+						"maximum": 0.6,
+						"deviation": 0.17567567567567566,
+						"inRange": false
+					},
+					{
+						"assetClass": "gold",
+						"value": 1000,
+						"current": 0.13513513513513514,
+						"target": 0.25,
+						"minimum": 0.2,
+						"maximum": 0.3,
+						"deviation": -0.11486486486486486,
+						"inRange": false
+					}
+				],
+				"funding": [
+					{
+						"depotId": "A",
+						"existingCashReleased": 0,
+						"externalCash": 400,
+						"grossSales": 0,
+						"taxCost": 0,
+						"fees": 0,
+						"purchases": 0,
+						"netInflow": 400,
+						"transferRequired": 0
+					}
+				],
+				"purchases": [],
+				"sales": []
+			}
+		],
+		"snapshot": {
+			"methodologyVersion": "rebalance-comparison-v4",
+			"request": {
+				"configuration": {
+					"money": {
+						"decimalPlaces": 2,
+						"maximumAmount": 1000000000
+					},
+					"limits": {
+						"holdings": 200,
+						"assetClasses": 32,
+						"accounts": 100,
+						"orders": 100,
+						"projectionPeriods": 600,
+						"scenarios": 100,
+						"jsonNodes": 10000,
+						"jsonDepth": 16,
+						"collectionEntries": 2000,
+						"textLength": 128
+					},
+					"cashAssetClass": "cash"
+				},
+				"baseCurrency": "EUR",
+				"purchasePlacement": {
+					"mode": "largest_holding"
+				},
+				"cashDeployment": {
+					"mode": "preserve"
+				},
+				"fundingDepotId": "A",
+				"policy": {
+					"equities": {
+						"min": 0.4,
+						"target": 0.5,
+						"max": 0.6
+					},
+					"bonds": {
+						"min": 0.2,
+						"target": 0.25,
+						"max": 0.3
+					},
+					"gold": {
+						"min": 0.2,
+						"target": 0.25,
+						"max": 0.3
+					}
+				},
+				"holdings": [
+					{
+						"holdingId": "equity",
+						"depotId": "A",
+						"assetClass": "equities",
+						"value": 5000,
+						"currency": "EUR"
+					},
+					{
+						"holdingId": "bond",
+						"depotId": "A",
+						"assetClass": "bonds",
+						"value": 1000,
+						"currency": "EUR"
+					},
+					{
+						"holdingId": "gold",
+						"depotId": "A",
+						"assetClass": "gold",
+						"value": 1000,
+						"currency": "EUR"
+					}
+				],
+				"accounts": [
+					{
+						"depotId": "A",
+						"feePerTrade": 0,
+						"minimum": 500,
+						"maximum": 0,
+						"increment": 0.01
+					}
+				],
+				"scenarios": [
+					{
+						"kind": "consolidated",
+						"mode": "contribution",
+						"externalCash": 600
+					},
+					{
+						"kind": "below_every_minimum",
+						"mode": "contribution",
+						"externalCash": 400
+					}
+				]
+			}
+		}
+	},
+	"reserveBelowFloor": {
+		"methodologyVersion": "rebalance-comparison-v4",
+		"baseCurrency": "EUR",
+		"priority": "input_order",
+		"valueBefore": 101000,
+		"rowsBefore": [
+			{
+				"assetClass": "bonds",
+				"value": 40000,
+				"current": 0.39603960396039606,
+				"target": 0.4,
+				"minimum": 0.35,
+				"maximum": 0.45,
+				"deviation": -0.003960396039603964,
+				"inRange": true
+			},
+			{
+				"assetClass": "cash",
+				"value": 1000,
+				"current": 0.009900990099009901,
+				"target": 0,
+				"minimum": 0,
+				"maximum": 0.1,
+				"deviation": 0.009900990099009901,
+				"inRange": true
+			},
+			{
+				"assetClass": "equities",
+				"value": 60000,
+				"current": 0.594059405940594,
+				"target": 0.6,
+				"minimum": 0.55,
+				"maximum": 0.65,
+				"deviation": -0.005940594059405946,
+				"inRange": true
+			}
+		],
+		"alternatives": [
+			{
+				"existingCashReleased": 0,
+				"cashReleases": [],
+				"kind": "keep",
+				"feasibility": "unavailable",
+				"reasonCodes": ["reserve_shortfall"],
+				"externalCash": 0,
+				"invested": 0,
+				"feeCost": 0,
+				"taxCost": 0,
+				"taxCoverage": "no_sales",
+				"cashRetained": null,
+				"valueAfter": null,
+				"reserveAfter": null,
+				"residualDrift": null,
+				"rows": null,
+				"funding": [
+					{
+						"depotId": "A",
+						"existingCashReleased": 0,
+						"externalCash": 0,
+						"grossSales": 0,
+						"taxCost": 0,
+						"fees": 0,
+						"purchases": 0,
+						"netInflow": 0,
+						"transferRequired": 0
+					}
+				],
+				"purchases": [],
+				"sales": []
+			},
+			{
+				"existingCashReleased": 0,
+				"cashReleases": [],
+				"kind": "fresh_cash",
+				"feasibility": "unavailable",
+				"reasonCodes": ["reserve_shortfall"],
+				"externalCash": 3000,
+				"invested": 0,
+				"feeCost": 0,
+				"taxCost": 0,
+				"taxCoverage": "no_sales",
+				"cashRetained": null,
+				"valueAfter": null,
+				"reserveAfter": null,
+				"residualDrift": null,
+				"rows": null,
+				"funding": [
+					{
+						"depotId": "A",
+						"existingCashReleased": 0,
+						"externalCash": 3000,
+						"grossSales": 0,
+						"taxCost": 0,
+						"fees": 0,
+						"purchases": 0,
+						"netInflow": 3000,
+						"transferRequired": 0
+					}
+				],
+				"purchases": [],
+				"sales": []
+			},
+			{
+				"existingCashReleased": 0,
+				"cashReleases": [],
+				"kind": "spend_reserve",
+				"feasibility": "unavailable",
+				"reasonCodes": ["reserve_shortfall"],
+				"externalCash": 0,
+				"invested": 500,
+				"feeCost": 0,
+				"taxCost": 0,
+				"taxCoverage": "supplied",
+				"cashRetained": null,
+				"valueAfter": null,
+				"reserveAfter": null,
+				"residualDrift": null,
+				"rows": null,
+				"funding": [
+					{
+						"depotId": "A",
+						"existingCashReleased": 0,
+						"externalCash": 0,
+						"grossSales": 500,
+						"taxCost": 0,
+						"fees": 0,
+						"purchases": 500,
+						"netInflow": 500,
+						"transferRequired": 0
+					}
+				],
+				"purchases": [
+					{
+						"holdingId": "bond",
+						"depotId": "A",
+						"assetClass": "bonds",
+						"amount": 500
+					}
+				],
+				"sales": [
+					{
+						"holdingId": "wallet",
+						"amount": 500,
+						"tax": {
+							"amount": 0,
+							"source": "Synthetic cash withdrawal without tax"
+						}
+					}
+				]
+			}
+		],
+		"snapshot": {
+			"methodologyVersion": "rebalance-comparison-v4",
+			"request": {
+				"configuration": {
+					"money": {
+						"decimalPlaces": 2,
+						"maximumAmount": 1000000000
+					},
+					"limits": {
+						"holdings": 200,
+						"assetClasses": 32,
+						"accounts": 100,
+						"orders": 100,
+						"projectionPeriods": 600,
+						"scenarios": 100,
+						"jsonNodes": 10000,
+						"jsonDepth": 16,
+						"collectionEntries": 2000,
+						"textLength": 128
+					},
+					"cashAssetClass": "cash"
+				},
+				"baseCurrency": "EUR",
+				"purchasePlacement": {
+					"mode": "largest_holding"
+				},
+				"cashDeployment": {
+					"mode": "preserve"
+				},
+				"fundingDepotId": "A",
+				"policy": {
+					"equities": {
+						"min": 0.55,
+						"target": 0.6,
+						"max": 0.65
+					},
+					"bonds": {
+						"min": 0.35,
+						"target": 0.4,
+						"max": 0.45
+					},
+					"cash": {
+						"min": 0,
+						"target": 0,
+						"max": 0.1
+					}
+				},
+				"cashFloor": 5000,
+				"holdings": [
+					{
+						"holdingId": "equity",
+						"depotId": "A",
+						"assetClass": "equities",
+						"value": 60000,
+						"currency": "EUR"
+					},
+					{
+						"holdingId": "bond",
+						"depotId": "A",
+						"assetClass": "bonds",
+						"value": 40000,
+						"currency": "EUR"
+					},
+					{
+						"holdingId": "wallet",
+						"depotId": "A",
+						"assetClass": "cash",
+						"value": 1000,
+						"currency": "EUR"
+					}
+				],
+				"accounts": [
+					{
+						"depotId": "A",
+						"feePerTrade": 0,
+						"minimum": 0,
+						"maximum": 0,
+						"increment": 0.01
+					}
+				],
+				"scenarios": [
+					{
+						"kind": "keep",
+						"mode": "keep"
+					},
+					{
+						"kind": "fresh_cash",
+						"mode": "contribution",
+						"externalCash": 3000
+					},
+					{
+						"kind": "spend_reserve",
+						"mode": "plan",
+						"externalCash": 0,
+						"plan": {
+							"sales": [
+								{
+									"holdingId": "wallet",
+									"amount": 500,
+									"tax": {
+										"amount": 0,
+										"source": "Synthetic cash withdrawal without tax"
+									}
+								}
+							],
+							"purchases": [
+								{
+									"holdingId": "bond",
+									"depotId": "A",
+									"assetClass": "bonds",
+									"amount": 500
+								}
+							]
+						}
+					}
+				]
+			}
+		}
+	}
+}

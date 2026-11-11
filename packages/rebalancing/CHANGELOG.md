@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0 (unreleased)
+
+- Choose the holding that receives a class purchase by rank: a usable price first, then a fund or ETF before a single share, then the larger value, then the smaller holding ID. Holdings gain optional `fund` and `priced` booleans; a holding without them ranks with unpriced single shares, so requests without declarations keep buying the largest holding.
+- Consolidate generated contribution amounts that fall below the smallest order a class's accounts admit into the fewest orders that move the book toward target, instead of leaving them as cash. An order may no longer cost what it buys: an account whose known buy fee is at least the order amount does not admit it.
+- In largest-holding mode, route amounts the first account refuses or caps to the other accounts that hold the class, lowest declared buy fee first, then accounts without declared rules. For example, a 100 contribution into a holding whose account caps orders at 1 now buys 1 there and 99 in the second account that holds the class, where 0.4 retained 99 as cash.
+- Report money no admissible order can take after consolidation and routing as `uninvestedCash`, with `uninvested_below_order_minimum` or `uninvested_above_order_maximum`. Such a scenario is `conditional`, never `feasible`.
+- Keep the current allocation available when the reserve already sits below `cashFloor`, and treat fresh cash that raises the reserve without reaching the floor the same way: both are `conditional` with `reserve_floor_not_reached` and state `reserveShortfall`. A scenario that would lower the reserve below the floor stays `unavailable` with `reserve_shortfall`.
+- Use `rebalance-comparison-v5` for new comparisons. Saved `rebalance-comparison-v4` snapshots replay under the v4 rules and return their original results; they cannot carry `fund` or `priced`. v1 to v3 replay is still refused. To apply the new rules to a saved request, call `compareRebalance(savedSnapshot.request)` and store the new snapshot separately.
+- Direct `allocateContribution` and `projectContributions` results are unchanged, and projections keep `contribution-projection-v3`.
+
 ## 0.4.1 (unreleased)
 
 - Make `AccountRules` an exclusive union: declare either `feePerTrade` (including null) or separate buy/sell fee schedules. TypeScript now rejects missing or conflicting fee declarations, matching the existing runtime validator.

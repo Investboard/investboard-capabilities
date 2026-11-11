@@ -1,4 +1,8 @@
-import type { GoalCashRequest, GoalCashResult } from "./types.js";
+import type {
+	GoalCashRequest,
+	GoalCashResult,
+	GoalCashSnapshot,
+} from "./types.js";
 import { validateRequest } from "./validation.js";
 import { requireInput, requireJson, shape } from "./internal/input-guards.js";
 import { calculateSchedule } from "./internal/schedule.js";
@@ -6,7 +10,8 @@ import { calculateSchedule } from "./internal/schedule.js";
 export type * from "./types.js";
 export { GoalCashInputError } from "./internal/input-guards.js";
 export { LIMITS } from "./limits.js";
-export const METHODOLOGY_VERSION = "goal-cash-schedule-v1" as const;
+export const METHODOLOGY_VERSION = "goal-cash-schedule-v2" as const;
+const LEGACY_VERSION = "goal-cash-schedule-v1" as const;
 
 /** Deterministic cash feasibility, with no network, persistence or wall clock. */
 export function planGoalCash(input: GoalCashRequest): GoalCashResult {
@@ -17,14 +22,23 @@ export function planGoalCash(input: GoalCashRequest): GoalCashResult {
 	});
 }
 
-/** Replays original declared evidence, never current account/provider state. */
+/**
+ * Replays original declared evidence, never current account/provider state.
+ * A version 1 snapshot is recalculated under version 1 rules, so it returns
+ * the result it was saved with.
+ */
 export function replayGoalCash(snapshot: unknown): GoalCashResult {
 	requireJson(snapshot);
 	shape(snapshot, ["methodologyVersion", "request"], "Snapshot");
+	const version = snapshot.methodologyVersion;
 	requireInput(
-		snapshot.methodologyVersion === METHODOLOGY_VERSION,
+		version === METHODOLOGY_VERSION || version === LEGACY_VERSION,
 		"Unsupported cash schedule methodology version",
 	);
-	validateRequest(snapshot.request);
-	return planGoalCash(snapshot.request);
+	validateRequest(snapshot.request, version);
+	const saved: GoalCashSnapshot = {
+		methodologyVersion: version,
+		request: structuredClone(snapshot.request),
+	};
+	return calculateSchedule(saved);
 }

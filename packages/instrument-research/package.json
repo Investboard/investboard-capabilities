@@ -1,12 +1,13 @@
 {
 	"name": "@investboard/instrument-research",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Source-aware instrument history, statement ratios and exact-listing pair comparisons with caller-supplied data and replay",
 	"type": "module",
 	"license": "Apache-2.0",
 	"files": [
 		"dist",
 		"README.md",
+		"CHANGELOG.md",
 		"LICENSE",
 		"NOTICE"
 	],

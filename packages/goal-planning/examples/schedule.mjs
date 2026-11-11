@@ -48,6 +48,28 @@ assert.equal(late.rows[0].liquidityShortfall, 1000);
 assert.equal(late.rows[0].overduePayments, 0);
 assert.equal(late.status, "constrained");
 
+// A goal whose deadline has passed is left out; the complete goal is still scheduled.
+const partial = planGoalCash({
+	...request,
+	goals: [
+		...request.goals,
+		{
+			id: "past",
+			deadline: "2025-10-01",
+			monthlyContribution: 300,
+			targetAmount: 2000,
+			startingCapital: null,
+		},
+	],
+});
+assert.equal(partial.status, "incomplete");
+assert.equal(partial.reasonCodes[0], "partial_schedule_goals_left_out");
+assert.deepEqual(partial.leftOutGoals, [
+	{ goalId: "past", reasonCodes: ["deadline_passed"] },
+]);
+assert.equal(partial.goals[0].fundedTotal, 6000);
+assert.equal(partial.goals[1].fundedTotal, null);
+
 console.table(
 	[distant, tight, late].map((result, i) => ({
 		case: [

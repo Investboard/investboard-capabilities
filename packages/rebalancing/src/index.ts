@@ -1,5 +1,6 @@
 import { releaseCash } from "./internal/cash-funding.js";
 import type {
+	ComparisonMethodology,
 	RebalanceComparison,
 	RebalanceRequest,
 	RebalanceSnapshot,
@@ -16,11 +17,27 @@ export { MAX_SAFE_MINOR_UNITS } from "./internal/money.js";
 export { RebalanceInputError } from "./validation.js";
 export { allocateContribution } from "./contribution.js";
 export { projectContributions } from "./projection.js";
-export const METHODOLOGY_VERSION = "rebalance-comparison-v4" as const;
+export const METHODOLOGY_VERSION = "rebalance-comparison-v5" as const;
+const LEGACY_METHODOLOGY = "rebalance-comparison-v4" as const;
 
 /** Compare caller-selected scenarios for one reporting-currency book. */
 export function compareRebalance(input: RebalanceRequest): RebalanceComparison {
+	return compare(input, METHODOLOGY_VERSION);
+}
+
+function compare(
+	input: RebalanceRequest,
+	methodologyVersion: ComparisonMethodology,
+): RebalanceComparison {
 	const ctx = validateRequest(input);
+	const legacy = methodologyVersion === LEGACY_METHODOLOGY;
+	requireInput(
+		!legacy ||
+			input.holdings.every(
+				(h) => !Object.hasOwn(h, "fund") && !Object.hasOwn(h, "priced"),
+			),
+		"Holding fund and price declarations require rebalance-comparison-v5",
+	);
 	const request = structuredClone(input);
 	const reasons: ReasonCode[] = [];
 	if (request.holdings.some((h) => h.value === null))
@@ -42,17 +59,25 @@ export function compareRebalance(input: RebalanceRequest): RebalanceComparison {
 				: request;
 		switch (scenario.mode) {
 			case "keep":
-				return assess(scope, scenario.kind, 0, [], [], ctx, []);
+				return assess(scope, scenario.kind, 0, [], [], ctx, [], { legacy });
 			case "contribution": {
 				const cash = releaseCash(scope, [], ctx);
+				const generated = cashPurchases(scope, externalCash, ctx, cash, legacy);
 				return assess(
 					scope,
 					scenario.kind,
 					externalCash,
 					[],
-					cashPurchases(scope, externalCash, ctx, cash),
+					generated.purchases,
 					ctx,
 					cash,
+					{
+						legacy,
+						uninvested: {
+							units: generated.uninvestedUnits,
+							reasons: generated.reasons,
+						},
+					},
 				);
 			}
 			case "plan":
@@ -64,6 +89,7 @@ export function compareRebalance(input: RebalanceRequest): RebalanceComparison {
 					scenario.plan.purchases,
 					ctx,
 					releaseCash(scope, scenario.plan.sales, ctx),
+					{ legacy },
 				);
 		}
 	});
@@ -84,7 +110,7 @@ export function compareRebalance(input: RebalanceRequest): RebalanceComparison {
 					ctx.money.sum(b.sales.map((s) => ctx.money.units(s.amount))),
 		);
 	return {
-		methodologyVersion: METHODOLOGY_VERSION,
+		methodologyVersion,
 		baseCurrency: request.baseCurrency,
 		priority,
 		valueBefore: reasons.length
@@ -106,20 +132,25 @@ export function compareRebalance(input: RebalanceRequest): RebalanceComparison {
 				),
 		alternatives,
 		snapshot: {
-			methodologyVersion: METHODOLOGY_VERSION,
+			methodologyVersion,
 			request: structuredClone(request),
 		},
 	};
 }
 
-/** Replay original assumptions. Snapshots are JSON data, not signed attestations. */
+/**
+ * Replay original assumptions under the methodology they were saved with: a
+ * v4 snapshot reproduces its v4 result. Snapshots are JSON data, not signed
+ * attestations.
+ */
 export function replayRebalanceComparison(
 	snapshot: RebalanceSnapshot,
 ): RebalanceComparison {
 	requireShape(snapshot, ["methodologyVersion", "request"], "Snapshot");
 	requireInput(
-		snapshot.methodologyVersion === METHODOLOGY_VERSION,
+		snapshot.methodologyVersion === METHODOLOGY_VERSION ||
+			snapshot.methodologyVersion === LEGACY_METHODOLOGY,
 		"Unsupported snapshot methodology",
 	);
-	return compareRebalance(snapshot.request);
+	return compare(snapshot.request, snapshot.methodologyVersion);
 }

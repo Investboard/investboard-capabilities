@@ -37,6 +37,21 @@ function result(
 	return alternative;
 }
 
+/** The same request under the v4 rules, as a saved v4 snapshot replays it. */
+function v4Result(
+	input: RebalanceRequest,
+	kind: "fresh_cash" | "sales" = "fresh_cash",
+) {
+	const comparison = replayRebalanceComparison({
+		methodologyVersion: "rebalance-comparison-v4",
+		request: compareRebalance(input).snapshot.request,
+	});
+	expect(comparison.methodologyVersion).toBe("rebalance-comparison-v4");
+	const alternative = comparison.alternatives.find((a) => a.kind === kind);
+	if (!alternative) throw new Error("Missing alternative");
+	return alternative;
+}
+
 describe("broker admission before the order cap", () => {
 	it.each([
 		"minimum",
@@ -53,7 +68,22 @@ describe("broker admission before the order cap", () => {
 			input.accounts![0]!.maximum = 20;
 			input.minTradeSize = 25;
 		}
-		const actual = result(input);
+		// v5 consolidates the share no order can take into the admitted order.
+		expect(result(input)).toMatchObject({
+			feasibility: "feasible",
+			invested: 100,
+			cashRetained: 0,
+			feeCost: 0,
+		});
+		expect(result(input).purchases).toEqual([
+			{
+				holdingId: "synthetic-bond",
+				depotId: "B",
+				assetClass: "bonds",
+				amount: 100,
+			},
+		]);
+		const actual = v4Result(input);
 		expect(actual).toMatchObject({
 			feasibility: "feasible",
 			invested: 40,
@@ -68,7 +98,7 @@ describe("broker admission before the order cap", () => {
 				amount: 40,
 			},
 		]);
-		expect(result({ ...input, maxTrades: 2 }).purchases).toEqual(
+		expect(v4Result({ ...input, maxTrades: 2 }).purchases).toEqual(
 			actual.purchases,
 		);
 	});
@@ -90,6 +120,13 @@ describe("broker admission before the order cap", () => {
 		input.accounts![0]!.feePerTrade = 1000;
 		input.accounts![1]!.feePerTrade = 5;
 		expect(result(input)).toMatchObject({
+			feasibility: "feasible",
+			invested: 95,
+			cashRetained: 0,
+			feeCost: 5,
+			valueAfter: 195,
+		});
+		expect(v4Result(input)).toMatchObject({
 			feasibility: "feasible",
 			invested: 38,
 			cashRetained: 57,
@@ -133,7 +170,8 @@ describe("known funding bounds with incomplete costs", () => {
 		input.fundingDepotId = "A";
 		input.transfersConfirmed = true;
 		input.accounts![0]!.minimum = 0;
-		input.accounts![0]!.feePerTrade = 200;
+		// Below each order it charges, so v5 still admits the order.
+		input.accounts![0]!.feePerTrade = 50;
 		input.accounts![1]!.minimum = 0;
 		input.accounts![1]!.feePerTrade = null;
 		if (kind === "sales") {
@@ -168,7 +206,7 @@ describe("known funding bounds with incomplete costs", () => {
 		expect(actual.reasonCodes).toEqual(
 			expect.arrayContaining(["fees_unknown", "insufficient_funding"]),
 		);
-		expect(actual.funding.find((f) => f.depotId === "A")?.fees).toBe(200);
+		expect(actual.funding.find((f) => f.depotId === "A")?.fees).toBe(50);
 		expect(actual.funding.find((f) => f.depotId === "B")?.fees).toBeNull();
 	});
 	it.each([
@@ -228,13 +266,23 @@ describe("known funding bounds with incomplete costs", () => {
 		input.salePlan!.purchases = [
 			{ ...input.salePlan!.purchases[0]!, amount: 100 },
 		];
-		const actual = result(input, "sales");
+		const actual = v4Result(input, "sales");
 		expect(actual.feasibility).toBe(expected);
 		expect(actual.reserveAfter).toBeNull();
 		expect(actual.reasonCodes.includes("reserve_shortfall")).toBe(
 			expected === "unavailable",
 		);
 		expect(actual.reasonCodes).not.toContain("insufficient_funding");
+		// v5: the plan raises the reserve from zero, so a floor it cannot reach
+		// is stated, not refused; the unknown tax still withholds the amount.
+		const current = result(input, "sales");
+		expect(current.feasibility).toBe("conditional");
+		expect(current.reserveAfter).toBeNull();
+		expect(current.reserveShortfall).toBeUndefined();
+		expect(current.reasonCodes.includes("reserve_floor_not_reached")).toBe(
+			expected === "unavailable",
+		);
+		expect(current.reasonCodes).not.toContain("reserve_shortfall");
 	});
 });
 
@@ -251,7 +299,7 @@ describe("comparison methodology compatibility", () => {
 	it("replays the corrected broker and incomplete-cost cases through JSON", () => {
 		for (const input of [constrainedCash(), salesRequest()]) {
 			const comparison = compareRebalance(input);
-			expect(comparison.methodologyVersion).toBe("rebalance-comparison-v4");
+			expect(comparison.methodologyVersion).toBe("rebalance-comparison-v5");
 			expect(
 				replayRebalanceComparison(
 					JSON.parse(JSON.stringify(comparison.snapshot)),

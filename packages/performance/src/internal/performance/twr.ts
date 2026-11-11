@@ -20,9 +20,13 @@ import type {
 	TwrResult,
 } from "./types.js";
 const MAX_ANNUALIZATION_GAP_DAYS = 100;
+/** The shortest window either return annualizes over, shared with `calculateXirr`. */
+export const ANNUALIZATION_MIN_DAYS = 365;
+/** `annualizationMinDays` stays configurable only to replay methodology v3 (366). */
 export function calculateTwr(
 	snapshots: Snapshot[],
 	cashFlows: CashFlow[],
+	annualizationMinDays = ANNUALIZATION_MIN_DAYS,
 ): TwrResult {
 	if (snapshots.length === 0) {
 		return {
@@ -311,7 +315,7 @@ export function calculateTwr(
 	}
 	const totalDays = daysBetween(firstDate, lastDate);
 	let annualizedTwr: number | null = null;
-	if (totalDays > 365) {
+	if (totalDays >= annualizationMinDays) {
 		annualizedTwr = (1 + twr) ** (365.25 / totalDays) - 1;
 	}
 	const shallowHistoryWarning =

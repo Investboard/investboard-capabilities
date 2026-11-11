@@ -2,7 +2,7 @@ import { isIsinShape } from "./identity.js";
 import type { HoldingImpact } from "./result-types.js";
 import type { CrisisDefinition } from "./scenarios/crisis-definitions.js";
 import { resolveStressTestSector } from "./scenarios/sector-enum.js";
-import { applyShock } from "./shock-applicator.js";
+import { ASSET_CLASS_SHOCK_PROXY, applyShock } from "./shock-applicator.js";
 import type { StressHoldingInput } from "./types.js";
 export interface PortfolioImpactResult {
 	holdingImpacts: HoldingImpact[];
@@ -14,7 +14,8 @@ export interface PortfolioImpactResult {
 export function computePortfolioImpact(
 	holdings: StressHoldingInput[],
 	crisis: CrisisDefinition,
-	baseCurrency: "EUR" | "USD" = "EUR",
+	baseCurrency: string = "EUR",
+	standIns: ReadonlyMap<string, string> = ASSET_CLASS_SHOCK_PROXY,
 ): PortfolioImpactResult {
 	if (holdings.length === 0) {
 		return {
@@ -27,7 +28,7 @@ export function computePortfolioImpact(
 	}
 	const holdingImpacts: HoldingImpact[] = holdings.map((holding) => {
 		const isin = holding.isin?.trim().toUpperCase();
-		const shockResult = applyShock(holding, crisis, baseCurrency);
+		const shockResult = applyShock(holding, crisis, baseCurrency, standIns);
 		const resolvedSector = resolveStressTestSector(
 			holding.sector,
 			holding.assetClass,

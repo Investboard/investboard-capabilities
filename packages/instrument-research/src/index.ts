@@ -1,4 +1,5 @@
 import type {
+	MethodologyVersion,
 	PairRequest,
 	PairResult,
 	ResearchRequest,
@@ -19,7 +20,8 @@ import { requireInput, requireJson, shape } from "./internal/input-guards.js";
 export type * from "./types.js";
 export { ResearchInputError } from "./validation.js";
 export { LIMITS } from "./limits.js";
-export const METHODOLOGY_VERSION = "instrument-research-v1" as const;
+export const METHODOLOGY_VERSION = "instrument-research-v2" as const;
+const LEGACY_VERSION = "instrument-research-v1" as const;
 
 function finiteCalculation(value: unknown): void {
 	if (typeof value === "number")
@@ -34,11 +36,18 @@ function finiteCalculation(value: unknown): void {
 export function evaluateInstrumentResearch(
 	input: ResearchRequest,
 ): ResearchResult {
+	return research(input, METHODOLOGY_VERSION);
+}
+
+function research(
+	input: ResearchRequest,
+	methodologyVersion: MethodologyVersion,
+): ResearchResult {
 	validateResearch(input);
 	const original = structuredClone(input);
 	const request = structuredClone(original);
 	const result: ResearchResult = {
-		snapshot: { methodologyVersion: METHODOLOGY_VERSION, request: original },
+		snapshot: { methodologyVersion, request: original },
 		history: { metrics: null, investment: null, reasons: [] },
 		fundamentals: { periods: [], reasons: [] },
 		interpretation:
@@ -81,6 +90,7 @@ export function evaluateInstrumentResearch(
 		result.history.investment = investmentReading(
 			windowPoints(converted.points, request.from, request.to),
 			request.investment,
+			methodologyVersion === LEGACY_VERSION ? 0 : null,
 		);
 	else if (request.investment)
 		result.history.reasons.push("investment_withheld_for_history_coverage");
@@ -90,10 +100,17 @@ export function evaluateInstrumentResearch(
 }
 
 export function evaluateInstrumentPair(input: PairRequest): PairResult {
+	return comparePair(input, METHODOLOGY_VERSION);
+}
+
+function comparePair(
+	input: PairRequest,
+	methodologyVersion: MethodologyVersion,
+): PairResult {
 	validatePair(input);
 	const request = structuredClone(input);
 	const result: PairResult = {
-		snapshot: { methodologyVersion: METHODOLOGY_VERSION, request },
+		snapshot: { methodologyVersion, request },
 		correlations: [],
 		reasons: [],
 		interpretation: "descriptive_pair_not_portfolio_risk",
@@ -113,6 +130,12 @@ export function evaluateInstrumentPair(input: PairRequest): PairResult {
 			points: converted.points,
 		};
 	});
+	// Price-only returns omit distributions the adjusted side reinvests.
+	if (
+		methodologyVersion !== LEGACY_VERSION &&
+		request.series[0].basis !== request.series[1].basis
+	)
+		result.reasons.push("mixed_return_basis");
 	result.correlations = request.horizons.map((horizon) =>
 		referenceCorrelation(
 			series[0]!,
@@ -132,21 +155,24 @@ function validateSnapshot(
 	requireJson(snapshot);
 	shape(snapshot, ["methodologyVersion", "request"], "Snapshot");
 	requireInput(
-		snapshot.methodologyVersion === METHODOLOGY_VERSION,
+		snapshot.methodologyVersion === METHODOLOGY_VERSION ||
+			snapshot.methodologyVersion === LEGACY_VERSION,
 		"Unsupported snapshot methodology",
 	);
 }
+/** A version 1 snapshot is recalculated under version 1 rules. */
 export function replayInstrumentResearch(
 	snapshot: Snapshot<ResearchRequest>,
 ): ResearchResult {
 	validateSnapshot(snapshot);
 	validateResearch(snapshot.request);
-	return evaluateInstrumentResearch(snapshot.request);
+	return research(snapshot.request, snapshot.methodologyVersion);
 }
+/** A version 1 snapshot is recalculated under version 1 rules. */
 export function replayInstrumentPair(
 	snapshot: Snapshot<PairRequest>,
 ): PairResult {
 	validateSnapshot(snapshot);
 	validatePair(snapshot.request);
-	return evaluateInstrumentPair(snapshot.request);
+	return comparePair(snapshot.request, snapshot.methodologyVersion);
 }

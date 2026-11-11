@@ -32,7 +32,7 @@ npm pack
 Install the generated tarball in your application:
 
 ```sh
-npm install /path/to/investboard-capabilities/packages/performance/investboard-performance-0.3.0.tgz
+npm install /path/to/investboard-capabilities/packages/performance/investboard-performance-0.4.0.tgz
 ```
 
 The package provides ESM JavaScript and TypeScript declarations through its root export. Its two calculation functions are `evaluatePerformance(request)` and `replayPerformance(snapshot)`. It also exports `PerformanceInputError`, `METHODOLOGY_VERSION`, `LIMITS`, and the public [types](src/types.ts).
@@ -90,12 +90,16 @@ The public names `buy` and `sell` describe security funding into and out of the 
 | `positions` | Include sold and closed holdings, not only today's positive positions |
 | `effects` | Complete position-effect ledger through `asOfDate`, including effects after the measured window |
 | `cashFlows` | Funding and gross distributed income; amounts are nonnegative and the type supplies the direction |
-| `recordedCosts` | Optional dated fees and taxes; omitted means unknown, `[]` means no recorded costs, `taxes: null` preserves unknown taxes |
+| `recordedCosts` | Optional dated fees and taxes; omitted means unknown, `[]` means no recorded costs, `taxes: null` preserves unknown taxes, `standalone: true` marks a fee booked on its own |
 | `scopeHoldingIds` | Optional fixed historical basket; NAV and flows are rebuilt before every metric is calculated |
 
 For an in-window buy or sell effect after the opening date, supply a cash flow with the **same ID, holding, type and date**. Opening-date funding is already embedded in the first NAV and is excluded from return funding; opening-date dividends remain income. A flow with no known holding uses explicit `holdingId: null`. Such capital lowers coverage or makes it unknown; it is never silently assigned to a holding.
 
 Caller-selected baskets can represent asset classes or depots. Classification and identity evidence belong to the caller. The engine selects a fixed set of IDs, including their closed history; it does not claim historical look-through classification. A selected basket requires complete valuations and assignable flows and costs. Otherwise it returns `scope_history_missing`, rather than combining selected NAV with whole-book returns. `calculation.scope.navBasis` distinguishes supplied NAV from reconstructed basket NAV.
+
+## Fees booked on their own
+
+A recorded cost normally describes a fee or tax inside a trade, already part of that trade's funding amount; it explains part of the result in the wealth bridge and never enters the returns again. A fee booked on its own, such as a custody or account fee, is different: it is money paid into the book that buys nothing. Mark it with `standalone: true`. The engine adds its `fees` to the flow series on its date as a contribution with no value added, so the time-weighted and money-weighted returns both fall by it. For example, a fee of 10 paid on the middle valuation date of a 10,000 book that then rises to 11,000 turns a 10% return into 0.999 × 1.1 - 1 = 9.89%. The wealth bridge counts it in `securityFunding` and `recordedFees`, so the investment result carries it and the recorded fee explains it with no residual. The attribution reports it at portfolio level as `recordedCostContribution` (and `recordedCostContributionPp`), never as unlinked capital or residual; the field is present only when the request records a standalone fee. A standalone fee dated on the opening snapshot falls before the measured window, like opening-date funding. Its `taxes` keep the ordinary treatment. In a selected basket, a standalone fee follows the holding it names; one with `holdingId: null` makes the basket return `scope_history_missing`, like any unassigned cost.
 
 ## Position, price and FX evidence
 
@@ -113,7 +117,7 @@ An unpaired signed `transfer` effect crosses the book's boundary. The engine val
 
 Every in-window transfer after the opening date requires an **observed NAV boundary** on its date. Missing boundaries or valuation evidence produce `transfer_valuation_missing` with no calculation. The engine does not insert carried NAV to make a transfer look supported. Transfer funding is generated automatically; do not also supply it in `cashFlows`. Selecting one side of a pair makes the movement external to the selected basket.
 
-Monetary boundaries use symmetric half-away-from-zero cent rounding, correcting only machine-precision noise around half-cent ties. Scoped NAV, coverage and external transfer funding use the same compensated summation of original reporting-currency amounts, with cent rounding applied once to the total. This preserves small net amounts amid large offsetting flows. Original prices, FX rates, allocation remainders and expense estimates retain their precision. Cent grain is allocated by largest fractional remainder, with effect IDs resolving ties deterministically. Each transfer's `value` is nonnegative. Its `roundingAdjustment` is that value minus the independently rounded magnitude, including for outgoing transfers. Internal pairs retain equal, opposite funding. Book rounding can remain in the wealth bridge and return attribution residuals.
+Monetary boundaries use symmetric half-away-from-zero cent rounding, correcting only machine-precision noise around half-cent ties. Scoped NAV, coverage and external transfer funding use the same compensated summation of original reporting-currency amounts, with cent rounding applied once to the total. Each amount carries its own binary representation error into that total, so a half-cent tie is judged against the combined magnitude of the amounts: same-day transfers of +100.005 and -99 fund 1.01, not 1.00. This preserves small net amounts amid large offsetting flows. Original prices, FX rates, allocation remainders and expense estimates retain their precision. Cent grain is allocated by largest fractional remainder, with effect IDs resolving ties deterministically. Each transfer's `value` is nonnegative. Its `roundingAdjustment` is that value minus the independently rounded magnitude, including for outgoing transfers. Internal pairs retain equal, opposite funding. Book rounding can remain in the wealth bridge and return attribution residuals.
 
 ## Read the result
 
@@ -123,16 +127,16 @@ Monetary boundaries use symmetric half-away-from-zero cent rounding, correcting 
 | --- | --- |
 | `timeWeightedReturn` | Modified Dietz return, geometrically linked at funding boundaries, including distributed dividends |
 | `moneyWeightedReturn` | Annualized XIRR including opening wealth, in-window funding and income, and terminal wealth |
-| `attribution` | Frongello-linked holding contributions, explicit residual, and optional independent price/FX contributions |
+| `attribution` | Frongello-linked holding contributions, recorded standalone fees, explicit residual, and optional independent price/FX contributions |
 | `currencyAttribution` | Holding contributions grouped by quote currency, distinct from the FX effect |
 | `coverage.fraction` | Historical capital-days coverage, or `null` when the denominator is unknown |
 | `fundCostEstimate` | Current recorded fund rates applied to actual historical exposure, never deducted again from observed returns |
 | `wealthBridge` | Opening wealth + net external flows + investment result = closing wealth, with price, FX, distributed income, recorded costs and residual |
 | `positions`, `replay`, `transfers` | Inclusion decisions, opening-balance provenance, reconstructed quantities and transfer valuation evidence |
 
-Returns and coverage fractions use decimal units: `0.10` means 10%. Named fields ending in `Pct` use percent and `Pp` use percentage points. Contributions sum with the residual to the official return; the residual is never redistributed across named holdings. A reconciliation identity alone cannot prove that the input prices, exchange rates or dates are correct.
+Returns and coverage fractions use decimal units: `0.10` means 10%. Named fields ending in `Pct` use percent and `Pp` use percentage points. Contributions sum with any recorded standalone fees and the residual to the official return; the residual is never redistributed across named holdings. A reconciliation identity alone cannot prove that the input prices, exchange rates or dates are correct.
 
-Modified Dietz is an approximation when capital arrives between observed valuations. Sparse snapshot history remains flagged. TWR annualization uses 365.25 days and is absent below a year. XIRR uses Act/365F, withholds annualization below 365 days, searches rates between -99.9% and 1000%, and reports failure rather than inventing a rate. Irregular cash flows may have multiple mathematical roots; the selected root is not guaranteed unique.
+Modified Dietz is an approximation when capital arrives between observed valuations. Sparse snapshot history remains flagged. Both returns annualize a window of at least 365 days and withhold annualization below it. TWR annualization uses a 365.25-day exponent. XIRR uses Act/365F, searches rates between -99.9% and 1000%, and reports failure rather than inventing a rate. Irregular cash flows may have multiple mathematical roots; the selected root is not guaranteed unique.
 
 XIRR nets same-day flows and terminal wealth in exact cents before solving. Neutral turnover cannot inflate the convergence tolerance. A Newton step blocked by a rate bound does not establish convergence; a successful rate must pass the net-flow NPV check.
 
@@ -144,9 +148,9 @@ Inputs must be plain JSON data. Unknown fields, explicit `undefined`, accessors,
 
 `LIMITS` caps each request at 200 positions, 5,000 snapshots, 10,000 combined effects/flows/cost rows, 100,000 combined price/FX points and one million position/date cells. Supplied and calculated wealth is capped at one billion reporting-currency units; quantities at one billion; FX rates at one million. This version assumes two-decimal accounting units, including for currencies whose native minor-unit conventions differ. It is not arbitrary-precision accounting.
 
-`result.snapshot` defensively copies the complete request, including basket selection, and pins `actual-position-performance-v3`. `replayPerformance` validates that version and recalculates only those inputs. It refuses unsupported methodology versions. Snapshots are unsigned and may contain sensitive caller-supplied history; storage, access control and retention belong to your application. No provider, authentication, database, account, app UI or hosted-service implementation is included.
+`result.snapshot` defensively copies the complete request, including basket selection, and pins `actual-position-performance-v4`. `replayPerformance` validates the saved version and recalculates only those inputs under that version's rules. It refuses unsupported methodology versions. Snapshots are unsigned and may contain sensitive caller-supplied history; storage, access control and retention belong to your application. No provider, authentication, database, account, app UI or hosted-service implementation is included.
 
-Package 0.3.0 introduces methodology v3 for full-precision aggregate rounding, retaining the earlier XIRR and cent-normalization corrections. It explicitly refuses v1 and v2 snapshots with `PerformanceInputError`. To recalculate their original inputs under the corrected methodology, call `evaluatePerformance(savedSnapshot.request)` and retain the new v3 snapshot. This produces a new analysis; it does not reproduce a historical v1 or v2 result.
+Package 0.4.0 introduces methodology v4: standalone fees, one 365-day annualization threshold for both returns, and half-cent ties judged against the summed amounts. A saved v3 snapshot still replays under the v3 rules and returns the result it was saved with: the time-weighted return annualizes only beyond 365 days, transfer ties are judged against the net, and a v3 request cannot declare a standalone fee. To apply the v4 rules to saved inputs, call `evaluatePerformance(savedSnapshot.request)` and retain the new v4 snapshot. v1 and v2 snapshots remain refused with `PerformanceInputError`. See the [changelog](CHANGELOG.md).
 
 The pure return, position-replay and attribution algorithms are adapted from Investboard's performance engine. The public request validation, evidence assembly and package boundary are independently maintained here. Future calculation changes require a compatibility decision for saved methodology versions.
 
