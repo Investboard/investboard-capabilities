@@ -68,7 +68,7 @@
 			"documentation": "packages/portfolio-intelligence/README.md",
 			"appParity": {
 				"app": "investboard",
-				"commit": null
+				"commit": "e47f299efaa508011a9d0d7a7b1194883addf417"
 			}
 		}
 	]
