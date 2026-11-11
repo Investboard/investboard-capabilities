@@ -1,6 +1,8 @@
 node_modules/
 dist/
-coverage/
+# Test coverage output only; a source folder named coverage is code.
+/coverage/
+/packages/*/coverage/
 test-results/
 .env
 .env.*
