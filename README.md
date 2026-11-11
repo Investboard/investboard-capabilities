@@ -2,9 +2,9 @@
 
 ## Build your own investing engine
 
-Bring [Investboard](https://investboard.com) portfolio analysis into your own code. Use reusable TypeScript modules to explore market crises, explain historical performance, compare ways to rebalance with new cash, research individual instruments, and make the assumptions visible in your own investing tools.
+Bring [Investboard](https://investboard.com) portfolio analysis into your own code. Use reusable TypeScript modules to see what your funds really hold, explore market crises, explain historical performance, compare ways to rebalance with new cash, research individual instruments, and make the assumptions visible in your own investing tools.
 
-Start with **[portfolio stress testing](packages/stress-test)**, **[contribution-aware rebalancing](packages/rebalancing)**, **[historical performance](packages/performance)**, **[goal cash scheduling](packages/goal-planning)** or **[instrument research](packages/instrument-research)**. Run the modules locally, connect your own data, and build the experience you want around them.
+Start with **[portfolio look-through](packages/portfolio-intelligence)**, **[portfolio stress testing](packages/stress-test)**, **[contribution-aware rebalancing](packages/rebalancing)**, **[historical performance](packages/performance)**, **[goal cash scheduling](packages/goal-planning)** or **[instrument research](packages/instrument-research)**. Run the modules locally, connect your own data, and build the experience you want around them.
 
 **[Run the examples](#try-it-with-your-own-code)** · **[Explore the modules](#available-modules)**
 
@@ -29,6 +29,7 @@ A holdings list tells you what you own. Scenario analysis helps you explore how 
 | Historical performance dashboard | Separate funding from gains, explain holding contributions and quote FX, and estimate embedded fund expenses |
 | Goal cash planner | Share cash across goals while protecting reserves, funding dated expenses and identifying deadline shortfalls |
 | Instrument research dossier | Inspect exact-listing history, reported statement ratios and common-week comparisons with your own dated sources |
+| Portfolio X-ray | Look through funds to the companies inside, compare fund overlap, and measure concentration and historical correlations |
 
 ## Start with portfolio stress testing
 
@@ -70,6 +71,14 @@ The [instrument-research module](packages/instrument-research) keeps exact listi
 
 Run the synthetic GBP/CHF example with `pnpm example:research`. See the [API, evidence conventions and replay](packages/instrument-research/README.md) before connecting your own sources.
 
+## See what your portfolio really owns
+
+The [portfolio look-through module](packages/portfolio-intelligence) is the calculation behind Investboard's X-Ray and Diversification view. Supply your holdings and the constituent lists of your funds to see each company's share of your whole portfolio, held directly and through each fund. Measure exposures by asset class, sector, country, region and currency, the overlap between funds, and concentration in single companies with explicit bounds. Supply price history to read how your holdings moved together over 1, 3, 5 and 10 years.
+
+Only equity funds are looked through: cash, bond, gold and crypto funds stay whole in their class. Funds without a list, unvalued holdings and unclassified companies remain visible as missing data. A parity check holds the module's figures equal to Investboard's own engine on seven synthetic portfolios.
+
+Run the synthetic example with `pnpm example:intelligence`. See the [API, look-through rules and replay](packages/portfolio-intelligence/README.md), or let an AI agent run it with the [Portfolio Intelligence engine skill](skills/portfolio-intelligence-engine).
+
 ## Try it with your own code
 
 Use Node 22 or newer and pnpm 9.15.0:
@@ -81,9 +90,9 @@ pnpm install --frozen-lockfile
 pnpm example
 ```
 
-The examples use synthetic data. Stress testing shows why two quote currencies do not automatically imply two economic exposures. Rebalancing shows how new cash can reach a target allocation, how per-depot tax changes funding, and why contributions below a trade minimum remain cash. Performance separates historical price and quote-FX effects. Goal scheduling shows how payment timing changes the required cash buffer and contribution funding. Instrument research retains exact listing identity and reported currency while comparing supplied price and FX histories. All five examples replay their original inputs.
+The examples use synthetic data. Stress testing shows why two quote currencies do not automatically imply two economic exposures. Rebalancing shows how new cash can reach a target allocation, how per-depot tax changes funding, and why contributions below a trade minimum remain cash. Performance separates historical price and quote-FX effects. Goal scheduling shows how payment timing changes the required cash buffer and contribution funding. Instrument research retains exact listing identity and reported currency while comparing supplied price and FX histories. Portfolio look-through shows one company held directly and through two overlapping funds, and keeps a fund without a list visible as missing data. All six examples replay their original inputs.
 
-Ready to add a capability to your own engine? **[Build the stress-testing module](packages/stress-test/README.md#use-it-in-your-project)**, **[build the rebalancing module](packages/rebalancing/README.md#use-it-in-your-project)**, **[build the performance module](packages/performance/README.md#use-it-in-your-project)**, **[build the goal-planning module](packages/goal-planning/README.md#use-it-in-your-project)** or **[build the research module](packages/instrument-research/README.md#use-it-in-your-project)**, then supply the data and assumptions that fit your workflow.
+Ready to add a capability to your own engine? **[Build the stress-testing module](packages/stress-test/README.md#use-it-in-your-project)**, **[build the rebalancing module](packages/rebalancing/README.md#use-it-in-your-project)**, **[build the performance module](packages/performance/README.md#use-it-in-your-project)**, **[build the goal-planning module](packages/goal-planning/README.md#use-it-in-your-project)** **[build the research module](packages/instrument-research/README.md#use-it-in-your-project)** or **[build the look-through module](packages/portfolio-intelligence/README.md#use-it-in-your-project)**, then supply the data and assumptions that fit your workflow.
 
 ## Available modules
 
@@ -94,6 +103,7 @@ Ready to add a capability to your own engine? **[Build the stress-testing module
 | Historical portfolio performance | `@investboard/performance` | [API, accounting conventions and replay](packages/performance/README.md) |
 | Deadline-aware goal cash scheduling | `@investboard/goal-planning` | [API, timing conventions and replay](packages/goal-planning/README.md) |
 | Source-aware instrument research | `@investboard/instrument-research` | [API, evidence conventions and replay](packages/instrument-research/README.md) |
+| Portfolio look-through and diversification | `@investboard/portfolio-intelligence` | [API, look-through rules and replay](packages/portfolio-intelligence/README.md) |
 
 [Browse the module catalogue](capabilities.json) · [Contribute a capability or improvement](CONTRIBUTING.md)
 

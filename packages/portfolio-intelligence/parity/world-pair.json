@@ -1,0 +1,4740 @@
+{
+	"name": "world-pair",
+	"description": "Two world funds sharing companies, one company also held directly, and cash.",
+	"basisParity": true,
+	"request": {
+		"asOf": "2026-10-30",
+		"baseCurrency": "EUR",
+		"holdings": [
+			{
+				"id": "world",
+				"kind": "fund",
+				"name": "Synthetic All-World UCITS ETF",
+				"isin": "IESYN0000110",
+				"ticker": "WRLD",
+				"value": 6000,
+				"listingCurrency": "EUR",
+				"assetClass": "equities"
+			},
+			{
+				"id": "core",
+				"kind": "fund",
+				"name": "Synthetic Core World UCITS ETF",
+				"isin": "IESYN0000120",
+				"ticker": "CORE",
+				"value": 3000,
+				"listingCurrency": "EUR",
+				"assetClass": "equities"
+			},
+			{
+				"id": "alder",
+				"kind": "security",
+				"name": "Alder Inc.",
+				"isin": "US1111110005",
+				"ticker": "ALDR",
+				"value": 500,
+				"listingCurrency": "USD",
+				"assetClass": "equities"
+			},
+			{
+				"id": "cash",
+				"kind": "cash",
+				"name": "Cash",
+				"value": 500,
+				"listingCurrency": "EUR",
+				"assetClass": "cash"
+			}
+		],
+		"funds": [
+			{
+				"holdingId": "world",
+				"holdings": {
+					"status": "listed",
+					"asOf": "2026-09-30",
+					"constituents": [
+						{
+							"id": "ALDR",
+							"isin": "US1111110005",
+							"name": "Alder Inc.",
+							"weight": 0.25
+						},
+						{
+							"id": "CDSF",
+							"isin": "US4444441045",
+							"name": "Cedarsoft Corp.",
+							"weight": 0.2
+						},
+						{
+							"id": "ELMT",
+							"isin": "US5555551040",
+							"name": "Elmtron Corp.",
+							"weight": 0.15
+						},
+						{
+							"id": "MAPLE",
+							"isin": "DESYN0000010",
+							"name": "Maple SE",
+							"weight": 0.1
+						},
+						{
+							"id": "PNCR",
+							"isin": "CHSYN0000040",
+							"name": "Pinecrest SA",
+							"weight": 0.1
+						},
+						{
+							"id": "SYSC",
+							"isin": "TWSYN0000050",
+							"name": "Synthetic Semiconductor Co.",
+							"weight": 0.1
+						},
+						{
+							"id": "RVMT",
+							"isin": "US3333331067",
+							"name": "Rivermart.com Inc.",
+							"weight": 0.08
+						}
+					]
+				},
+				"sectorBreakdown": [
+					{
+						"key": "Technology",
+						"weight": 0.6
+					},
+					{
+						"key": "Financial Services",
+						"weight": 0.2
+					}
+				],
+				"countryBreakdown": [
+					{
+						"key": "United States",
+						"weight": 0.7
+					},
+					{
+						"key": "Germany",
+						"weight": 0.1
+					}
+				]
+			},
+			{
+				"holdingId": "core",
+				"holdings": {
+					"status": "listed",
+					"asOf": "2026-09-30",
+					"constituents": [
+						{
+							"id": "ALDR",
+							"isin": "US1111110005",
+							"name": "Alder Inc.",
+							"weight": 0.3
+						},
+						{
+							"id": "CDSF",
+							"isin": "US4444441045",
+							"name": "Cedarsoft Corp.",
+							"weight": 0.25
+						},
+						{
+							"id": "ELMT",
+							"isin": "US5555551040",
+							"name": "Elmtron Corp.",
+							"weight": 0.2
+						},
+						{
+							"id": "RVMT",
+							"isin": "US3333331067",
+							"name": "Rivermart.com Inc.",
+							"weight": 0.15
+						},
+						{
+							"id": "MAPLE",
+							"isin": "DESYN0000010",
+							"name": "Maple SE",
+							"weight": 0.08
+						}
+					]
+				}
+			}
+		],
+		"securities": [
+			{
+				"isin": "US1111110005",
+				"name": "Alder Inc.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US4444441045",
+				"name": "Cedarsoft Corp.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US5555551040",
+				"name": "Elmtron Corp.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US3333331067",
+				"name": "Rivermart.com Inc.",
+				"sector": "Consumer Cyclical",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "DESYN0000010",
+				"name": "Maple SE",
+				"sector": "Technology",
+				"country": "Germany",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "CHSYN0000040",
+				"name": "Pinecrest SA",
+				"sector": "Consumer Defensive",
+				"country": "Switzerland",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "TWSYN0000050",
+				"name": "Synthetic Semiconductor Co.",
+				"sector": "Technology",
+				"country": "Taiwan",
+				"assetClass": "equities"
+			}
+		]
+	},
+	"correlation": {
+		"asOf": "2026-10-30",
+		"baseCurrency": "EUR",
+		"holdings": [
+			{
+				"id": "world",
+				"value": 6000,
+				"priceCurrency": "EUR"
+			},
+			{
+				"id": "core",
+				"value": 3000,
+				"priceCurrency": "EUR"
+			},
+			{
+				"id": "alder",
+				"value": 500,
+				"priceCurrency": "EUR"
+			},
+			{
+				"id": "cash",
+				"value": 500,
+				"priceCurrency": "EUR"
+			}
+		],
+		"closes": [
+			{
+				"id": "world",
+				"date": "2021-01-29",
+				"close": 98.375535
+			},
+			{
+				"id": "core",
+				"date": "2021-01-29",
+				"close": 100.120144
+			},
+			{
+				"id": "alder",
+				"date": "2021-01-29",
+				"close": 100.421518
+			},
+			{
+				"id": "world",
+				"date": "2021-02-05",
+				"close": 96.468979
+			},
+			{
+				"id": "core",
+				"date": "2021-02-05",
+				"close": 99.438714
+			},
+			{
+				"id": "alder",
+				"date": "2021-02-05",
+				"close": 98.162304
+			},
+			{
+				"id": "world",
+				"date": "2021-02-12",
+				"close": 96.889506
+			},
+			{
+				"id": "core",
+				"date": "2021-02-12",
+				"close": 101.776196
+			},
+			{
+				"id": "alder",
+				"date": "2021-02-12",
+				"close": 99.966452
+			},
+			{
+				"id": "world",
+				"date": "2021-02-19",
+				"close": 94.604147
+			},
+			{
+				"id": "core",
+				"date": "2021-02-19",
+				"close": 99.026931
+			},
+			{
+				"id": "alder",
+				"date": "2021-02-19",
+				"close": 97.632849
+			},
+			{
+				"id": "world",
+				"date": "2021-02-26",
+				"close": 94.254174
+			},
+			{
+				"id": "core",
+				"date": "2021-02-26",
+				"close": 98.330466
+			},
+			{
+				"id": "alder",
+				"date": "2021-02-26",
+				"close": 97.296418
+			},
+			{
+				"id": "world",
+				"date": "2021-03-05",
+				"close": 94.484659
+			},
+			{
+				"id": "core",
+				"date": "2021-03-05",
+				"close": 96.142047
+			},
+			{
+				"id": "alder",
+				"date": "2021-03-05",
+				"close": 96.726398
+			},
+			{
+				"id": "world",
+				"date": "2021-03-12",
+				"close": 93.003987
+			},
+			{
+				"id": "core",
+				"date": "2021-03-12",
+				"close": 92.271483
+			},
+			{
+				"id": "alder",
+				"date": "2021-03-12",
+				"close": 93.856417
+			},
+			{
+				"id": "world",
+				"date": "2021-03-19",
+				"close": 93.371483
+			},
+			{
+				"id": "core",
+				"date": "2021-03-19",
+				"close": 92.345478
+			},
+			{
+				"id": "alder",
+				"date": "2021-03-19",
+				"close": 92.668461
+			},
+			{
+				"id": "world",
+				"date": "2021-03-26",
+				"close": 93.37369
+			},
+			{
+				"id": "core",
+				"date": "2021-03-26",
+				"close": 90.651195
+			},
+			{
+				"id": "alder",
+				"date": "2021-03-26",
+				"close": 91.592853
+			},
+			{
+				"id": "world",
+				"date": "2021-04-02",
+				"close": 92.071965
+			},
+			{
+				"id": "core",
+				"date": "2021-04-02",
+				"close": 89.662514
+			},
+			{
+				"id": "alder",
+				"date": "2021-04-02",
+				"close": 89.989265
+			},
+			{
+				"id": "world",
+				"date": "2021-04-09",
+				"close": 91.598494
+			},
+			{
+				"id": "core",
+				"date": "2021-04-09",
+				"close": 86.793693
+			},
+			{
+				"id": "alder",
+				"date": "2021-04-09",
+				"close": 86.833425
+			},
+			{
+				"id": "world",
+				"date": "2021-04-16",
+				"close": 90.20716
+			},
+			{
+				"id": "core",
+				"date": "2021-04-16",
+				"close": 85.791295
+			},
+			{
+				"id": "alder",
+				"date": "2021-04-16",
+				"close": 85.685073
+			},
+			{
+				"id": "world",
+				"date": "2021-04-23",
+				"close": 89.340013
+			},
+			{
+				"id": "core",
+				"date": "2021-04-23",
+				"close": 84.510855
+			},
+			{
+				"id": "alder",
+				"date": "2021-04-23",
+				"close": 86.40238
+			},
+			{
+				"id": "world",
+				"date": "2021-04-30",
+				"close": 90.446525
+			},
+			{
+				"id": "core",
+				"date": "2021-04-30",
+				"close": 86.631411
+			},
+			{
+				"id": "alder",
+				"date": "2021-04-30",
+				"close": 86.911033
+			},
+			{
+				"id": "world",
+				"date": "2021-05-07",
+				"close": 88.177052
+			},
+			{
+				"id": "core",
+				"date": "2021-05-07",
+				"close": 85.218112
+			},
+			{
+				"id": "alder",
+				"date": "2021-05-07",
+				"close": 84.895407
+			},
+			{
+				"id": "world",
+				"date": "2021-05-14",
+				"close": 86.279341
+			},
+			{
+				"id": "core",
+				"date": "2021-05-14",
+				"close": 84.962024
+			},
+			{
+				"id": "alder",
+				"date": "2021-05-14",
+				"close": 83.929274
+			},
+			{
+				"id": "world",
+				"date": "2021-05-21",
+				"close": 87.405457
+			},
+			{
+				"id": "core",
+				"date": "2021-05-21",
+				"close": 84.533054
+			},
+			{
+				"id": "alder",
+				"date": "2021-05-21",
+				"close": 85.421864
+			},
+			{
+				"id": "world",
+				"date": "2021-05-28",
+				"close": 87.498347
+			},
+			{
+				"id": "core",
+				"date": "2021-05-28",
+				"close": 87.662273
+			},
+			{
+				"id": "alder",
+				"date": "2021-05-28",
+				"close": 87.433306
+			},
+			{
+				"id": "world",
+				"date": "2021-06-04",
+				"close": 87.288055
+			},
+			{
+				"id": "core",
+				"date": "2021-06-04",
+				"close": 88.196374
+			},
+			{
+				"id": "alder",
+				"date": "2021-06-04",
+				"close": 88.927902
+			},
+			{
+				"id": "world",
+				"date": "2021-06-11",
+				"close": 86.396859
+			},
+			{
+				"id": "core",
+				"date": "2021-06-11",
+				"close": 86.683418
+			},
+			{
+				"id": "alder",
+				"date": "2021-06-11",
+				"close": 88.488006
+			},
+			{
+				"id": "world",
+				"date": "2021-06-18",
+				"close": 87.011478
+			},
+			{
+				"id": "core",
+				"date": "2021-06-18",
+				"close": 88.077663
+			},
+			{
+				"id": "alder",
+				"date": "2021-06-18",
+				"close": 89.936309
+			},
+			{
+				"id": "world",
+				"date": "2021-06-25",
+				"close": 84.598475
+			},
+			{
+				"id": "core",
+				"date": "2021-06-25",
+				"close": 84.958426
+			},
+			{
+				"id": "alder",
+				"date": "2021-06-25",
+				"close": 87.157989
+			},
+			{
+				"id": "world",
+				"date": "2021-07-02",
+				"close": 85.056228
+			},
+			{
+				"id": "core",
+				"date": "2021-07-02",
+				"close": 87.397591
+			},
+			{
+				"id": "alder",
+				"date": "2021-07-02",
+				"close": 88.348807
+			},
+			{
+				"id": "world",
+				"date": "2021-07-09",
+				"close": 84.494309
+			},
+			{
+				"id": "core",
+				"date": "2021-07-09",
+				"close": 85.479712
+			},
+			{
+				"id": "alder",
+				"date": "2021-07-09",
+				"close": 86.908093
+			},
+			{
+				"id": "world",
+				"date": "2021-07-16",
+				"close": 82.328696
+			},
+			{
+				"id": "core",
+				"date": "2021-07-16",
+				"close": 83.064679
+			},
+			{
+				"id": "alder",
+				"date": "2021-07-16",
+				"close": 83.922637
+			},
+			{
+				"id": "world",
+				"date": "2021-07-23",
+				"close": 81.915896
+			},
+			{
+				"id": "core",
+				"date": "2021-07-23",
+				"close": 81.338642
+			},
+			{
+				"id": "alder",
+				"date": "2021-07-23",
+				"close": 81.354408
+			},
+			{
+				"id": "world",
+				"date": "2021-07-30",
+				"close": 81.361045
+			},
+			{
+				"id": "core",
+				"date": "2021-07-30",
+				"close": 81.489904
+			},
+			{
+				"id": "alder",
+				"date": "2021-07-30",
+				"close": 79.525753
+			},
+			{
+				"id": "world",
+				"date": "2021-08-06",
+				"close": 82.947441
+			},
+			{
+				"id": "core",
+				"date": "2021-08-06",
+				"close": 82.827871
+			},
+			{
+				"id": "alder",
+				"date": "2021-08-06",
+				"close": 80.913943
+			},
+			{
+				"id": "world",
+				"date": "2021-08-13",
+				"close": 82.948182
+			},
+			{
+				"id": "core",
+				"date": "2021-08-13",
+				"close": 81.018528
+			},
+			{
+				"id": "alder",
+				"date": "2021-08-13",
+				"close": 79.491434
+			},
+			{
+				"id": "world",
+				"date": "2021-08-20",
+				"close": 83.627992
+			},
+			{
+				"id": "core",
+				"date": "2021-08-20",
+				"close": 82.577043
+			},
+			{
+				"id": "alder",
+				"date": "2021-08-20",
+				"close": 79.477574
+			},
+			{
+				"id": "world",
+				"date": "2021-08-27",
+				"close": 84.826577
+			},
+			{
+				"id": "core",
+				"date": "2021-08-27",
+				"close": 83.758775
+			},
+			{
+				"id": "alder",
+				"date": "2021-08-27",
+				"close": 80.416659
+			},
+			{
+				"id": "world",
+				"date": "2021-09-03",
+				"close": 84.24403
+			},
+			{
+				"id": "core",
+				"date": "2021-09-03",
+				"close": 82.751821
+			},
+			{
+				"id": "alder",
+				"date": "2021-09-03",
+				"close": 78.770143
+			},
+			{
+				"id": "world",
+				"date": "2021-09-10",
+				"close": 83.434814
+			},
+			{
+				"id": "core",
+				"date": "2021-09-10",
+				"close": 81.916748
+			},
+			{
+				"id": "alder",
+				"date": "2021-09-10",
+				"close": 79.548839
+			},
+			{
+				"id": "world",
+				"date": "2021-09-17",
+				"close": 81.677136
+			},
+			{
+				"id": "core",
+				"date": "2021-09-17",
+				"close": 78.998525
+			},
+			{
+				"id": "alder",
+				"date": "2021-09-17",
+				"close": 76.620268
+			},
+			{
+				"id": "world",
+				"date": "2021-09-24",
+				"close": 81.383394
+			},
+			{
+				"id": "core",
+				"date": "2021-09-24",
+				"close": 77.845811
+			},
+			{
+				"id": "alder",
+				"date": "2021-09-24",
+				"close": 75.133028
+			},
+			{
+				"id": "world",
+				"date": "2021-10-01",
+				"close": 80.099258
+			},
+			{
+				"id": "core",
+				"date": "2021-10-01",
+				"close": 75.907613
+			},
+			{
+				"id": "alder",
+				"date": "2021-10-01",
+				"close": 73.436218
+			},
+			{
+				"id": "world",
+				"date": "2021-10-08",
+				"close": 80.455745
+			},
+			{
+				"id": "core",
+				"date": "2021-10-08",
+				"close": 75.927092
+			},
+			{
+				"id": "alder",
+				"date": "2021-10-08",
+				"close": 74.05467
+			},
+			{
+				"id": "world",
+				"date": "2021-10-15",
+				"close": 79.701289
+			},
+			{
+				"id": "core",
+				"date": "2021-10-15",
+				"close": 76.658033
+			},
+			{
+				"id": "alder",
+				"date": "2021-10-15",
+				"close": 74.806039
+			},
+			{
+				"id": "world",
+				"date": "2021-10-22",
+				"close": 79.348525
+			},
+			{
+				"id": "core",
+				"date": "2021-10-22",
+				"close": 75.238669
+			},
+			{
+				"id": "alder",
+				"date": "2021-10-22",
+				"close": 75.076794
+			},
+			{
+				"id": "world",
+				"date": "2021-10-29",
+				"close": 79.108435
+			},
+			{
+				"id": "core",
+				"date": "2021-10-29",
+				"close": 75.290741
+			},
+			{
+				"id": "alder",
+				"date": "2021-10-29",
+				"close": 74.310801
+			},
+			{
+				"id": "world",
+				"date": "2021-11-05",
+				"close": 78.711165
+			},
+			{
+				"id": "core",
+				"date": "2021-11-05",
+				"close": 75.027713
+			},
+			{
+				"id": "alder",
+				"date": "2021-11-05",
+				"close": 74.123215
+			},
+			{
+				"id": "world",
+				"date": "2021-11-12",
+				"close": 77.509985
+			},
+			{
+				"id": "core",
+				"date": "2021-11-12",
+				"close": 74.161421
+			},
+			{
+				"id": "alder",
+				"date": "2021-11-12",
+				"close": 72.195794
+			},
+			{
+				"id": "world",
+				"date": "2021-11-19",
+				"close": 77.678378
+			},
+			{
+				"id": "core",
+				"date": "2021-11-19",
+				"close": 74.52308
+			},
+			{
+				"id": "alder",
+				"date": "2021-11-19",
+				"close": 73.161775
+			},
+			{
+				"id": "world",
+				"date": "2021-11-26",
+				"close": 77.095876
+			},
+			{
+				"id": "core",
+				"date": "2021-11-26",
+				"close": 74.321188
+			},
+			{
+				"id": "alder",
+				"date": "2021-11-26",
+				"close": 73.542933
+			},
+			{
+				"id": "world",
+				"date": "2021-12-03",
+				"close": 75.858139
+			},
+			{
+				"id": "core",
+				"date": "2021-12-03",
+				"close": 73.401794
+			},
+			{
+				"id": "alder",
+				"date": "2021-12-03",
+				"close": 72.55921
+			},
+			{
+				"id": "world",
+				"date": "2021-12-10",
+				"close": 76.605654
+			},
+			{
+				"id": "core",
+				"date": "2021-12-10",
+				"close": 74.0676
+			},
+			{
+				"id": "alder",
+				"date": "2021-12-10",
+				"close": 73.330125
+			},
+			{
+				"id": "world",
+				"date": "2021-12-17",
+				"close": 77.537503
+			},
+			{
+				"id": "core",
+				"date": "2021-12-17",
+				"close": 73.931042
+			},
+			{
+				"id": "alder",
+				"date": "2021-12-17",
+				"close": 73.050539
+			},
+			{
+				"id": "world",
+				"date": "2021-12-24",
+				"close": 79.578773
+			},
+			{
+				"id": "core",
+				"date": "2021-12-24",
+				"close": 74.772531
+			},
+			{
+				"id": "alder",
+				"date": "2021-12-24",
+				"close": 75.067972
+			},
+			{
+				"id": "world",
+				"date": "2021-12-31",
+				"close": 80.494267
+			},
+			{
+				"id": "core",
+				"date": "2021-12-31",
+				"close": 74.750639
+			},
+			{
+				"id": "alder",
+				"date": "2021-12-31",
+				"close": 76.782301
+			},
+			{
+				"id": "world",
+				"date": "2022-01-07",
+				"close": 80.904519
+			},
+			{
+				"id": "core",
+				"date": "2022-01-07",
+				"close": 74.110855
+			},
+			{
+				"id": "alder",
+				"date": "2022-01-07",
+				"close": 76.414155
+			},
+			{
+				"id": "world",
+				"date": "2022-01-14",
+				"close": 82.882676
+			},
+			{
+				"id": "core",
+				"date": "2022-01-14",
+				"close": 75.386217
+			},
+			{
+				"id": "alder",
+				"date": "2022-01-14",
+				"close": 78.512088
+			},
+			{
+				"id": "world",
+				"date": "2022-01-21",
+				"close": 81.899129
+			},
+			{
+				"id": "core",
+				"date": "2022-01-21",
+				"close": 74.462977
+			},
+			{
+				"id": "alder",
+				"date": "2022-01-21",
+				"close": 77.559699
+			},
+			{
+				"id": "world",
+				"date": "2022-01-28",
+				"close": 82.49046
+			},
+			{
+				"id": "core",
+				"date": "2022-01-28",
+				"close": 74.294867
+			},
+			{
+				"id": "alder",
+				"date": "2022-01-28",
+				"close": 78.120065
+			},
+			{
+				"id": "world",
+				"date": "2022-02-04",
+				"close": 83.609405
+			},
+			{
+				"id": "core",
+				"date": "2022-02-04",
+				"close": 75.840948
+			},
+			{
+				"id": "alder",
+				"date": "2022-02-04",
+				"close": 78.605893
+			},
+			{
+				"id": "world",
+				"date": "2022-02-11",
+				"close": 81.519375
+			},
+			{
+				"id": "core",
+				"date": "2022-02-11",
+				"close": 73.465444
+			},
+			{
+				"id": "alder",
+				"date": "2022-02-11",
+				"close": 76.753894
+			},
+			{
+				"id": "world",
+				"date": "2022-02-18",
+				"close": 80.524903
+			},
+			{
+				"id": "core",
+				"date": "2022-02-18",
+				"close": 74.158251
+			},
+			{
+				"id": "alder",
+				"date": "2022-02-18",
+				"close": 76.841482
+			},
+			{
+				"id": "world",
+				"date": "2022-02-25",
+				"close": 79.667951
+			},
+			{
+				"id": "core",
+				"date": "2022-02-25",
+				"close": 72.444349
+			},
+			{
+				"id": "alder",
+				"date": "2022-02-25",
+				"close": 75.286003
+			},
+			{
+				"id": "world",
+				"date": "2022-03-04",
+				"close": 80.063349
+			},
+			{
+				"id": "core",
+				"date": "2022-03-04",
+				"close": 72.076246
+			},
+			{
+				"id": "alder",
+				"date": "2022-03-04",
+				"close": 76.663681
+			},
+			{
+				"id": "world",
+				"date": "2022-03-11",
+				"close": 81.32507
+			},
+			{
+				"id": "core",
+				"date": "2022-03-11",
+				"close": 73.195816
+			},
+			{
+				"id": "alder",
+				"date": "2022-03-11",
+				"close": 77.874244
+			},
+			{
+				"id": "world",
+				"date": "2022-03-18",
+				"close": 81.900281
+			},
+			{
+				"id": "core",
+				"date": "2022-03-18",
+				"close": 72.554936
+			},
+			{
+				"id": "alder",
+				"date": "2022-03-18",
+				"close": 78.744148
+			},
+			{
+				"id": "world",
+				"date": "2022-03-25",
+				"close": 82.257436
+			},
+			{
+				"id": "core",
+				"date": "2022-03-25",
+				"close": 73.218926
+			},
+			{
+				"id": "alder",
+				"date": "2022-03-25",
+				"close": 79.836957
+			},
+			{
+				"id": "world",
+				"date": "2022-04-01",
+				"close": 82.342097
+			},
+			{
+				"id": "core",
+				"date": "2022-04-01",
+				"close": 71.775361
+			},
+			{
+				"id": "alder",
+				"date": "2022-04-01",
+				"close": 79.583238
+			},
+			{
+				"id": "world",
+				"date": "2022-04-08",
+				"close": 84.022449
+			},
+			{
+				"id": "core",
+				"date": "2022-04-08",
+				"close": 72.580579
+			},
+			{
+				"id": "alder",
+				"date": "2022-04-08",
+				"close": 80.168434
+			},
+			{
+				"id": "world",
+				"date": "2022-04-15",
+				"close": 84.218623
+			},
+			{
+				"id": "core",
+				"date": "2022-04-15",
+				"close": 73.38039
+			},
+			{
+				"id": "alder",
+				"date": "2022-04-15",
+				"close": 81.231851
+			},
+			{
+				"id": "world",
+				"date": "2022-04-22",
+				"close": 84.725535
+			},
+			{
+				"id": "core",
+				"date": "2022-04-22",
+				"close": 74.0369
+			},
+			{
+				"id": "alder",
+				"date": "2022-04-22",
+				"close": 80.563614
+			},
+			{
+				"id": "world",
+				"date": "2022-04-29",
+				"close": 83.712812
+			},
+			{
+				"id": "core",
+				"date": "2022-04-29",
+				"close": 73.301103
+			},
+			{
+				"id": "alder",
+				"date": "2022-04-29",
+				"close": 80.954951
+			},
+			{
+				"id": "world",
+				"date": "2022-05-06",
+				"close": 84.115644
+			},
+			{
+				"id": "core",
+				"date": "2022-05-06",
+				"close": 74.904788
+			},
+			{
+				"id": "alder",
+				"date": "2022-05-06",
+				"close": 81.303678
+			},
+			{
+				"id": "world",
+				"date": "2022-05-13",
+				"close": 84.181994
+			},
+			{
+				"id": "core",
+				"date": "2022-05-13",
+				"close": 76.329543
+			},
+			{
+				"id": "alder",
+				"date": "2022-05-13",
+				"close": 83.73672
+			},
+			{
+				"id": "world",
+				"date": "2022-05-20",
+				"close": 84.598854
+			},
+			{
+				"id": "core",
+				"date": "2022-05-20",
+				"close": 76.616486
+			},
+			{
+				"id": "alder",
+				"date": "2022-05-20",
+				"close": 83.090538
+			},
+			{
+				"id": "world",
+				"date": "2022-05-27",
+				"close": 85.077062
+			},
+			{
+				"id": "core",
+				"date": "2022-05-27",
+				"close": 77.269416
+			},
+			{
+				"id": "alder",
+				"date": "2022-05-27",
+				"close": 83.766246
+			},
+			{
+				"id": "world",
+				"date": "2022-06-03",
+				"close": 82.929224
+			},
+			{
+				"id": "core",
+				"date": "2022-06-03",
+				"close": 76.200356
+			},
+			{
+				"id": "alder",
+				"date": "2022-06-03",
+				"close": 80.960928
+			},
+			{
+				"id": "world",
+				"date": "2022-06-10",
+				"close": 84.643647
+			},
+			{
+				"id": "core",
+				"date": "2022-06-10",
+				"close": 78.093895
+			},
+			{
+				"id": "alder",
+				"date": "2022-06-10",
+				"close": 80.697537
+			},
+			{
+				"id": "world",
+				"date": "2022-06-17",
+				"close": 84.930669
+			},
+			{
+				"id": "core",
+				"date": "2022-06-17",
+				"close": 79.514063
+			},
+			{
+				"id": "alder",
+				"date": "2022-06-17",
+				"close": 82.492024
+			},
+			{
+				"id": "world",
+				"date": "2022-06-24",
+				"close": 86.117437
+			},
+			{
+				"id": "core",
+				"date": "2022-06-24",
+				"close": 81.250935
+			},
+			{
+				"id": "alder",
+				"date": "2022-06-24",
+				"close": 84.039308
+			},
+			{
+				"id": "world",
+				"date": "2022-07-01",
+				"close": 88.139507
+			},
+			{
+				"id": "core",
+				"date": "2022-07-01",
+				"close": 82.072644
+			},
+			{
+				"id": "alder",
+				"date": "2022-07-01",
+				"close": 85.751433
+			},
+			{
+				"id": "world",
+				"date": "2022-07-08",
+				"close": 86.595799
+			},
+			{
+				"id": "core",
+				"date": "2022-07-08",
+				"close": 81.099919
+			},
+			{
+				"id": "alder",
+				"date": "2022-07-08",
+				"close": 85.887421
+			},
+			{
+				"id": "world",
+				"date": "2022-07-15",
+				"close": 85.330675
+			},
+			{
+				"id": "core",
+				"date": "2022-07-15",
+				"close": 81.338331
+			},
+			{
+				"id": "alder",
+				"date": "2022-07-15",
+				"close": 85.363662
+			},
+			{
+				"id": "world",
+				"date": "2022-07-22",
+				"close": 86.77309
+			},
+			{
+				"id": "core",
+				"date": "2022-07-22",
+				"close": 82.635271
+			},
+			{
+				"id": "alder",
+				"date": "2022-07-22",
+				"close": 85.477551
+			},
+			{
+				"id": "world",
+				"date": "2022-07-29",
+				"close": 86.506977
+			},
+			{
+				"id": "core",
+				"date": "2022-07-29",
+				"close": 80.297885
+			},
+			{
+				"id": "alder",
+				"date": "2022-07-29",
+				"close": 81.98626
+			},
+			{
+				"id": "world",
+				"date": "2022-08-05",
+				"close": 85.114598
+			},
+			{
+				"id": "core",
+				"date": "2022-08-05",
+				"close": 80.098336
+			},
+			{
+				"id": "alder",
+				"date": "2022-08-05",
+				"close": 81.690251
+			},
+			{
+				"id": "world",
+				"date": "2022-08-12",
+				"close": 83.721339
+			},
+			{
+				"id": "core",
+				"date": "2022-08-12",
+				"close": 77.682887
+			},
+			{
+				"id": "alder",
+				"date": "2022-08-12",
+				"close": 79.797622
+			},
+			{
+				"id": "world",
+				"date": "2022-08-19",
+				"close": 82.252365
+			},
+			{
+				"id": "core",
+				"date": "2022-08-19",
+				"close": 76.739457
+			},
+			{
+				"id": "alder",
+				"date": "2022-08-19",
+				"close": 76.903157
+			},
+			{
+				"id": "world",
+				"date": "2022-08-26",
+				"close": 81.731482
+			},
+			{
+				"id": "core",
+				"date": "2022-08-26",
+				"close": 75.544458
+			},
+			{
+				"id": "alder",
+				"date": "2022-08-26",
+				"close": 74.137596
+			},
+			{
+				"id": "world",
+				"date": "2022-09-02",
+				"close": 83.465668
+			},
+			{
+				"id": "core",
+				"date": "2022-09-02",
+				"close": 77.210098
+			},
+			{
+				"id": "alder",
+				"date": "2022-09-02",
+				"close": 76.138237
+			},
+			{
+				"id": "world",
+				"date": "2022-09-09",
+				"close": 81.967567
+			},
+			{
+				"id": "core",
+				"date": "2022-09-09",
+				"close": 75.243546
+			},
+			{
+				"id": "alder",
+				"date": "2022-09-09",
+				"close": 74.321889
+			},
+			{
+				"id": "world",
+				"date": "2022-09-16",
+				"close": 82.544249
+			},
+			{
+				"id": "core",
+				"date": "2022-09-16",
+				"close": 74.336307
+			},
+			{
+				"id": "alder",
+				"date": "2022-09-16",
+				"close": 72.966657
+			},
+			{
+				"id": "world",
+				"date": "2022-09-23",
+				"close": 82.083316
+			},
+			{
+				"id": "core",
+				"date": "2022-09-23",
+				"close": 73.361682
+			},
+			{
+				"id": "alder",
+				"date": "2022-09-23",
+				"close": 71.53467
+			},
+			{
+				"id": "world",
+				"date": "2022-09-30",
+				"close": 82.060246
+			},
+			{
+				"id": "core",
+				"date": "2022-09-30",
+				"close": 75.68883
+			},
+			{
+				"id": "alder",
+				"date": "2022-09-30",
+				"close": 72.554328
+			},
+			{
+				"id": "world",
+				"date": "2022-10-07",
+				"close": 82.051409
+			},
+			{
+				"id": "core",
+				"date": "2022-10-07",
+				"close": 73.266537
+			},
+			{
+				"id": "alder",
+				"date": "2022-10-07",
+				"close": 70.349652
+			},
+			{
+				"id": "world",
+				"date": "2022-10-14",
+				"close": 81.947425
+			},
+			{
+				"id": "core",
+				"date": "2022-10-14",
+				"close": 72.367509
+			},
+			{
+				"id": "alder",
+				"date": "2022-10-14",
+				"close": 69.883277
+			},
+			{
+				"id": "world",
+				"date": "2022-10-21",
+				"close": 83.196142
+			},
+			{
+				"id": "core",
+				"date": "2022-10-21",
+				"close": 73.410614
+			},
+			{
+				"id": "alder",
+				"date": "2022-10-21",
+				"close": 70.729723
+			},
+			{
+				"id": "world",
+				"date": "2022-10-28",
+				"close": 84.524808
+			},
+			{
+				"id": "core",
+				"date": "2022-10-28",
+				"close": 75.964002
+			},
+			{
+				"id": "alder",
+				"date": "2022-10-28",
+				"close": 73.175027
+			},
+			{
+				"id": "world",
+				"date": "2022-11-04",
+				"close": 85.497394
+			},
+			{
+				"id": "core",
+				"date": "2022-11-04",
+				"close": 77.880174
+			},
+			{
+				"id": "alder",
+				"date": "2022-11-04",
+				"close": 73.487171
+			},
+			{
+				"id": "world",
+				"date": "2022-11-11",
+				"close": 87.070938
+			},
+			{
+				"id": "core",
+				"date": "2022-11-11",
+				"close": 79.420095
+			},
+			{
+				"id": "alder",
+				"date": "2022-11-11",
+				"close": 75.533875
+			},
+			{
+				"id": "world",
+				"date": "2022-11-18",
+				"close": 86.842304
+			},
+			{
+				"id": "core",
+				"date": "2022-11-18",
+				"close": 77.883463
+			},
+			{
+				"id": "alder",
+				"date": "2022-11-18",
+				"close": 73.579743
+			},
+			{
+				"id": "world",
+				"date": "2022-11-25",
+				"close": 87.723101
+			},
+			{
+				"id": "core",
+				"date": "2022-11-25",
+				"close": 76.627583
+			},
+			{
+				"id": "alder",
+				"date": "2022-11-25",
+				"close": 73.171242
+			},
+			{
+				"id": "world",
+				"date": "2022-12-02",
+				"close": 86.922487
+			},
+			{
+				"id": "core",
+				"date": "2022-12-02",
+				"close": 75.530973
+			},
+			{
+				"id": "alder",
+				"date": "2022-12-02",
+				"close": 73.120433
+			},
+			{
+				"id": "world",
+				"date": "2022-12-09",
+				"close": 89.213564
+			},
+			{
+				"id": "core",
+				"date": "2022-12-09",
+				"close": 76.68145
+			},
+			{
+				"id": "alder",
+				"date": "2022-12-09",
+				"close": 75.027155
+			},
+			{
+				"id": "world",
+				"date": "2022-12-16",
+				"close": 89.963315
+			},
+			{
+				"id": "core",
+				"date": "2022-12-16",
+				"close": 78.862204
+			},
+			{
+				"id": "alder",
+				"date": "2022-12-16",
+				"close": 76.701996
+			},
+			{
+				"id": "world",
+				"date": "2022-12-23",
+				"close": 88.078961
+			},
+			{
+				"id": "core",
+				"date": "2022-12-23",
+				"close": 76.45475
+			},
+			{
+				"id": "alder",
+				"date": "2022-12-23",
+				"close": 74.538628
+			},
+			{
+				"id": "world",
+				"date": "2022-12-30",
+				"close": 88.255796
+			},
+			{
+				"id": "core",
+				"date": "2022-12-30",
+				"close": 75.003019
+			},
+			{
+				"id": "alder",
+				"date": "2022-12-30",
+				"close": 72.568466
+			},
+			{
+				"id": "world",
+				"date": "2023-01-06",
+				"close": 88.588311
+			},
+			{
+				"id": "core",
+				"date": "2023-01-06",
+				"close": 74.946584
+			},
+			{
+				"id": "alder",
+				"date": "2023-01-06",
+				"close": 71.376229
+			},
+			{
+				"id": "world",
+				"date": "2023-01-13",
+				"close": 86.888394
+			},
+			{
+				"id": "core",
+				"date": "2023-01-13",
+				"close": 73.088362
+			},
+			{
+				"id": "alder",
+				"date": "2023-01-13",
+				"close": 69.439814
+			},
+			{
+				"id": "world",
+				"date": "2023-01-20",
+				"close": 86.435383
+			},
+			{
+				"id": "core",
+				"date": "2023-01-20",
+				"close": 72.127619
+			},
+			{
+				"id": "alder",
+				"date": "2023-01-20",
+				"close": 68.838211
+			},
+			{
+				"id": "world",
+				"date": "2023-01-27",
+				"close": 86.05078
+			},
+			{
+				"id": "core",
+				"date": "2023-01-27",
+				"close": 72.653501
+			},
+			{
+				"id": "alder",
+				"date": "2023-01-27",
+				"close": 69.97962
+			},
+			{
+				"id": "world",
+				"date": "2023-02-03",
+				"close": 86.053945
+			},
+			{
+				"id": "core",
+				"date": "2023-02-03",
+				"close": 71.457195
+			},
+			{
+				"id": "alder",
+				"date": "2023-02-03",
+				"close": 68.874174
+			},
+			{
+				"id": "world",
+				"date": "2023-02-10",
+				"close": 84.775779
+			},
+			{
+				"id": "core",
+				"date": "2023-02-10",
+				"close": 69.124693
+			},
+			{
+				"id": "alder",
+				"date": "2023-02-10",
+				"close": 66.637686
+			},
+			{
+				"id": "world",
+				"date": "2023-02-17",
+				"close": 83.446123
+			},
+			{
+				"id": "core",
+				"date": "2023-02-17",
+				"close": 68.336263
+			},
+			{
+				"id": "alder",
+				"date": "2023-02-17",
+				"close": 67.271844
+			},
+			{
+				"id": "world",
+				"date": "2023-02-24",
+				"close": 82.166813
+			},
+			{
+				"id": "core",
+				"date": "2023-02-24",
+				"close": 67.821671
+			},
+			{
+				"id": "alder",
+				"date": "2023-02-24",
+				"close": 67.043607
+			},
+			{
+				"id": "world",
+				"date": "2023-03-03",
+				"close": 83.232503
+			},
+			{
+				"id": "core",
+				"date": "2023-03-03",
+				"close": 67.506401
+			},
+			{
+				"id": "alder",
+				"date": "2023-03-03",
+				"close": 66.830765
+			},
+			{
+				"id": "world",
+				"date": "2023-03-10",
+				"close": 83.789077
+			},
+			{
+				"id": "core",
+				"date": "2023-03-10",
+				"close": 69.088869
+			},
+			{
+				"id": "alder",
+				"date": "2023-03-10",
+				"close": 68.408627
+			},
+			{
+				"id": "world",
+				"date": "2023-03-17",
+				"close": 85.431541
+			},
+			{
+				"id": "core",
+				"date": "2023-03-17",
+				"close": 70.57983
+			},
+			{
+				"id": "alder",
+				"date": "2023-03-17",
+				"close": 69.899645
+			},
+			{
+				"id": "world",
+				"date": "2023-03-24",
+				"close": 84.247542
+			},
+			{
+				"id": "core",
+				"date": "2023-03-24",
+				"close": 69.65323
+			},
+			{
+				"id": "alder",
+				"date": "2023-03-24",
+				"close": 70.399296
+			},
+			{
+				"id": "world",
+				"date": "2023-03-31",
+				"close": 85.558845
+			},
+			{
+				"id": "core",
+				"date": "2023-03-31",
+				"close": 70.075494
+			},
+			{
+				"id": "alder",
+				"date": "2023-03-31",
+				"close": 71.044456
+			},
+			{
+				"id": "world",
+				"date": "2023-04-07",
+				"close": 84.749494
+			},
+			{
+				"id": "core",
+				"date": "2023-04-07",
+				"close": 70.568201
+			},
+			{
+				"id": "alder",
+				"date": "2023-04-07",
+				"close": 72.651326
+			},
+			{
+				"id": "world",
+				"date": "2023-04-14",
+				"close": 84.389907
+			},
+			{
+				"id": "core",
+				"date": "2023-04-14",
+				"close": 69.483481
+			},
+			{
+				"id": "alder",
+				"date": "2023-04-14",
+				"close": 71.875996
+			},
+			{
+				"id": "world",
+				"date": "2023-04-21",
+				"close": 84.81225
+			},
+			{
+				"id": "core",
+				"date": "2023-04-21",
+				"close": 70.289046
+			},
+			{
+				"id": "alder",
+				"date": "2023-04-21",
+				"close": 72.730046
+			},
+			{
+				"id": "world",
+				"date": "2023-04-28",
+				"close": 85.615063
+			},
+			{
+				"id": "core",
+				"date": "2023-04-28",
+				"close": 71.821708
+			},
+			{
+				"id": "alder",
+				"date": "2023-04-28",
+				"close": 74.827352
+			},
+			{
+				"id": "world",
+				"date": "2023-05-05",
+				"close": 87.191819
+			},
+			{
+				"id": "core",
+				"date": "2023-05-05",
+				"close": 73.709339
+			},
+			{
+				"id": "alder",
+				"date": "2023-05-05",
+				"close": 76.982494
+			},
+			{
+				"id": "world",
+				"date": "2023-05-12",
+				"close": 87.896065
+			},
+			{
+				"id": "core",
+				"date": "2023-05-12",
+				"close": 75.104878
+			},
+			{
+				"id": "alder",
+				"date": "2023-05-12",
+				"close": 77.196169
+			},
+			{
+				"id": "world",
+				"date": "2023-05-19",
+				"close": 88.343299
+			},
+			{
+				"id": "core",
+				"date": "2023-05-19",
+				"close": 74.030507
+			},
+			{
+				"id": "alder",
+				"date": "2023-05-19",
+				"close": 77.705968
+			},
+			{
+				"id": "world",
+				"date": "2023-05-26",
+				"close": 88.448582
+			},
+			{
+				"id": "core",
+				"date": "2023-05-26",
+				"close": 73.158167
+			},
+			{
+				"id": "alder",
+				"date": "2023-05-26",
+				"close": 76.40151
+			},
+			{
+				"id": "world",
+				"date": "2023-06-02",
+				"close": 86.688416
+			},
+			{
+				"id": "core",
+				"date": "2023-06-02",
+				"close": 71.76419
+			},
+			{
+				"id": "alder",
+				"date": "2023-06-02",
+				"close": 75.169728
+			},
+			{
+				"id": "world",
+				"date": "2023-06-09",
+				"close": 86.045402
+			},
+			{
+				"id": "core",
+				"date": "2023-06-09",
+				"close": 71.401748
+			},
+			{
+				"id": "alder",
+				"date": "2023-06-09",
+				"close": 75.787022
+			},
+			{
+				"id": "world",
+				"date": "2023-06-16",
+				"close": 85.076138
+			},
+			{
+				"id": "core",
+				"date": "2023-06-16",
+				"close": 69.337468
+			},
+			{
+				"id": "alder",
+				"date": "2023-06-16",
+				"close": 73.310913
+			},
+			{
+				"id": "world",
+				"date": "2023-06-23",
+				"close": 84.177796
+			},
+			{
+				"id": "core",
+				"date": "2023-06-23",
+				"close": 66.568012
+			},
+			{
+				"id": "alder",
+				"date": "2023-06-23",
+				"close": 71.107937
+			},
+			{
+				"id": "world",
+				"date": "2023-06-30",
+				"close": 83.308405
+			},
+			{
+				"id": "core",
+				"date": "2023-06-30",
+				"close": 66.352838
+			},
+			{
+				"id": "alder",
+				"date": "2023-06-30",
+				"close": 70.263005
+			},
+			{
+				"id": "world",
+				"date": "2023-07-07",
+				"close": 83.383799
+			},
+			{
+				"id": "core",
+				"date": "2023-07-07",
+				"close": 64.99569
+			},
+			{
+				"id": "alder",
+				"date": "2023-07-07",
+				"close": 68.382481
+			},
+			{
+				"id": "world",
+				"date": "2023-07-14",
+				"close": 82.332103
+			},
+			{
+				"id": "core",
+				"date": "2023-07-14",
+				"close": 65.286985
+			},
+			{
+				"id": "alder",
+				"date": "2023-07-14",
+				"close": 68.193186
+			},
+			{
+				"id": "world",
+				"date": "2023-07-21",
+				"close": 80.699194
+			},
+			{
+				"id": "core",
+				"date": "2023-07-21",
+				"close": 62.645198
+			},
+			{
+				"id": "alder",
+				"date": "2023-07-21",
+				"close": 66.490485
+			},
+			{
+				"id": "world",
+				"date": "2023-07-28",
+				"close": 79.854637
+			},
+			{
+				"id": "core",
+				"date": "2023-07-28",
+				"close": 60.667315
+			},
+			{
+				"id": "alder",
+				"date": "2023-07-28",
+				"close": 64.155639
+			},
+			{
+				"id": "world",
+				"date": "2023-08-04",
+				"close": 79.380754
+			},
+			{
+				"id": "core",
+				"date": "2023-08-04",
+				"close": 60.206113
+			},
+			{
+				"id": "alder",
+				"date": "2023-08-04",
+				"close": 62.383771
+			},
+			{
+				"id": "world",
+				"date": "2023-08-11",
+				"close": 77.277446
+			},
+			{
+				"id": "core",
+				"date": "2023-08-11",
+				"close": 58.512968
+			},
+			{
+				"id": "alder",
+				"date": "2023-08-11",
+				"close": 60.850461
+			},
+			{
+				"id": "world",
+				"date": "2023-08-18",
+				"close": 77.369601
+			},
+			{
+				"id": "core",
+				"date": "2023-08-18",
+				"close": 57.517123
+			},
+			{
+				"id": "alder",
+				"date": "2023-08-18",
+				"close": 60.930543
+			},
+			{
+				"id": "world",
+				"date": "2023-08-25",
+				"close": 76.771397
+			},
+			{
+				"id": "core",
+				"date": "2023-08-25",
+				"close": 55.932415
+			},
+			{
+				"id": "alder",
+				"date": "2023-08-25",
+				"close": 58.78156
+			},
+			{
+				"id": "world",
+				"date": "2023-09-01",
+				"close": 78.756308
+			},
+			{
+				"id": "core",
+				"date": "2023-09-01",
+				"close": 56.838669
+			},
+			{
+				"id": "alder",
+				"date": "2023-09-01",
+				"close": 60.571315
+			},
+			{
+				"id": "world",
+				"date": "2023-09-08",
+				"close": 78.4025
+			},
+			{
+				"id": "core",
+				"date": "2023-09-08",
+				"close": 56.742152
+			},
+			{
+				"id": "alder",
+				"date": "2023-09-08",
+				"close": 61.429422
+			},
+			{
+				"id": "world",
+				"date": "2023-09-15",
+				"close": 77.054585
+			},
+			{
+				"id": "core",
+				"date": "2023-09-15",
+				"close": 56.347362
+			},
+			{
+				"id": "alder",
+				"date": "2023-09-15",
+				"close": 60.219257
+			},
+			{
+				"id": "world",
+				"date": "2023-09-22",
+				"close": 75.732094
+			},
+			{
+				"id": "core",
+				"date": "2023-09-22",
+				"close": 55.064787
+			},
+			{
+				"id": "alder",
+				"date": "2023-09-22",
+				"close": 59.238498
+			},
+			{
+				"id": "world",
+				"date": "2023-09-29",
+				"close": 75.744575
+			},
+			{
+				"id": "core",
+				"date": "2023-09-29",
+				"close": 55.315574
+			},
+			{
+				"id": "alder",
+				"date": "2023-09-29",
+				"close": 58.106584
+			},
+			{
+				"id": "world",
+				"date": "2023-10-06",
+				"close": 75.179271
+			},
+			{
+				"id": "core",
+				"date": "2023-10-06",
+				"close": 54.400609
+			},
+			{
+				"id": "alder",
+				"date": "2023-10-06",
+				"close": 58.493489
+			},
+			{
+				"id": "world",
+				"date": "2023-10-13",
+				"close": 73.480935
+			},
+			{
+				"id": "core",
+				"date": "2023-10-13",
+				"close": 52.471515
+			},
+			{
+				"id": "alder",
+				"date": "2023-10-13",
+				"close": 56.492969
+			},
+			{
+				"id": "world",
+				"date": "2023-10-20",
+				"close": 74.051217
+			},
+			{
+				"id": "core",
+				"date": "2023-10-20",
+				"close": 54.167068
+			},
+			{
+				"id": "alder",
+				"date": "2023-10-20",
+				"close": 58.240897
+			},
+			{
+				"id": "world",
+				"date": "2023-10-27",
+				"close": 75.715279
+			},
+			{
+				"id": "core",
+				"date": "2023-10-27",
+				"close": 56.534719
+			},
+			{
+				"id": "alder",
+				"date": "2023-10-27",
+				"close": 60.594405
+			},
+			{
+				"id": "world",
+				"date": "2023-11-03",
+				"close": 75.246518
+			},
+			{
+				"id": "core",
+				"date": "2023-11-03",
+				"close": 55.889095
+			},
+			{
+				"id": "alder",
+				"date": "2023-11-03",
+				"close": 61.271991
+			},
+			{
+				"id": "world",
+				"date": "2023-11-10",
+				"close": 75.764322
+			},
+			{
+				"id": "core",
+				"date": "2023-11-10",
+				"close": 55.051495
+			},
+			{
+				"id": "alder",
+				"date": "2023-11-10",
+				"close": 61.519077
+			},
+			{
+				"id": "world",
+				"date": "2023-11-17",
+				"close": 74.502831
+			},
+			{
+				"id": "core",
+				"date": "2023-11-17",
+				"close": 53.512422
+			},
+			{
+				"id": "alder",
+				"date": "2023-11-17",
+				"close": 59.789646
+			},
+			{
+				"id": "world",
+				"date": "2023-11-24",
+				"close": 72.832565
+			},
+			{
+				"id": "core",
+				"date": "2023-11-24",
+				"close": 51.47169
+			},
+			{
+				"id": "alder",
+				"date": "2023-11-24",
+				"close": 58.070042
+			},
+			{
+				"id": "world",
+				"date": "2023-12-01",
+				"close": 72.147987
+			},
+			{
+				"id": "core",
+				"date": "2023-12-01",
+				"close": 51.702258
+			},
+			{
+				"id": "alder",
+				"date": "2023-12-01",
+				"close": 56.905579
+			},
+			{
+				"id": "world",
+				"date": "2023-12-08",
+				"close": 72.619715
+			},
+			{
+				"id": "core",
+				"date": "2023-12-08",
+				"close": 50.538442
+			},
+			{
+				"id": "alder",
+				"date": "2023-12-08",
+				"close": 55.915288
+			},
+			{
+				"id": "world",
+				"date": "2023-12-15",
+				"close": 74.070489
+			},
+			{
+				"id": "core",
+				"date": "2023-12-15",
+				"close": 51.996818
+			},
+			{
+				"id": "alder",
+				"date": "2023-12-15",
+				"close": 56.826047
+			},
+			{
+				"id": "world",
+				"date": "2023-12-22",
+				"close": 72.281119
+			},
+			{
+				"id": "core",
+				"date": "2023-12-22",
+				"close": 50.927806
+			},
+			{
+				"id": "alder",
+				"date": "2023-12-22",
+				"close": 55.537583
+			},
+			{
+				"id": "world",
+				"date": "2023-12-29",
+				"close": 72.107933
+			},
+			{
+				"id": "core",
+				"date": "2023-12-29",
+				"close": 49.041038
+			},
+			{
+				"id": "alder",
+				"date": "2023-12-29",
+				"close": 53.836331
+			},
+			{
+				"id": "world",
+				"date": "2024-01-05",
+				"close": 73.988278
+			},
+			{
+				"id": "core",
+				"date": "2024-01-05",
+				"close": 49.641015
+			},
+			{
+				"id": "alder",
+				"date": "2024-01-05",
+				"close": 55.044445
+			},
+			{
+				"id": "world",
+				"date": "2024-01-12",
+				"close": 74.746095
+			},
+			{
+				"id": "core",
+				"date": "2024-01-12",
+				"close": 50.120027
+			},
+			{
+				"id": "alder",
+				"date": "2024-01-12",
+				"close": 54.372528
+			},
+			{
+				"id": "world",
+				"date": "2024-01-19",
+				"close": 72.873272
+			},
+			{
+				"id": "core",
+				"date": "2024-01-19",
+				"close": 48.428389
+			},
+			{
+				"id": "alder",
+				"date": "2024-01-19",
+				"close": 53.987613
+			},
+			{
+				"id": "world",
+				"date": "2024-01-26",
+				"close": 72.440891
+			},
+			{
+				"id": "core",
+				"date": "2024-01-26",
+				"close": 48.909706
+			},
+			{
+				"id": "alder",
+				"date": "2024-01-26",
+				"close": 54.762925
+			},
+			{
+				"id": "world",
+				"date": "2024-02-02",
+				"close": 71.014882
+			},
+			{
+				"id": "core",
+				"date": "2024-02-02",
+				"close": 47.225311
+			},
+			{
+				"id": "alder",
+				"date": "2024-02-02",
+				"close": 54.072397
+			},
+			{
+				"id": "world",
+				"date": "2024-02-09",
+				"close": 71.326806
+			},
+			{
+				"id": "core",
+				"date": "2024-02-09",
+				"close": 46.965857
+			},
+			{
+				"id": "alder",
+				"date": "2024-02-09",
+				"close": 54.508467
+			},
+			{
+				"id": "world",
+				"date": "2024-02-16",
+				"close": 72.006256
+			},
+			{
+				"id": "core",
+				"date": "2024-02-16",
+				"close": 47.961572
+			},
+			{
+				"id": "alder",
+				"date": "2024-02-16",
+				"close": 55.149595
+			},
+			{
+				"id": "world",
+				"date": "2024-02-23",
+				"close": 73.380341
+			},
+			{
+				"id": "core",
+				"date": "2024-02-23",
+				"close": 49.577993
+			},
+			{
+				"id": "alder",
+				"date": "2024-02-23",
+				"close": 56.487183
+			},
+			{
+				"id": "world",
+				"date": "2024-03-01",
+				"close": 74.808376
+			},
+			{
+				"id": "core",
+				"date": "2024-03-01",
+				"close": 49.438206
+			},
+			{
+				"id": "alder",
+				"date": "2024-03-01",
+				"close": 56.653404
+			},
+			{
+				"id": "world",
+				"date": "2024-03-08",
+				"close": 74.191317
+			},
+			{
+				"id": "core",
+				"date": "2024-03-08",
+				"close": 49.426277
+			},
+			{
+				"id": "alder",
+				"date": "2024-03-08",
+				"close": 56.671152
+			},
+			{
+				"id": "world",
+				"date": "2024-03-15",
+				"close": 73.628059
+			},
+			{
+				"id": "core",
+				"date": "2024-03-15",
+				"close": 48.672535
+			},
+			{
+				"id": "alder",
+				"date": "2024-03-15",
+				"close": 56.131322
+			},
+			{
+				"id": "world",
+				"date": "2024-03-22",
+				"close": 72.843541
+			},
+			{
+				"id": "core",
+				"date": "2024-03-22",
+				"close": 48.351636
+			},
+			{
+				"id": "alder",
+				"date": "2024-03-22",
+				"close": 54.556557
+			},
+			{
+				"id": "world",
+				"date": "2024-03-29",
+				"close": 74.127012
+			},
+			{
+				"id": "core",
+				"date": "2024-03-29",
+				"close": 49.46511
+			},
+			{
+				"id": "alder",
+				"date": "2024-03-29",
+				"close": 55.91106
+			},
+			{
+				"id": "world",
+				"date": "2024-04-05",
+				"close": 74.809583
+			},
+			{
+				"id": "core",
+				"date": "2024-04-05",
+				"close": 49.71838
+			},
+			{
+				"id": "alder",
+				"date": "2024-04-05",
+				"close": 55.72371
+			},
+			{
+				"id": "world",
+				"date": "2024-04-12",
+				"close": 75.060385
+			},
+			{
+				"id": "core",
+				"date": "2024-04-12",
+				"close": 50.322221
+			},
+			{
+				"id": "alder",
+				"date": "2024-04-12",
+				"close": 57.061562
+			},
+			{
+				"id": "world",
+				"date": "2024-04-19",
+				"close": 73.710772
+			},
+			{
+				"id": "core",
+				"date": "2024-04-19",
+				"close": 49.364904
+			},
+			{
+				"id": "alder",
+				"date": "2024-04-19",
+				"close": 56.953158
+			},
+			{
+				"id": "world",
+				"date": "2024-04-26",
+				"close": 72.510688
+			},
+			{
+				"id": "core",
+				"date": "2024-04-26",
+				"close": 47.92221
+			},
+			{
+				"id": "alder",
+				"date": "2024-04-26",
+				"close": 55.278249
+			},
+			{
+				"id": "world",
+				"date": "2024-05-03",
+				"close": 73.334661
+			},
+			{
+				"id": "core",
+				"date": "2024-05-03",
+				"close": 48.54313
+			},
+			{
+				"id": "alder",
+				"date": "2024-05-03",
+				"close": 57.03369
+			},
+			{
+				"id": "world",
+				"date": "2024-05-10",
+				"close": 75.295442
+			},
+			{
+				"id": "core",
+				"date": "2024-05-10",
+				"close": 50.627653
+			},
+			{
+				"id": "alder",
+				"date": "2024-05-10",
+				"close": 58.171706
+			},
+			{
+				"id": "world",
+				"date": "2024-05-17",
+				"close": 75.19001
+			},
+			{
+				"id": "core",
+				"date": "2024-05-17",
+				"close": 51.056821
+			},
+			{
+				"id": "alder",
+				"date": "2024-05-17",
+				"close": 59.311462
+			},
+			{
+				"id": "world",
+				"date": "2024-05-24",
+				"close": 76.386142
+			},
+			{
+				"id": "core",
+				"date": "2024-05-24",
+				"close": 51.887814
+			},
+			{
+				"id": "alder",
+				"date": "2024-05-24",
+				"close": 59.849543
+			},
+			{
+				"id": "world",
+				"date": "2024-05-31",
+				"close": 76.959431
+			},
+			{
+				"id": "core",
+				"date": "2024-05-31",
+				"close": 53.039283
+			},
+			{
+				"id": "alder",
+				"date": "2024-05-31",
+				"close": 61.223207
+			},
+			{
+				"id": "world",
+				"date": "2024-06-07",
+				"close": 78.111864
+			},
+			{
+				"id": "core",
+				"date": "2024-06-07",
+				"close": 54.334073
+			},
+			{
+				"id": "alder",
+				"date": "2024-06-07",
+				"close": 62.343092
+			},
+			{
+				"id": "world",
+				"date": "2024-06-14",
+				"close": 76.553602
+			},
+			{
+				"id": "core",
+				"date": "2024-06-14",
+				"close": 54.023004
+			},
+			{
+				"id": "alder",
+				"date": "2024-06-14",
+				"close": 61.008635
+			},
+			{
+				"id": "world",
+				"date": "2024-06-21",
+				"close": 76.749626
+			},
+			{
+				"id": "core",
+				"date": "2024-06-21",
+				"close": 53.872754
+			},
+			{
+				"id": "alder",
+				"date": "2024-06-21",
+				"close": 61.504291
+			},
+			{
+				"id": "world",
+				"date": "2024-06-28",
+				"close": 75.70878
+			},
+			{
+				"id": "core",
+				"date": "2024-06-28",
+				"close": 53.010333
+			},
+			{
+				"id": "alder",
+				"date": "2024-06-28",
+				"close": 60.539667
+			},
+			{
+				"id": "world",
+				"date": "2024-07-05",
+				"close": 73.80117
+			},
+			{
+				"id": "core",
+				"date": "2024-07-05",
+				"close": 52.163749
+			},
+			{
+				"id": "alder",
+				"date": "2024-07-05",
+				"close": 59.093752
+			},
+			{
+				"id": "world",
+				"date": "2024-07-12",
+				"close": 72.32227
+			},
+			{
+				"id": "core",
+				"date": "2024-07-12",
+				"close": 50.563679
+			},
+			{
+				"id": "alder",
+				"date": "2024-07-12",
+				"close": 58.413181
+			},
+			{
+				"id": "world",
+				"date": "2024-07-19",
+				"close": 71.837024
+			},
+			{
+				"id": "core",
+				"date": "2024-07-19",
+				"close": 49.505141
+			},
+			{
+				"id": "alder",
+				"date": "2024-07-19",
+				"close": 58.236107
+			},
+			{
+				"id": "world",
+				"date": "2024-07-26",
+				"close": 71.624001
+			},
+			{
+				"id": "core",
+				"date": "2024-07-26",
+				"close": 49.538348
+			},
+			{
+				"id": "alder",
+				"date": "2024-07-26",
+				"close": 56.760278
+			},
+			{
+				"id": "world",
+				"date": "2024-08-02",
+				"close": 72.00294
+			},
+			{
+				"id": "core",
+				"date": "2024-08-02",
+				"close": 50.569306
+			},
+			{
+				"id": "alder",
+				"date": "2024-08-02",
+				"close": 57.948763
+			},
+			{
+				"id": "world",
+				"date": "2024-08-09",
+				"close": 73.9306
+			},
+			{
+				"id": "core",
+				"date": "2024-08-09",
+				"close": 51.219594
+			},
+			{
+				"id": "alder",
+				"date": "2024-08-09",
+				"close": 59.063391
+			},
+			{
+				"id": "world",
+				"date": "2024-08-16",
+				"close": 72.963495
+			},
+			{
+				"id": "core",
+				"date": "2024-08-16",
+				"close": 50.584813
+			},
+			{
+				"id": "alder",
+				"date": "2024-08-16",
+				"close": 59.72785
+			},
+			{
+				"id": "world",
+				"date": "2024-08-23",
+				"close": 74.147266
+			},
+			{
+				"id": "core",
+				"date": "2024-08-23",
+				"close": 52.528069
+			},
+			{
+				"id": "alder",
+				"date": "2024-08-23",
+				"close": 60.952619
+			},
+			{
+				"id": "world",
+				"date": "2024-08-30",
+				"close": 76.098434
+			},
+			{
+				"id": "core",
+				"date": "2024-08-30",
+				"close": 53.944332
+			},
+			{
+				"id": "alder",
+				"date": "2024-08-30",
+				"close": 62.170356
+			},
+			{
+				"id": "world",
+				"date": "2024-09-06",
+				"close": 77.82027
+			},
+			{
+				"id": "core",
+				"date": "2024-09-06",
+				"close": 56.098392
+			},
+			{
+				"id": "alder",
+				"date": "2024-09-06",
+				"close": 63.010491
+			},
+			{
+				"id": "world",
+				"date": "2024-09-13",
+				"close": 77.713824
+			},
+			{
+				"id": "core",
+				"date": "2024-09-13",
+				"close": 55.856985
+			},
+			{
+				"id": "alder",
+				"date": "2024-09-13",
+				"close": 62.001733
+			},
+			{
+				"id": "world",
+				"date": "2024-09-20",
+				"close": 76.725305
+			},
+			{
+				"id": "core",
+				"date": "2024-09-20",
+				"close": 54.344569
+			},
+			{
+				"id": "alder",
+				"date": "2024-09-20",
+				"close": 60.485864
+			},
+			{
+				"id": "world",
+				"date": "2024-09-27",
+				"close": 75.502818
+			},
+			{
+				"id": "core",
+				"date": "2024-09-27",
+				"close": 53.640136
+			},
+			{
+				"id": "alder",
+				"date": "2024-09-27",
+				"close": 59.840885
+			},
+			{
+				"id": "world",
+				"date": "2024-10-04",
+				"close": 74.111735
+			},
+			{
+				"id": "core",
+				"date": "2024-10-04",
+				"close": 51.90418
+			},
+			{
+				"id": "alder",
+				"date": "2024-10-04",
+				"close": 58.519978
+			},
+			{
+				"id": "world",
+				"date": "2024-10-11",
+				"close": 73.819953
+			},
+			{
+				"id": "core",
+				"date": "2024-10-11",
+				"close": 50.51821
+			},
+			{
+				"id": "alder",
+				"date": "2024-10-11",
+				"close": 57.226788
+			},
+			{
+				"id": "world",
+				"date": "2024-10-18",
+				"close": 73.450823
+			},
+			{
+				"id": "core",
+				"date": "2024-10-18",
+				"close": 51.331586
+			},
+			{
+				"id": "alder",
+				"date": "2024-10-18",
+				"close": 57.704683
+			},
+			{
+				"id": "world",
+				"date": "2024-10-25",
+				"close": 73.412128
+			},
+			{
+				"id": "core",
+				"date": "2024-10-25",
+				"close": 51.917235
+			},
+			{
+				"id": "alder",
+				"date": "2024-10-25",
+				"close": 58.809901
+			},
+			{
+				"id": "world",
+				"date": "2024-11-01",
+				"close": 74.307637
+			},
+			{
+				"id": "core",
+				"date": "2024-11-01",
+				"close": 53.165739
+			},
+			{
+				"id": "alder",
+				"date": "2024-11-01",
+				"close": 59.203587
+			},
+			{
+				"id": "world",
+				"date": "2024-11-08",
+				"close": 73.510009
+			},
+			{
+				"id": "core",
+				"date": "2024-11-08",
+				"close": 53.413702
+			},
+			{
+				"id": "alder",
+				"date": "2024-11-08",
+				"close": 58.975683
+			},
+			{
+				"id": "world",
+				"date": "2024-11-15",
+				"close": 73.385381
+			},
+			{
+				"id": "core",
+				"date": "2024-11-15",
+				"close": 53.58237
+			},
+			{
+				"id": "alder",
+				"date": "2024-11-15",
+				"close": 60.279951
+			},
+			{
+				"id": "world",
+				"date": "2024-11-22",
+				"close": 73.663049
+			},
+			{
+				"id": "core",
+				"date": "2024-11-22",
+				"close": 54.626526
+			},
+			{
+				"id": "alder",
+				"date": "2024-11-22",
+				"close": 61.027622
+			},
+			{
+				"id": "world",
+				"date": "2024-11-29",
+				"close": 72.517576
+			},
+			{
+				"id": "core",
+				"date": "2024-11-29",
+				"close": 53.899412
+			},
+			{
+				"id": "alder",
+				"date": "2024-11-29",
+				"close": 60.525607
+			},
+			{
+				"id": "world",
+				"date": "2024-12-06",
+				"close": 72.587047
+			},
+			{
+				"id": "core",
+				"date": "2024-12-06",
+				"close": 53.915045
+			},
+			{
+				"id": "alder",
+				"date": "2024-12-06",
+				"close": 61.480963
+			},
+			{
+				"id": "world",
+				"date": "2024-12-13",
+				"close": 72.876126
+			},
+			{
+				"id": "core",
+				"date": "2024-12-13",
+				"close": 54.405484
+			},
+			{
+				"id": "alder",
+				"date": "2024-12-13",
+				"close": 63.624826
+			},
+			{
+				"id": "world",
+				"date": "2024-12-20",
+				"close": 73.355706
+			},
+			{
+				"id": "core",
+				"date": "2024-12-20",
+				"close": 55.824931
+			},
+			{
+				"id": "alder",
+				"date": "2024-12-20",
+				"close": 64.446136
+			},
+			{
+				"id": "world",
+				"date": "2024-12-27",
+				"close": 74.774618
+			},
+			{
+				"id": "core",
+				"date": "2024-12-27",
+				"close": 56.574594
+			},
+			{
+				"id": "alder",
+				"date": "2024-12-27",
+				"close": 64.691497
+			},
+			{
+				"id": "world",
+				"date": "2025-01-03",
+				"close": 73.634677
+			},
+			{
+				"id": "core",
+				"date": "2025-01-03",
+				"close": 56.589537
+			},
+			{
+				"id": "alder",
+				"date": "2025-01-03",
+				"close": 64.885351
+			},
+			{
+				"id": "world",
+				"date": "2025-01-10",
+				"close": 73.796312
+			},
+			{
+				"id": "core",
+				"date": "2025-01-10",
+				"close": 54.829887
+			},
+			{
+				"id": "alder",
+				"date": "2025-01-10",
+				"close": 63.961512
+			},
+			{
+				"id": "world",
+				"date": "2025-01-17",
+				"close": 74.180647
+			},
+			{
+				"id": "core",
+				"date": "2025-01-17",
+				"close": 55.762643
+			},
+			{
+				"id": "alder",
+				"date": "2025-01-17",
+				"close": 64.311971
+			},
+			{
+				"id": "world",
+				"date": "2025-01-24",
+				"close": 73.308107
+			},
+			{
+				"id": "core",
+				"date": "2025-01-24",
+				"close": 55.25287
+			},
+			{
+				"id": "alder",
+				"date": "2025-01-24",
+				"close": 64.533043
+			},
+			{
+				"id": "world",
+				"date": "2025-01-31",
+				"close": 73.140502
+			},
+			{
+				"id": "core",
+				"date": "2025-01-31",
+				"close": 56.207391
+			},
+			{
+				"id": "alder",
+				"date": "2025-01-31",
+				"close": 66.204318
+			},
+			{
+				"id": "world",
+				"date": "2025-02-07",
+				"close": 75.248606
+			},
+			{
+				"id": "core",
+				"date": "2025-02-07",
+				"close": 57.244566
+			},
+			{
+				"id": "alder",
+				"date": "2025-02-07",
+				"close": 67.201831
+			},
+			{
+				"id": "world",
+				"date": "2025-02-14",
+				"close": 76.002612
+			},
+			{
+				"id": "core",
+				"date": "2025-02-14",
+				"close": 57.713176
+			},
+			{
+				"id": "alder",
+				"date": "2025-02-14",
+				"close": 66.777189
+			},
+			{
+				"id": "world",
+				"date": "2025-02-21",
+				"close": 74.748831
+			},
+			{
+				"id": "core",
+				"date": "2025-02-21",
+				"close": 58.11882
+			},
+			{
+				"id": "alder",
+				"date": "2025-02-21",
+				"close": 66.185868
+			},
+			{
+				"id": "world",
+				"date": "2025-02-28",
+				"close": 76.704415
+			},
+			{
+				"id": "core",
+				"date": "2025-02-28",
+				"close": 59.844455
+			},
+			{
+				"id": "alder",
+				"date": "2025-02-28",
+				"close": 68.477212
+			},
+			{
+				"id": "world",
+				"date": "2025-03-07",
+				"close": 76.464328
+			},
+			{
+				"id": "core",
+				"date": "2025-03-07",
+				"close": 61.142907
+			},
+			{
+				"id": "alder",
+				"date": "2025-03-07",
+				"close": 68.76357
+			},
+			{
+				"id": "world",
+				"date": "2025-03-14",
+				"close": 75.452569
+			},
+			{
+				"id": "core",
+				"date": "2025-03-14",
+				"close": 60.600411
+			},
+			{
+				"id": "alder",
+				"date": "2025-03-14",
+				"close": 68.178899
+			},
+			{
+				"id": "world",
+				"date": "2025-03-21",
+				"close": 73.850934
+			},
+			{
+				"id": "core",
+				"date": "2025-03-21",
+				"close": 58.768639
+			},
+			{
+				"id": "alder",
+				"date": "2025-03-21",
+				"close": 66.557692
+			},
+			{
+				"id": "world",
+				"date": "2025-03-28",
+				"close": 73.081276
+			},
+			{
+				"id": "core",
+				"date": "2025-03-28",
+				"close": 57.366633
+			},
+			{
+				"id": "alder",
+				"date": "2025-03-28",
+				"close": 64.51194
+			},
+			{
+				"id": "world",
+				"date": "2025-04-04",
+				"close": 73.456151
+			},
+			{
+				"id": "core",
+				"date": "2025-04-04",
+				"close": 59.109387
+			},
+			{
+				"id": "alder",
+				"date": "2025-04-04",
+				"close": 66.735408
+			},
+			{
+				"id": "world",
+				"date": "2025-04-11",
+				"close": 73.152135
+			},
+			{
+				"id": "core",
+				"date": "2025-04-11",
+				"close": 60.277505
+			},
+			{
+				"id": "alder",
+				"date": "2025-04-11",
+				"close": 68.390022
+			},
+			{
+				"id": "world",
+				"date": "2025-04-18",
+				"close": 71.325451
+			},
+			{
+				"id": "core",
+				"date": "2025-04-18",
+				"close": 59.644108
+			},
+			{
+				"id": "alder",
+				"date": "2025-04-18",
+				"close": 66.25807
+			},
+			{
+				"id": "world",
+				"date": "2025-04-25",
+				"close": 72.269972
+			},
+			{
+				"id": "core",
+				"date": "2025-04-25",
+				"close": 60.870463
+			},
+			{
+				"id": "alder",
+				"date": "2025-04-25",
+				"close": 67.715442
+			},
+			{
+				"id": "world",
+				"date": "2025-05-02",
+				"close": 72.940239
+			},
+			{
+				"id": "core",
+				"date": "2025-05-02",
+				"close": 62.431146
+			},
+			{
+				"id": "alder",
+				"date": "2025-05-02",
+				"close": 69.694635
+			},
+			{
+				"id": "world",
+				"date": "2025-05-09",
+				"close": 73.138092
+			},
+			{
+				"id": "core",
+				"date": "2025-05-09",
+				"close": 63.301787
+			},
+			{
+				"id": "alder",
+				"date": "2025-05-09",
+				"close": 70.19381
+			},
+			{
+				"id": "world",
+				"date": "2025-05-16",
+				"close": 72.659137
+			},
+			{
+				"id": "core",
+				"date": "2025-05-16",
+				"close": 61.843882
+			},
+			{
+				"id": "alder",
+				"date": "2025-05-16",
+				"close": 69.859379
+			},
+			{
+				"id": "world",
+				"date": "2025-05-23",
+				"close": 72.747318
+			},
+			{
+				"id": "core",
+				"date": "2025-05-23",
+				"close": 61.528355
+			},
+			{
+				"id": "alder",
+				"date": "2025-05-23",
+				"close": 70.601073
+			},
+			{
+				"id": "world",
+				"date": "2025-05-30",
+				"close": 72.515049
+			},
+			{
+				"id": "core",
+				"date": "2025-05-30",
+				"close": 60.125989
+			},
+			{
+				"id": "alder",
+				"date": "2025-05-30",
+				"close": 68.471441
+			},
+			{
+				"id": "world",
+				"date": "2025-06-06",
+				"close": 71.350259
+			},
+			{
+				"id": "core",
+				"date": "2025-06-06",
+				"close": 57.71234
+			},
+			{
+				"id": "alder",
+				"date": "2025-06-06",
+				"close": 65.855883
+			},
+			{
+				"id": "world",
+				"date": "2025-06-13",
+				"close": 72.257139
+			},
+			{
+				"id": "core",
+				"date": "2025-06-13",
+				"close": 58.59182
+			},
+			{
+				"id": "alder",
+				"date": "2025-06-13",
+				"close": 67.468297
+			},
+			{
+				"id": "world",
+				"date": "2025-06-20",
+				"close": 72.618904
+			},
+			{
+				"id": "core",
+				"date": "2025-06-20",
+				"close": 58.296522
+			},
+			{
+				"id": "alder",
+				"date": "2025-06-20",
+				"close": 68.306849
+			},
+			{
+				"id": "world",
+				"date": "2025-06-27",
+				"close": 71.769425
+			},
+			{
+				"id": "core",
+				"date": "2025-06-27",
+				"close": 58.795309
+			},
+			{
+				"id": "alder",
+				"date": "2025-06-27",
+				"close": 68.976902
+			},
+			{
+				"id": "world",
+				"date": "2025-07-04",
+				"close": 72.771763
+			},
+			{
+				"id": "core",
+				"date": "2025-07-04",
+				"close": 59.49734
+			},
+			{
+				"id": "alder",
+				"date": "2025-07-04",
+				"close": 70.650784
+			},
+			{
+				"id": "world",
+				"date": "2025-07-11",
+				"close": 72.353806
+			},
+			{
+				"id": "core",
+				"date": "2025-07-11",
+				"close": 60.072218
+			},
+			{
+				"id": "alder",
+				"date": "2025-07-11",
+				"close": 69.619231
+			},
+			{
+				"id": "world",
+				"date": "2025-07-18",
+				"close": 73.973796
+			},
+			{
+				"id": "core",
+				"date": "2025-07-18",
+				"close": 62.269886
+			},
+			{
+				"id": "alder",
+				"date": "2025-07-18",
+				"close": 71.545299
+			},
+			{
+				"id": "world",
+				"date": "2025-07-25",
+				"close": 75.430735
+			},
+			{
+				"id": "core",
+				"date": "2025-07-25",
+				"close": 62.883252
+			},
+			{
+				"id": "alder",
+				"date": "2025-07-25",
+				"close": 73.878834
+			},
+			{
+				"id": "world",
+				"date": "2025-08-01",
+				"close": 74.727641
+			},
+			{
+				"id": "core",
+				"date": "2025-08-01",
+				"close": 62.684015
+			},
+			{
+				"id": "alder",
+				"date": "2025-08-01",
+				"close": 73.612022
+			},
+			{
+				"id": "world",
+				"date": "2025-08-08",
+				"close": 73.394322
+			},
+			{
+				"id": "core",
+				"date": "2025-08-08",
+				"close": 62.318261
+			},
+			{
+				"id": "alder",
+				"date": "2025-08-08",
+				"close": 73.545521
+			},
+			{
+				"id": "world",
+				"date": "2025-08-15",
+				"close": 71.960333
+			},
+			{
+				"id": "core",
+				"date": "2025-08-15",
+				"close": 61.28637
+			},
+			{
+				"id": "alder",
+				"date": "2025-08-15",
+				"close": 73.262756
+			},
+			{
+				"id": "world",
+				"date": "2025-08-22",
+				"close": 70.637161
+			},
+			{
+				"id": "core",
+				"date": "2025-08-22",
+				"close": 61.087216
+			},
+			{
+				"id": "alder",
+				"date": "2025-08-22",
+				"close": 71.709572
+			},
+			{
+				"id": "world",
+				"date": "2025-08-29",
+				"close": 71.49781
+			},
+			{
+				"id": "core",
+				"date": "2025-08-29",
+				"close": 60.742246
+			},
+			{
+				"id": "alder",
+				"date": "2025-08-29",
+				"close": 72.059545
+			},
+			{
+				"id": "world",
+				"date": "2025-09-05",
+				"close": 71.85802
+			},
+			{
+				"id": "core",
+				"date": "2025-09-05",
+				"close": 59.3575
+			},
+			{
+				"id": "alder",
+				"date": "2025-09-05",
+				"close": 70.581207
+			},
+			{
+				"id": "world",
+				"date": "2025-09-12",
+				"close": 71.688156
+			},
+			{
+				"id": "core",
+				"date": "2025-09-12",
+				"close": 58.754712
+			},
+			{
+				"id": "alder",
+				"date": "2025-09-12",
+				"close": 69.282133
+			},
+			{
+				"id": "world",
+				"date": "2025-09-19",
+				"close": 70.173647
+			},
+			{
+				"id": "core",
+				"date": "2025-09-19",
+				"close": 56.892262
+			},
+			{
+				"id": "alder",
+				"date": "2025-09-19",
+				"close": 68.765687
+			},
+			{
+				"id": "world",
+				"date": "2025-09-26",
+				"close": 71.45575
+			},
+			{
+				"id": "core",
+				"date": "2025-09-26",
+				"close": 58.928813
+			},
+			{
+				"id": "alder",
+				"date": "2025-09-26",
+				"close": 69.652562
+			},
+			{
+				"id": "world",
+				"date": "2025-10-03",
+				"close": 71.73821
+			},
+			{
+				"id": "core",
+				"date": "2025-10-03",
+				"close": 57.745357
+			},
+			{
+				"id": "alder",
+				"date": "2025-10-03",
+				"close": 69.149568
+			},
+			{
+				"id": "world",
+				"date": "2025-10-10",
+				"close": 71.937302
+			},
+			{
+				"id": "core",
+				"date": "2025-10-10",
+				"close": 57.361412
+			},
+			{
+				"id": "alder",
+				"date": "2025-10-10",
+				"close": 69.762126
+			},
+			{
+				"id": "world",
+				"date": "2025-10-17",
+				"close": 72.244739
+			},
+			{
+				"id": "core",
+				"date": "2025-10-17",
+				"close": 57.77824
+			},
+			{
+				"id": "alder",
+				"date": "2025-10-17",
+				"close": 70.886547
+			},
+			{
+				"id": "world",
+				"date": "2025-10-24",
+				"close": 72.305324
+			},
+			{
+				"id": "core",
+				"date": "2025-10-24",
+				"close": 59.996286
+			},
+			{
+				"id": "alder",
+				"date": "2025-10-24",
+				"close": 72.758626
+			},
+			{
+				"id": "world",
+				"date": "2025-10-31",
+				"close": 71.895668
+			},
+			{
+				"id": "core",
+				"date": "2025-10-31",
+				"close": 60.254084
+			},
+			{
+				"id": "alder",
+				"date": "2025-10-31",
+				"close": 71.923519
+			},
+			{
+				"id": "world",
+				"date": "2025-11-07",
+				"close": 73.897028
+			},
+			{
+				"id": "core",
+				"date": "2025-11-07",
+				"close": 61.863155
+			},
+			{
+				"id": "alder",
+				"date": "2025-11-07",
+				"close": 73.295201
+			},
+			{
+				"id": "world",
+				"date": "2025-11-14",
+				"close": 74.487537
+			},
+			{
+				"id": "core",
+				"date": "2025-11-14",
+				"close": 61.76199
+			},
+			{
+				"id": "alder",
+				"date": "2025-11-14",
+				"close": 72.591165
+			},
+			{
+				"id": "world",
+				"date": "2025-11-21",
+				"close": 75.106348
+			},
+			{
+				"id": "core",
+				"date": "2025-11-21",
+				"close": 61.039776
+			},
+			{
+				"id": "alder",
+				"date": "2025-11-21",
+				"close": 73.416319
+			},
+			{
+				"id": "world",
+				"date": "2025-11-28",
+				"close": 74.60674
+			},
+			{
+				"id": "core",
+				"date": "2025-11-28",
+				"close": 61.378504
+			},
+			{
+				"id": "alder",
+				"date": "2025-11-28",
+				"close": 74.578557
+			},
+			{
+				"id": "world",
+				"date": "2025-12-05",
+				"close": 73.670946
+			},
+			{
+				"id": "core",
+				"date": "2025-12-05",
+				"close": 59.955502
+			},
+			{
+				"id": "alder",
+				"date": "2025-12-05",
+				"close": 72.160349
+			},
+			{
+				"id": "world",
+				"date": "2025-12-12",
+				"close": 72.431273
+			},
+			{
+				"id": "core",
+				"date": "2025-12-12",
+				"close": 58.907399
+			},
+			{
+				"id": "alder",
+				"date": "2025-12-12",
+				"close": 71.160666
+			},
+			{
+				"id": "world",
+				"date": "2025-12-19",
+				"close": 71.962418
+			},
+			{
+				"id": "core",
+				"date": "2025-12-19",
+				"close": 57.69796
+			},
+			{
+				"id": "alder",
+				"date": "2025-12-19",
+				"close": 69.931855
+			},
+			{
+				"id": "world",
+				"date": "2025-12-26",
+				"close": 71.69494
+			},
+			{
+				"id": "core",
+				"date": "2025-12-26",
+				"close": 55.390236
+			},
+			{
+				"id": "alder",
+				"date": "2025-12-26",
+				"close": 67.427641
+			},
+			{
+				"id": "world",
+				"date": "2026-01-02",
+				"close": 72.69804
+			},
+			{
+				"id": "core",
+				"date": "2026-01-02",
+				"close": 55.56374
+			},
+			{
+				"id": "alder",
+				"date": "2026-01-02",
+				"close": 67.544962
+			},
+			{
+				"id": "world",
+				"date": "2026-01-09",
+				"close": 71.633462
+			},
+			{
+				"id": "core",
+				"date": "2026-01-09",
+				"close": 53.844849
+			},
+			{
+				"id": "alder",
+				"date": "2026-01-09",
+				"close": 66.022956
+			},
+			{
+				"id": "world",
+				"date": "2026-01-16",
+				"close": 70.981245
+			},
+			{
+				"id": "core",
+				"date": "2026-01-16",
+				"close": 53.896562
+			},
+			{
+				"id": "alder",
+				"date": "2026-01-16",
+				"close": 66.101953
+			},
+			{
+				"id": "world",
+				"date": "2026-01-23",
+				"close": 70.853453
+			},
+			{
+				"id": "core",
+				"date": "2026-01-23",
+				"close": 54.805434
+			},
+			{
+				"id": "alder",
+				"date": "2026-01-23",
+				"close": 66.881202
+			},
+			{
+				"id": "world",
+				"date": "2026-01-30",
+				"close": 70.202774
+			},
+			{
+				"id": "core",
+				"date": "2026-01-30",
+				"close": 55.703938
+			},
+			{
+				"id": "alder",
+				"date": "2026-01-30",
+				"close": 66.577087
+			},
+			{
+				"id": "world",
+				"date": "2026-02-06",
+				"close": 69.080435
+			},
+			{
+				"id": "core",
+				"date": "2026-02-06",
+				"close": 54.462635
+			},
+			{
+				"id": "alder",
+				"date": "2026-02-06",
+				"close": 66.207907
+			},
+			{
+				"id": "world",
+				"date": "2026-02-13",
+				"close": 69.889709
+			},
+			{
+				"id": "core",
+				"date": "2026-02-13",
+				"close": 54.981978
+			},
+			{
+				"id": "alder",
+				"date": "2026-02-13",
+				"close": 66.080819
+			},
+			{
+				"id": "world",
+				"date": "2026-02-20",
+				"close": 69.517114
+			},
+			{
+				"id": "core",
+				"date": "2026-02-20",
+				"close": 54.354151
+			},
+			{
+				"id": "alder",
+				"date": "2026-02-20",
+				"close": 66.572203
+			},
+			{
+				"id": "world",
+				"date": "2026-02-27",
+				"close": 70.267893
+			},
+			{
+				"id": "core",
+				"date": "2026-02-27",
+				"close": 55.012056
+			},
+			{
+				"id": "alder",
+				"date": "2026-02-27",
+				"close": 67.916955
+			},
+			{
+				"id": "world",
+				"date": "2026-03-06",
+				"close": 69.279868
+			},
+			{
+				"id": "core",
+				"date": "2026-03-06",
+				"close": 54.468638
+			},
+			{
+				"id": "alder",
+				"date": "2026-03-06",
+				"close": 66.902887
+			},
+			{
+				"id": "world",
+				"date": "2026-03-13",
+				"close": 68.888369
+			},
+			{
+				"id": "core",
+				"date": "2026-03-13",
+				"close": 55.3197
+			},
+			{
+				"id": "alder",
+				"date": "2026-03-13",
+				"close": 66.212321
+			},
+			{
+				"id": "world",
+				"date": "2026-03-20",
+				"close": 68.409262
+			},
+			{
+				"id": "core",
+				"date": "2026-03-20",
+				"close": 54.351513
+			},
+			{
+				"id": "alder",
+				"date": "2026-03-20",
+				"close": 64.763803
+			},
+			{
+				"id": "world",
+				"date": "2026-03-27",
+				"close": 67.023534
+			},
+			{
+				"id": "core",
+				"date": "2026-03-27",
+				"close": 54.098452
+			},
+			{
+				"id": "alder",
+				"date": "2026-03-27",
+				"close": 63.011715
+			},
+			{
+				"id": "world",
+				"date": "2026-04-03",
+				"close": 67.699155
+			},
+			{
+				"id": "core",
+				"date": "2026-04-03",
+				"close": 55.673827
+			},
+			{
+				"id": "alder",
+				"date": "2026-04-03",
+				"close": 63.290911
+			},
+			{
+				"id": "world",
+				"date": "2026-04-10",
+				"close": 67.105289
+			},
+			{
+				"id": "core",
+				"date": "2026-04-10",
+				"close": 55.879418
+			},
+			{
+				"id": "alder",
+				"date": "2026-04-10",
+				"close": 63.331294
+			},
+			{
+				"id": "world",
+				"date": "2026-04-17",
+				"close": 67.520418
+			},
+			{
+				"id": "core",
+				"date": "2026-04-17",
+				"close": 56.606119
+			},
+			{
+				"id": "alder",
+				"date": "2026-04-17",
+				"close": 62.930852
+			},
+			{
+				"id": "world",
+				"date": "2026-04-24",
+				"close": 67.685759
+			},
+			{
+				"id": "core",
+				"date": "2026-04-24",
+				"close": 57.126032
+			},
+			{
+				"id": "alder",
+				"date": "2026-04-24",
+				"close": 62.989651
+			},
+			{
+				"id": "world",
+				"date": "2026-05-01",
+				"close": 69.353417
+			},
+			{
+				"id": "core",
+				"date": "2026-05-01",
+				"close": 58.986496
+			},
+			{
+				"id": "alder",
+				"date": "2026-05-01",
+				"close": 64.843712
+			},
+			{
+				"id": "world",
+				"date": "2026-05-08",
+				"close": 68.202685
+			},
+			{
+				"id": "core",
+				"date": "2026-05-08",
+				"close": 59.400591
+			},
+			{
+				"id": "alder",
+				"date": "2026-05-08",
+				"close": 65.115731
+			},
+			{
+				"id": "world",
+				"date": "2026-05-15",
+				"close": 68.372705
+			},
+			{
+				"id": "core",
+				"date": "2026-05-15",
+				"close": 60.221586
+			},
+			{
+				"id": "alder",
+				"date": "2026-05-15",
+				"close": 65.430993
+			},
+			{
+				"id": "world",
+				"date": "2026-05-22",
+				"close": 67.822502
+			},
+			{
+				"id": "core",
+				"date": "2026-05-22",
+				"close": 59.52799
+			},
+			{
+				"id": "alder",
+				"date": "2026-05-22",
+				"close": 64.925746
+			},
+			{
+				"id": "world",
+				"date": "2026-05-29",
+				"close": 66.910057
+			},
+			{
+				"id": "core",
+				"date": "2026-05-29",
+				"close": 59.276508
+			},
+			{
+				"id": "alder",
+				"date": "2026-05-29",
+				"close": 65.455989
+			},
+			{
+				"id": "world",
+				"date": "2026-06-05",
+				"close": 67.706796
+			},
+			{
+				"id": "core",
+				"date": "2026-06-05",
+				"close": 60.557499
+			},
+			{
+				"id": "alder",
+				"date": "2026-06-05",
+				"close": 66.57425
+			},
+			{
+				"id": "world",
+				"date": "2026-06-12",
+				"close": 67.130114
+			},
+			{
+				"id": "core",
+				"date": "2026-06-12",
+				"close": 60.48676
+			},
+			{
+				"id": "alder",
+				"date": "2026-06-12",
+				"close": 66.269846
+			},
+			{
+				"id": "world",
+				"date": "2026-06-19",
+				"close": 67.781216
+			},
+			{
+				"id": "core",
+				"date": "2026-06-19",
+				"close": 60.646466
+			},
+			{
+				"id": "alder",
+				"date": "2026-06-19",
+				"close": 65.92608
+			},
+			{
+				"id": "world",
+				"date": "2026-06-26",
+				"close": 68.023204
+			},
+			{
+				"id": "core",
+				"date": "2026-06-26",
+				"close": 61.414985
+			},
+			{
+				"id": "alder",
+				"date": "2026-06-26",
+				"close": 65.285717
+			},
+			{
+				"id": "world",
+				"date": "2026-07-03",
+				"close": 69.74218
+			},
+			{
+				"id": "core",
+				"date": "2026-07-03",
+				"close": 62.104608
+			},
+			{
+				"id": "alder",
+				"date": "2026-07-03",
+				"close": 66.421642
+			},
+			{
+				"id": "world",
+				"date": "2026-07-10",
+				"close": 69.626505
+			},
+			{
+				"id": "core",
+				"date": "2026-07-10",
+				"close": 63.281208
+			},
+			{
+				"id": "alder",
+				"date": "2026-07-10",
+				"close": 68.044711
+			},
+			{
+				"id": "world",
+				"date": "2026-07-17",
+				"close": 70.964226
+			},
+			{
+				"id": "core",
+				"date": "2026-07-17",
+				"close": 64.343443
+			},
+			{
+				"id": "alder",
+				"date": "2026-07-17",
+				"close": 70.247663
+			},
+			{
+				"id": "world",
+				"date": "2026-07-24",
+				"close": 71.584952
+			},
+			{
+				"id": "core",
+				"date": "2026-07-24",
+				"close": 65.500773
+			},
+			{
+				"id": "alder",
+				"date": "2026-07-24",
+				"close": 72.836508
+			},
+			{
+				"id": "world",
+				"date": "2026-07-31",
+				"close": 71.325016
+			},
+			{
+				"id": "core",
+				"date": "2026-07-31",
+				"close": 64.960509
+			},
+			{
+				"id": "alder",
+				"date": "2026-07-31",
+				"close": 72.222367
+			},
+			{
+				"id": "world",
+				"date": "2026-08-07",
+				"close": 72.48333
+			},
+			{
+				"id": "core",
+				"date": "2026-08-07",
+				"close": 65.126732
+			},
+			{
+				"id": "alder",
+				"date": "2026-08-07",
+				"close": 73.197788
+			},
+			{
+				"id": "world",
+				"date": "2026-08-14",
+				"close": 73.922348
+			},
+			{
+				"id": "core",
+				"date": "2026-08-14",
+				"close": 67.510426
+			},
+			{
+				"id": "alder",
+				"date": "2026-08-14",
+				"close": 74.866916
+			},
+			{
+				"id": "world",
+				"date": "2026-08-21",
+				"close": 75.210021
+			},
+			{
+				"id": "core",
+				"date": "2026-08-21",
+				"close": 68.992771
+			},
+			{
+				"id": "alder",
+				"date": "2026-08-21",
+				"close": 75.852756
+			},
+			{
+				"id": "world",
+				"date": "2026-08-28",
+				"close": 73.702821
+			},
+			{
+				"id": "core",
+				"date": "2026-08-28",
+				"close": 67.785179
+			},
+			{
+				"id": "alder",
+				"date": "2026-08-28",
+				"close": 73.359116
+			},
+			{
+				"id": "world",
+				"date": "2026-09-04",
+				"close": 73.735069
+			},
+			{
+				"id": "core",
+				"date": "2026-09-04",
+				"close": 65.565248
+			},
+			{
+				"id": "alder",
+				"date": "2026-09-04",
+				"close": 70.772057
+			},
+			{
+				"id": "world",
+				"date": "2026-09-11",
+				"close": 72.730951
+			},
+			{
+				"id": "core",
+				"date": "2026-09-11",
+				"close": 66.187442
+			},
+			{
+				"id": "alder",
+				"date": "2026-09-11",
+				"close": 70.214538
+			},
+			{
+				"id": "world",
+				"date": "2026-09-18",
+				"close": 70.972858
+			},
+			{
+				"id": "core",
+				"date": "2026-09-18",
+				"close": 63.600167
+			},
+			{
+				"id": "alder",
+				"date": "2026-09-18",
+				"close": 67.577532
+			},
+			{
+				"id": "world",
+				"date": "2026-09-25",
+				"close": 70.804747
+			},
+			{
+				"id": "core",
+				"date": "2026-09-25",
+				"close": 62.892708
+			},
+			{
+				"id": "alder",
+				"date": "2026-09-25",
+				"close": 67.000812
+			},
+			{
+				"id": "world",
+				"date": "2026-10-02",
+				"close": 70.358239
+			},
+			{
+				"id": "core",
+				"date": "2026-10-02",
+				"close": 60.506207
+			},
+			{
+				"id": "alder",
+				"date": "2026-10-02",
+				"close": 65.589795
+			},
+			{
+				"id": "world",
+				"date": "2026-10-09",
+				"close": 70.44449
+			},
+			{
+				"id": "core",
+				"date": "2026-10-09",
+				"close": 61.681212
+			},
+			{
+				"id": "alder",
+				"date": "2026-10-09",
+				"close": 66.837653
+			},
+			{
+				"id": "world",
+				"date": "2026-10-16",
+				"close": 71.899719
+			},
+			{
+				"id": "core",
+				"date": "2026-10-16",
+				"close": 61.900357
+			},
+			{
+				"id": "alder",
+				"date": "2026-10-16",
+				"close": 68.632032
+			},
+			{
+				"id": "world",
+				"date": "2026-10-23",
+				"close": 73.690326
+			},
+			{
+				"id": "core",
+				"date": "2026-10-23",
+				"close": 64.160073
+			},
+			{
+				"id": "alder",
+				"date": "2026-10-23",
+				"close": 69.340644
+			}
+		]
+	}
+}

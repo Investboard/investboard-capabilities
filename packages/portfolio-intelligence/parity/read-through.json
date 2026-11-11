@@ -1,0 +1,159 @@
+{
+	"name": "read-through",
+	"description": "A fund without a published list, read through its index.",
+	"basisParity": true,
+	"request": {
+		"asOf": "2026-10-30",
+		"baseCurrency": "EUR",
+		"holdings": [
+			{
+				"id": "world",
+				"kind": "fund",
+				"name": "Synthetic All-World UCITS ETF",
+				"isin": "IESYN0000110",
+				"ticker": "WRLD",
+				"value": 5000,
+				"listingCurrency": "EUR",
+				"assetClass": "equities"
+			},
+			{
+				"id": "tracker",
+				"kind": "fund",
+				"name": "Synthetic All Country Tracker",
+				"isin": "LUSYN0000180",
+				"ticker": "ACWT",
+				"value": 5000,
+				"listingCurrency": "EUR",
+				"assetClass": "equities"
+			}
+		],
+		"funds": [
+			{
+				"holdingId": "world",
+				"holdings": {
+					"status": "listed",
+					"asOf": "2026-09-30",
+					"constituents": [
+						{
+							"id": "ALDR",
+							"isin": "US1111110005",
+							"name": "Alder Inc.",
+							"weight": 0.05
+						},
+						{
+							"id": "CDSF",
+							"isin": "US4444441045",
+							"name": "Cedarsoft Corp.",
+							"weight": 0.04
+						},
+						{
+							"id": "ELMT",
+							"isin": "US5555551040",
+							"name": "Elmtron Corp.",
+							"weight": 0.03
+						},
+						{
+							"id": "MAPLE",
+							"isin": "DESYN0000010",
+							"name": "Maple SE",
+							"weight": 0.02
+						},
+						{
+							"id": "PNCR",
+							"isin": "CHSYN0000040",
+							"name": "Pinecrest SA",
+							"weight": 0.01
+						},
+						{
+							"id": "SYSC",
+							"isin": "TWSYN0000050",
+							"name": "Synthetic Semiconductor Co.",
+							"weight": 0.02
+						}
+					]
+				}
+			},
+			{
+				"holdingId": "tracker",
+				"holdings": {
+					"status": "missing"
+				},
+				"readThrough": {
+					"index": "Synthetic All Country Index",
+					"fundName": "Synthetic All Country Index Fund",
+					"asOf": "2026-09-30",
+					"constituents": [
+						{
+							"id": "ALDR",
+							"isin": "US1111110005",
+							"name": "Alder Inc.",
+							"weight": 0.06
+						},
+						{
+							"id": "CDSF",
+							"isin": "US4444441045",
+							"name": "Cedarsoft Corp.",
+							"weight": 0.05
+						},
+						{
+							"id": "SYSC",
+							"isin": "TWSYN0000050",
+							"name": "Synthetic Semiconductor Co.",
+							"weight": 0.03
+						},
+						{
+							"id": "PNCR",
+							"isin": "CHSYN0000040",
+							"name": "Pinecrest SA",
+							"weight": 0.02
+						}
+					]
+				}
+			}
+		],
+		"securities": [
+			{
+				"isin": "US1111110005",
+				"name": "Alder Inc.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US4444441045",
+				"name": "Cedarsoft Corp.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US5555551040",
+				"name": "Elmtron Corp.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "DESYN0000010",
+				"name": "Maple SE",
+				"sector": "Technology",
+				"country": "Germany",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "CHSYN0000040",
+				"name": "Pinecrest SA",
+				"sector": "Consumer Defensive",
+				"country": "Switzerland",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "TWSYN0000050",
+				"name": "Synthetic Semiconductor Co.",
+				"sector": "Technology",
+				"country": "Taiwan",
+				"assetClass": "equities"
+			}
+		]
+	}
+}

@@ -1,0 +1,122 @@
+{
+	"name": "partial",
+	"description": "A partly listed fund, a fund with no list, a direct holding and one holding that could not be valued.",
+	"basisParity": true,
+	"request": {
+		"asOf": "2026-10-30",
+		"baseCurrency": "EUR",
+		"holdings": [
+			{
+				"id": "world",
+				"kind": "fund",
+				"name": "Synthetic All-World UCITS ETF",
+				"isin": "IESYN0000110",
+				"ticker": "WRLD",
+				"value": 5000,
+				"listingCurrency": "EUR",
+				"assetClass": "equities"
+			},
+			{
+				"id": "smallcap",
+				"kind": "fund",
+				"name": "Synthetic Small Cap UCITS ETF",
+				"isin": "IESYN0000170",
+				"ticker": "SMLL",
+				"value": 3000,
+				"listingCurrency": "EUR",
+				"assetClass": "equities"
+			},
+			{
+				"id": "elm",
+				"kind": "security",
+				"name": "Elmtron Corp.",
+				"isin": "US5555551040",
+				"ticker": "ELMT",
+				"value": 1000,
+				"listingCurrency": "USD",
+				"assetClass": "equities"
+			},
+			{
+				"id": "private",
+				"kind": "security",
+				"name": "Synthetic Private Holding",
+				"value": null,
+				"listingCurrency": "EUR",
+				"assetClass": "alternatives"
+			},
+			{
+				"id": "cash",
+				"kind": "cash",
+				"name": "Cash",
+				"value": 1000,
+				"listingCurrency": "EUR",
+				"assetClass": "cash"
+			}
+		],
+		"funds": [
+			{
+				"holdingId": "world",
+				"holdings": {
+					"status": "listed",
+					"asOf": "2026-09-30",
+					"constituents": [
+						{
+							"id": "ALDR",
+							"isin": "US1111110005",
+							"name": "Alder Inc.",
+							"weight": 0.1
+						},
+						{
+							"id": "CDSF",
+							"isin": "US4444441045",
+							"name": "Cedarsoft Corp.",
+							"weight": 0.1
+						},
+						{
+							"id": "MAPLE",
+							"isin": "DESYN0000010",
+							"name": "Maple SE",
+							"weight": 0.1
+						}
+					]
+				}
+			},
+			{
+				"holdingId": "smallcap",
+				"holdings": {
+					"status": "missing"
+				}
+			}
+		],
+		"securities": [
+			{
+				"isin": "US1111110005",
+				"name": "Alder Inc.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US4444441045",
+				"name": "Cedarsoft Corp.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "US5555551040",
+				"name": "Elmtron Corp.",
+				"sector": "Technology",
+				"country": "United States",
+				"assetClass": "equities"
+			},
+			{
+				"isin": "DESYN0000010",
+				"name": "Maple SE",
+				"sector": "Technology",
+				"country": "Germany",
+				"assetClass": "equities"
+			}
+		]
+	}
+}

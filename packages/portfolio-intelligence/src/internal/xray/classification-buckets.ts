@@ -31,7 +31,7 @@ export interface ClassificationResult {
 	buckets: ClassificationBucket[];
 	coverage: number;
 }
-const RESIDUAL_MIN_VALUE_EUR = 0.005;
+const RESIDUAL_MIN_VALUE = 0.005;
 function assembleBuckets(
 	acc: Map<string, number>,
 	totalValue: number,
@@ -76,7 +76,7 @@ export function proRateVector(
 	const remainder = value - covered;
 	return {
 		entries,
-		unknown: remainder > RESIDUAL_MIN_VALUE_EUR ? remainder : 0,
+		unknown: remainder > RESIDUAL_MIN_VALUE ? remainder : 0,
 	};
 }
 export function classificationBuckets(input: {

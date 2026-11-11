@@ -67,7 +67,7 @@ export function lookThroughDissolutionTally(
 	return tally;
 }
 const FULL_DISSOLUTION_THRESHOLD = 0.98;
-const RESIDUAL_MIN_VALUE_EUR = 0.01;
+const RESIDUAL_MIN_VALUE = 0.01;
 export function dissolveEtfs(etfs: EngineEtfInput[]): {
 	exposures: DissolvedExposure[];
 	dissolutions: EtfDissolution[];
@@ -125,7 +125,7 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 					? "full"
 					: "partial";
 		const uncoveredValue = etf.value * (1 - covered);
-		if (uncoveredValue > RESIDUAL_MIN_VALUE_EUR) {
+		if (uncoveredValue > RESIDUAL_MIN_VALUE) {
 			exposures.push({
 				id: `${RESIDUAL_ID_PREFIX}${etf.ticker.toUpperCase()}`,
 				isin: null,
