@@ -21,8 +21,8 @@ Portfolio Intelligence skill of the Investboard AI toolkit instead.
 3. Put the investor's data into these files. Never invent a holding, a
    constituent, a weight, a class or a price.
    - **Portfolio** (required): `as_of, base_currency, holding_id, holding_name,
-     holding_type, portfolio_weight_pct`, optionally `value, isin, ticker,
-     asset_class, reported_class, listing_currency`. `holding_type` is `fund`,
+     holding_type, portfolio_weight_pct, listing_currency`, optionally `value, isin, ticker,
+     asset_class, reported_class`. `holding_type` is `fund`,
      `etf`, `stock`, `bond`, `cash`, `gold` or `crypto`. Without `value`,
      weights act as notional values. **Every fund needs `asset_class` or
      `reported_class`** (from its factsheet), so a bond, cash, gold or crypto
@@ -71,6 +71,7 @@ figure.
   combined share of shared companies, and fund-pair overlap. Overlap is the
   weight two funds hold in common, security by security; it is not a share of
   the portfolio, and pairwise overlaps never add up.
+- Treat `economicCurrency` as the qualified country/name estimate it is. Name-only hedges have unknown policy and ratio; never present `nameInferredHedgeWeight` as verified hedged weight. `reportedEconomicCurrency` is separate caller-source evidence and never independently verified by this module. Neither dimension is a verified stress input.
 - Report coverage. Say which funds are pending without a list, which are held
   whole (cash, bond, gold and crypto funds are never looked through), what
   share is unclassified and which holdings were not valued. Never present a

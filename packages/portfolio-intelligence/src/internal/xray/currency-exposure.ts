@@ -1,4 +1,6 @@
-/** Economic currency exposure: the currencies behind the holdings, net of hedging read from fund names. */
+/** Country-to-currency proxy with a name-based full-allocation hedge assumption.
+ * Neither corporate economic exposure nor hedge effectiveness is independently verified.
+ * Public results must carry the currency qualification; never adapt this to verified stress input. */
 import {
 	type BucketContributor,
 	type DimensionBucket,

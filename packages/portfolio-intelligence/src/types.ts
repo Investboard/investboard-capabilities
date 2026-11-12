@@ -27,6 +27,70 @@ export interface PortfolioRequest {
 	fundOverrides?: FundOverride[];
 }
 
+/** Caller-supplied document provenance; the engine never verifies or fetches it. */
+export interface CurrencySource {
+	reference: string;
+	/** Effective observation/policy date, not the date of this calculation. */
+	asOf: string;
+}
+
+export interface HoldingCurrencyEvidence {
+	/** Pre-hedge economic exposure, fractions of this exact holding. Missing mass stays unknown. */
+	exposure?: {
+		basis: "reported_economic_exposure";
+		source: CurrencySource;
+		buckets: BreakdownEntry[];
+	};
+	/** Policy stated by the source, never inferred from a name or listing denomination. */
+	hedge?: (
+		| { status: "unhedged" }
+		| { status: "full"; targetCurrency: string }
+		| { status: "partial"; targetCurrency?: string }
+		| { status: "unknown" }
+	) & { basis: "reported_hedge_policy"; source: CurrencySource };
+}
+
+/** Qualification travels with the figures, including through JSON serialization. */
+export interface CurrencyQualification {
+	basis:
+		| "caller_supplied_listing_denomination"
+		| "country_proxy_with_name_hedge_assumption";
+	methodologyVersion: "listing-denomination-v1" | "country-name-currency-proxy-v1";
+	independentlyVerified: false;
+	hedgePolicy: "not_verified";
+	stressUse: "ineligible";
+	weightBasis: "whole_valued_portfolio";
+	coverageBasis: "whole_valued_portfolio" | "valued_equity_value";
+	hedgeRatio: null;
+}
+
+export interface ReportedCurrencyHolding {
+	holdingId: string;
+	isin: string | null;
+	value: number;
+	weight: number;
+	/** Exact caller evidence, including explicitly reported zero exposures. */
+	evidence: HoldingCurrencyEvidence | null;
+	method: "source_backed_unhedged" | "source_backed_full_hedge_model" | "unknown";
+	reasonCodes: string[];
+	buckets: Bucket[];
+	/** Source-backed is not independently verified by this module. No stress input is emitted. */
+	stressHandoff: "independent_verification_required" | "unavailable";
+}
+
+export interface ReportedCurrencyDimension extends Dimension {
+	status: Status;
+	basis: "caller_supplied_source";
+	independentlyVerified: false;
+	scope: "equity";
+	weightBasis: "whole_valued_portfolio";
+	coverageBasis: "valued_equity_value";
+	equityValue: number;
+	assignedValue: number;
+	unknownValue: number;
+	byHolding: ReportedCurrencyHolding[];
+}
+
 export interface HoldingInput {
 	id: string;
 	kind: "security" | "fund" | "cash";
@@ -35,7 +99,10 @@ export interface HoldingInput {
 	ticker?: string | null;
 	/** Value in the base currency; null when the holding could not be valued. */
 	value: number | null;
+	/** Caller-reported quote denomination; never economic exposure. */
 	listingCurrency: string;
+	listingCurrencySource?: CurrencySource;
+	currencyEvidence?: HoldingCurrencyEvidence;
 	assetClass: HoldingClass;
 }
 
@@ -192,8 +259,21 @@ export interface PortfolioResult {
 		sector: Dimension;
 		country: Dimension;
 		region: Dimension;
-		listingCurrency: Dimension;
-		economicCurrency: Dimension & { hedged: number };
+		listingCurrency: Dimension & { qualification: CurrencyQualification };
+		/** Geography/name estimate. This is not verified corporate economic exposure. */
+		economicCurrency: Dimension & {
+			qualification: CurrencyQualification;
+			/** Whole-book share allocated by the name-based full-hedge assumption, NOT a hedge ratio. */
+			nameInferredHedgeWeight: number;
+			/** Name hints only. Unknown source date and hedge ratio stay null. */
+			nameInferredHedges: Array<{
+				id: string; name: string; isin: string | null;
+				targetCurrency: string | null; weight: number;
+				basis: "fund_name_inference"; sourceAsOf: null; hedgeRatio: null;
+			}>;
+		};
+		/** Separate source-backed model; never filled from countries, names or listing currency. */
+		reportedEconomicCurrency: ReportedCurrencyDimension;
 	};
 	overlap: OverlapPair[];
 	concentration: Concentration;

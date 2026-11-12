@@ -31,6 +31,8 @@ node skills/portfolio-intelligence-engine/scripts/run.mjs \
   --out /tmp/portfolio-intelligence-example
 ```
 
+Every portfolio CSV row must state its reported `listing_currency`; base currency is not a substitute. Currency estimates carry machine-readable proxy qualification. Use JSON for dated source-backed currency evidence; see the package README.
+
 The example files are synthetic. One fund has no constituent list, so the result is partial and says so.
 
 ## Related

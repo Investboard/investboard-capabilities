@@ -3,6 +3,7 @@
  * describe the equity part of the portfolio only: their buckets are weighted on
  * the whole valued portfolio and their coverage is measured on the equity part.
  */
+import { currencyQualification } from "../../currency-evidence.js";
 import type {
 	Bucket,
 	Dimension,
@@ -87,7 +88,7 @@ export function computeDimensions(args: {
 	direct: readonly EngineDirectHolding[];
 	valued: readonly ValuedHolding[];
 	valuedTotal: number;
-}): PortfolioResult["dimensions"] {
+}): Omit<PortfolioResult["dimensions"], "reportedEconomicCurrency"> {
 	const { etfInputs, direct, valued, valuedTotal } = args;
 	const equityEtfs = etfInputs.filter(isEquityAxisEtf);
 	const equityDirect = direct.filter(isEquityAxisDirect);
@@ -165,10 +166,24 @@ export function computeDimensions(args: {
 		sector: toDimension(onEquityBase(sector, equityTotal)),
 		country: toDimension(onEquityBase(country, equityTotal)),
 		region: toDimension(onEquityBase(region, equityTotal)),
-		listingCurrency: toDimension(listing),
+		listingCurrency: {
+			...toDimension(listing),
+			qualification: currencyQualification(true),
+		},
 		economicCurrency: {
 			...toDimension(economic),
-			hedged: economic.hedged.reduce((s, h) => s + h.weight, 0),
+			qualification: currencyQualification(),
+			nameInferredHedgeWeight: economic.hedged.reduce((s, h) => s + h.weight, 0),
+			nameInferredHedges: economic.hedged.map((h) => ({
+				id: h.id,
+				name: h.label,
+				isin: h.isin,
+				targetCurrency: h.currency,
+				weight: h.weight,
+				basis: "fund_name_inference",
+				sourceAsOf: null,
+				hedgeRatio: null,
+			})),
 		},
 	};
 }

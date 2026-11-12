@@ -23,7 +23,7 @@ Build a source tarball; registry publication is a separate release step:
 pnpm --filter @investboard/portfolio-intelligence build
 pnpm --dir packages/portfolio-intelligence pack --pack-destination /tmp
 # In your application:
-pnpm add /tmp/investboard-portfolio-intelligence-0.2.0.tgz
+pnpm add /tmp/investboard-portfolio-intelligence-0.3.0.tgz
 ```
 
 The ESM package exports these functions and their TypeScript request and result types:
@@ -72,7 +72,36 @@ Every weight is a share of the whole valued portfolio, cash included, unless a f
 
 - **Basis** groups the portfolio by asset class **by holding**: each direct holding in its class and each fund whole in its resolved class. It answers what the portfolio holds before looking inside funds.
 - **Sector, country and region** describe the equity part only. Their bucket weights are shares of the whole portfolio, their `coverage` is the classified share of the equity part, and unclassified equity stays in an `unknown` bucket, always last. A constituent's profile replaces a fund's reported breakdown dimension by dimension. Sectors are Investboard's eleven sector groups.
-- **Listing currency** groups holdings by the currency they trade in. **Economic currency** reads the currencies behind the equity part from countries, and treats a fund whose name declares a currency hedge as hedged into that currency; `hedged` is the hedged share.
+- **Listing currency** groups the caller-reported quote denominations. Its qualification is `caller_supplied_listing_denomination`, never verified economic exposure. Optional `listingCurrencySource` retains a reference and observation date in the snapshot.
+- **`economicCurrency` is a country/name estimate**, retained under that property name for discoverability. Its `qualification.basis` is `country_proxy_with_name_hedge_assumption`, `independentlyVerified` is false, `stressUse` is `ineligible`, and `hedgeRatio` is null. It maps assigned company countries to currencies. A recognized fund-name hedge hint allocates the entire fund to the hinted target as a **model assumption**, including where the real hedge policy may be partial or ambiguous. A hint without a target allocates to unknown. No hint means unknown hedge policy, never verified unhedged status. Country assignment is not corporate revenue, cash-flow or balance-sheet currency exposure.
+- `economicCurrency.coverage` means assigned equity value / valued equity value; 100% assignment does not mean 100% evidence quality. Bucket weights use whole valued portfolio value. `nameInferredHedgeWeight` replaces the old unqualified `hedged` number: it is the whole-book weight selected by the name rule, not a hedge ratio or verified hedged weight. `nameInferredHedges` keeps each parsed name, identity, hinted target, null source date and null hedge ratio.
+- **`reportedEconomicCurrency` is a separate caller-supplied source model**. It never falls back to geography, names or listing currency. Its own `status`, assigned/unknown values and coverage describe the valued equity scope only. Each exact holding retains its original evidence, source reference/date, method, reason codes and whole-book buckets. The module does not independently verify source authenticity, identity, policy or hedge effectiveness; `independentlyVerified` remains false.
+
+### Supplying source-backed currency evidence
+
+Attach evidence to the exact `HoldingInput`, after checking its security/share-class identity against the source. All source dates must be valid and on or before the analysis date. Evidence is not pooled across accounts or inherited from another line sharing an ISIN. This synthetic example explicitly reports no EUR exposure, 75% JPY exposure and leaves 25% unknown:
+
+```ts
+holding.currencyEvidence = {
+  exposure: {
+    basis: "reported_economic_exposure",
+    source: { reference: "synthetic:exact-security-exposure", asOf: "2026-09-30" },
+    buckets: [{ key: "EUR", weight: 0 }, { key: "JPY", weight: 0.75 }]
+  },
+  hedge: {
+    basis: "reported_hedge_policy", status: "unhedged",
+    source: { reference: "synthetic:exact-security-policy", asOf: "2026-09-30" }
+  }
+};
+```
+
+Economic exposure weights are fractions of that holding, sum to at most 1 and cannot repeat currency keys. Explicit zero entries are retained; missing mass is unknown and never renormalized away. The caller must supply actual economic-exposure evidence, not relabel a geographic factsheet breakdown with `reported_economic_exposure`. Unsupported basis, status, ratio/verification fields, invalid dates and incomplete provenance are rejected.
+
+A source-backed `unhedged` policy permits the reported vector. A source-backed `full` policy with `targetCurrency` models the holding in that target; this models the stated policy, not measured hedge effectiveness. `partial`, `unknown` and missing hedge policies withhold net currency allocation as unknown, even when a pre-hedge vector is present. No hedge ratio is invented. Off-axis holdings and unvalued positions do not enter the equity denominator; their original inputs remain in the snapshot.
+
+### Stress handoff
+
+Neither dimension is an `economicCurrency` stress input. Proxy `qualification.stressUse` is always `ineligible`. A fully assigned, source-backed single-currency holding returns only `stressHandoff: "independent_verification_required"`; missing, partial or mixed cases return `unavailable`. No helper emits a stress-compatible `{currency, hedge, source}` object. An adapter must independently verify the exact source/identity/date and either a single economic currency with an explicit unhedged policy or a full hedge target before constructing stress's verified contract. Never copy a country bucket, name hint, listing denomination or an aggregate portfolio currency into that contract. Stress arithmetic is unchanged.
 
 ## Overlap
 
@@ -104,7 +133,7 @@ Historical correlation describes the observed period. It is distinct from holdin
 
 ## Retained evidence and replay
 
-Every result carries a `snapshot` with the methodology version and a copy of the request. `replayPortfolioAnalysis` and `replayCorrelations` refuse a snapshot from another methodology and otherwise recalculate exactly. Results are deep-frozen; the caller's request is never changed.
+Every result carries a `snapshot` with the methodology version and a copy of the request. `replayPortfolioAnalysis` now accepts `portfolio-intelligence-v3` only. A v1/v2 snapshot is refused with an explicit migration message: use the original package/version for its documented historical replay, or deliberately pass `snapshot.request` to `analyzePortfolio` for a **new** evaluation with a new snapshot. Never overwrite or relabel the old snapshot. `replayCorrelations` retains its existing independent method and behavior. Results are deep-frozen; the caller's request is never changed.
 
 ## Bounds and verification
 
@@ -119,7 +148,7 @@ pnpm example:intelligence
 pnpm format:check
 ```
 
-The calculation is adapted from Investboard's X-Ray, concentration and diversification engines. The seven synthetic portfolios in [`parity/`](parity) are also run through Investboard's own engine by a parity check in the Investboard application, which fails on any difference in figures; the commit it last matched is recorded in [`capabilities.json`](../../capabilities.json).
+The calculation is adapted from Investboard's X-Ray, concentration and diversification engines. The seven synthetic portfolios in [`parity/`](parity) are also run through Investboard's own engine by a parity check in the Investboard application, which fails on any difference in figures; the historic v2 numeric parity commit is recorded in [`capabilities.json`](../../capabilities.json). That receipt does not validate v3 evidence semantics. The updated native/public parity assertions and new currency regressions are **UNRUN** under the founder’s 12 November no-run instruction; no new parity commit or runtime certification is claimed.
 
 ## Use it with an AI agent
 

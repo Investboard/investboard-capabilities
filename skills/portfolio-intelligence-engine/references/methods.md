@@ -45,6 +45,25 @@ The basis groups the portfolio by asset class **by holding**: each fund whole
 in its resolved class, each direct holding in its class. It is the answer
 before looking inside funds.
 
+## Currency evidence
+
+Listing denomination is supplied by the caller; a missing CSV `listing_currency`
+is refused, never filled with the valuation base currency. `economicCurrency`
+is the existing country-to-currency/name-hedge estimate. Its qualification says
+`country_proxy_with_name_hedge_assumption`, `independentlyVerified: false` and
+`stressUse: "ineligible"`. Its coverage measures assigned equity mass, not
+verified economic exposure. A recognized name can trigger a full allocation
+assumption but never establishes hedge policy, a ratio or a source date.
+`nameInferredHedgeWeight` is a whole-book hint-selected weight, not a hedge ratio.
+
+`reportedEconomicCurrency` reads only explicit source evidence on each exact
+holding. Sources retain reference and effective date; reported zero entries
+survive; unreported mass stays unknown. Missing/partial/unknown hedge policies
+withhold the net allocation. Source-backed declarations are not independently
+verified by the module, and require separate identity/source/policy verification
+before any verified stress handoff. See the package README for the input contract
+and explicit v1/v2 historical replay versus v3 re-evaluation boundary.
+
 ## Overlap
 
 Fund-pair overlap is `sum(min(weightA, weightB))` over the companies two funds
