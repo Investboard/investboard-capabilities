@@ -3,6 +3,8 @@
  * with direct holdings, and the exposures, overlap, concentration and coverage
  * measured on it. The order of work follows Investboard's X-Ray.
  */
+import { currencyQualification, reportedCurrencyDimension } from "./currency-evidence.js";
+import { isEquityAxisDirect, isEquityAxisEtf } from "./internal/xray/equity-axis.js";
 import { measureConcentration } from "./internal/concentration/measure.js";
 import { classificationGate } from "./internal/coverage/classification-gate.js";
 import {
@@ -49,7 +51,7 @@ import type {
 import { freeze } from "./internal/freeze.js";
 import { validatePortfolioRequest } from "./validation.js";
 
-export const METHODOLOGY_VERSION = "portfolio-intelligence-v2" as const;
+export const METHODOLOGY_VERSION = "portfolio-intelligence-v3" as const;
 
 function fundKey(isin: string | null | undefined, ticker: string): string {
 	return positionIdentity(normalizeIsin(isin), ticker) ?? ticker;
@@ -124,8 +126,14 @@ function emptyResult(
 			sector: none,
 			country: none,
 			region: none,
-			listingCurrency: none,
-			economicCurrency: { ...none, hedged: 0 },
+			listingCurrency: { ...none, qualification: currencyQualification(true) },
+			economicCurrency: {
+				...none,
+				qualification: currencyQualification(),
+				nameInferredHedgeWeight: 0,
+				nameInferredHedges: [],
+			},
+			reportedEconomicCurrency: reportedCurrencyDimension(request, new Set<string>(), 0),
 		},
 		overlap: [],
 		concentration: {
@@ -180,13 +188,11 @@ export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 		holdingByFund.get(fundKey(null, etf)) ||
 		etf;
 
+	const resolvedFunds = fundHoldings.map((h) =>
+		resolveFundInput(h, fundInputs.get(h.id), overrides),
+	);
 	const etfInputs = applyProfilesToFunds(
-		mergeEtfInputsByFund(
-			fundHoldings.map((h) =>
-				resolveFundInput(h, fundInputs.get(h.id), overrides),
-			),
-		),
-		profiles,
+		mergeEtfInputsByFund(resolvedFunds), profiles,
 	);
 	const direct = toEngineDirectHoldings(directHoldings, profiles);
 	const { exposures, dissolutions } = dissolveEtfs(etfInputs);
@@ -242,7 +248,13 @@ export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 			weight: g.weight,
 			positionIds: g.breakdown.map((p) => p.id),
 		})),
-		dimensions,
+		dimensions: {
+			...dimensions,
+			reportedEconomicCurrency: reportedCurrencyDimension(request, new Set([
+				...fundHoldings.filter((_, i) => isEquityAxisEtf(resolvedFunds[i]!)).map((h) => h.id),
+				...directHoldings.filter((h) => isEquityAxisDirect(h)).map((h) => h.id),
+			]), valuedTotal),
+		},
 		overlap: pairs.map((p) => toOverlap(p, holdingOf)),
 		concentration,
 		coverage: {

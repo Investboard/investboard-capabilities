@@ -283,6 +283,6 @@ describe("computeDimensions", () => {
 			valuedTotal: 1000,
 		});
 		expect(dims.economicCurrency.buckets[0]?.key).toBe("EUR");
-		expect(dims.economicCurrency.hedged).toBeCloseTo(1, 6);
+		expect(dims.economicCurrency.nameInferredHedgeWeight).toBeCloseTo(1, 6);
 	});
 });

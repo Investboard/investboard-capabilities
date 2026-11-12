@@ -12,7 +12,7 @@ export function replayPortfolioAnalysis(
 		snapshot.methodologyVersion !== METHODOLOGY_VERSION
 	)
 		throw new PortfolioInputError(
-			`This snapshot was saved with methodology ${String(snapshot?.methodologyVersion)}; this version replays ${METHODOLOGY_VERSION}`,
+			`This snapshot was saved with methodology ${String(snapshot?.methodologyVersion)}; this version replays ${METHODOLOGY_VERSION}. Use the original package for historical replay, or explicitly call analyzePortfolio(snapshot.request) for a new evaluation; do not relabel the saved snapshot`,
 		);
 	return analyzePortfolio(snapshot.request);
 }

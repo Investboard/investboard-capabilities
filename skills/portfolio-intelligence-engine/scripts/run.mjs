@@ -134,6 +134,8 @@ export function buildRequestFromCsv(
 		const assetClass = ASSET_CLASSES.has(stated)
 			? stated
 			: (CLASS_BY_TYPE[type] ?? "unknown");
+		if (!r.listing_currency?.trim())
+			throw new Error(`Holding ${r.holding_id} needs listing_currency: the portfolio base currency is a valuation unit, not evidence of denomination`);
 		return {
 			id: r.holding_id,
 			kind,
@@ -141,7 +143,7 @@ export function buildRequestFromCsv(
 			isin: text(r.isin),
 			ticker: text(r.ticker),
 			value: number(r.value) ?? number(r.portfolio_weight_pct),
-			listingCurrency: (r.listing_currency || baseCurrency).toUpperCase(),
+			listingCurrency: r.listing_currency.toUpperCase(),
 			assetClass,
 		};
 	});
@@ -284,6 +286,7 @@ export function summarize(result) {
 		.map((f) => f.holdingId);
 	if (held.length)
 		lines.push(`Funds held whole in their class: ${held.join(", ")}`);
+	lines.push("Currency exposure is a country/name estimate, not verified corporate exposure or hedge policy. Name hints do not establish hedge ratios; verified stress handoff is ineligible.");
 	const sector = result.dimensions.sector;
 	lines.push(
 		`Sectors, share of the whole portfolio (classified ${pct(sector.coverage)} of the equity part): ${sector.buckets.map((b) => `${b.key} ${pct(b.weight)}`).join(", ")}`,

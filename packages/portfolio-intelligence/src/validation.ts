@@ -112,6 +112,54 @@ function breakdown(list: unknown, what: string): void {
 	}
 }
 
+/** Currency evidence is strict: unsupported metadata must not silently acquire meaning. */
+function keys(value: Record<string, unknown>, allowed: readonly string[], what: string): void {
+	for (const key of Object.keys(value)) require(allowed.includes(key), `${what}: unsupported field ${key}`);
+}
+function currencySource(value: unknown, asOf: string, what: string): void {
+	require(isObject(value), `${what} must carry source provenance`);
+	keys(value, ["reference", "asOf"], what);
+	text(value.reference, `${what} reference`);
+	date(value.asOf, `${what} asOf`);
+	require(value.asOf <= asOf, `${what} cannot be dated after the analysis`);
+}
+function currencyEvidence(value: unknown, asOf: string, what: string): void {
+	if (value === undefined) return;
+	require(isObject(value), `${what} must be an object`);
+	keys(value, ["exposure", "hedge"], what);
+	require(value.exposure !== undefined || value.hedge !== undefined, `${what} must name exposure or hedge evidence`);
+	if (value.exposure !== undefined) {
+		const exposure = value.exposure;
+		require(isObject(exposure), `${what} exposure must be an object`);
+		keys(exposure, ["basis", "source", "buckets"], `${what} exposure`);
+		require(exposure.basis === "reported_economic_exposure", `${what} exposure basis must be reported_economic_exposure`);
+		currencySource(exposure.source, asOf, `${what} exposure source`);
+		require(Array.isArray(exposure.buckets) && exposure.buckets.length <= 200, `${what} exposure requires at most 200 currency buckets`);
+		const seen = new Set<string>();
+		let sum = 0;
+		for (const bucket of exposure.buckets) {
+			require(isObject(bucket), `${what} currency bucket must be an object`);
+			keys(bucket, ["key", "weight"], what);
+			currency(bucket.key, `${what} currency bucket key`);
+			require(!seen.has(bucket.key), `${what} duplicate currency ${bucket.key}`);
+			seen.add(bucket.key);
+			require(fraction(bucket.weight), `${what} currency weights must be fractions of 1`);
+			sum += bucket.weight as number;
+		}
+		require(sum <= 1, `${what} exposure weights exceed 1; unknown mass is never normalized away`);
+	}
+	if (value.hedge !== undefined) {
+		const hedge = value.hedge;
+		require(isObject(hedge), `${what} hedge must be an object`);
+		keys(hedge, ["basis", "status", "targetCurrency", "source"], `${what} hedge`);
+		require(typeof hedge.status === "string" && ["unhedged", "full", "partial", "unknown"].includes(hedge.status), `${what} unsupported hedge status`);
+		require(hedge.basis === "reported_hedge_policy", `${what} hedge basis must be reported_hedge_policy`);
+		currencySource(hedge.source, asOf, `${what} hedge source`);
+		if (hedge.status === "full" || hedge.targetCurrency !== undefined) currency(hedge.targetCurrency, `${what} hedge targetCurrency`);
+		require(hedge.targetCurrency === undefined || hedge.status === "full" || hedge.status === "partial", `${what} hedge target is only supported for full or partial policies`);
+	}
+}
+
 export function validatePortfolioRequest(request: PortfolioRequest): void {
 	require(isObject(request), "The request must be an object");
 	date(request.asOf, "asOf");
@@ -135,6 +183,8 @@ export function validatePortfolioRequest(request: PortfolioRequest): void {
 		if (holding.value !== null) amount(holding.value, `Holding ${holding.id}:`);
 		currency(holding.listingCurrency, `Holding ${holding.id}: listingCurrency`);
 		assetClass(holding.assetClass, `Holding ${holding.id}`, true);
+		if (holding.listingCurrencySource !== undefined) currencySource(holding.listingCurrencySource, request.asOf, `Holding ${holding.id}: listing source`);
+		currencyEvidence(holding.currencyEvidence, request.asOf, `Holding ${holding.id}: currencyEvidence`);
 	}
 
 	const funds = request.funds ?? [];
