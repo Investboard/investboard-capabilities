@@ -246,7 +246,7 @@ export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 			name: g.name,
 			value: g.value,
 			weight: g.weight,
-			positionIds: g.breakdown.map((p) => p.id),
+			positionIds: g.positionIds,
 		})),
 		dimensions: {
 			...dimensions,

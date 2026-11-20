@@ -46,8 +46,8 @@ export function fisherInterval(
 	n: number,
 ): readonly [number, number] | null {
 	if (n <= 3) return null;
-	const rc = Math.max(-0.999999, Math.min(0.999999, r));
-	const z = Math.atanh(rc);
+	// At the endpoints the limiting Fisher interval collapses to the measured coefficient.
+	const z = Math.atanh(r);
 	const se = 1 / Math.sqrt(n - 3);
 	return [Math.tanh(z - Z_95 * se), Math.tanh(z + Z_95 * se)];
 }

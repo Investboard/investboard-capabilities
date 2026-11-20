@@ -37,6 +37,13 @@ describe("fisherInterval", () => {
 		expect(lo).toBeCloseTo(0.262979, 6);
 		expect(hi).toBeCloseTo(0.680103, 6);
 	});
+	it.each([
+		-1, -0.99999999, 0.99999999, 1,
+	])("contains its measured coefficient at %d", (r) => {
+		const [lo, hi] = fisherInterval(r, 52)!;
+		expect(lo).toBeLessThanOrEqual(r);
+		expect(hi).toBeGreaterThanOrEqual(r);
+	});
 	it("narrows with five and ten years", () => {
 		const five = fisherInterval(0.5, 260)!;
 		expect(five[0]).toBeCloseTo(0.402849, 6);

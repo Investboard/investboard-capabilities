@@ -148,14 +148,21 @@ export function referenceCorrelation(
 	horizon: 1 | 3 | 5 | 10,
 	currency: string,
 	to: string,
+	interval = fisherInterval,
 ): KnowledgeCorrelation {
-	return createReferenceCorrelationReader(horizon, currency, to)(a, b);
+	return createReferenceCorrelationReader(
+		horizon,
+		currency,
+		to,
+		interval,
+	)(a, b);
 }
 /** One local cache per build/window. Never crosses input revisions or requests. */
 export function createReferenceCorrelationReader(
 	horizon: 1 | 3 | 5 | 10,
 	currency: string,
 	to: string,
+	interval = fisherInterval,
 ) {
 	const from = yearsBefore(to, horizon);
 	const cache = new WeakMap<KnowledgePoint[], Map<string, number | null>>();
@@ -221,7 +228,7 @@ export function createReferenceCorrelationReader(
 			interval95:
 				coefficient === null
 					? null
-					: [...(fisherInterval(coefficient, n) ?? [-1, 1])],
+					: [...(interval(coefficient, n) ?? [-1, 1])],
 			quality: {
 				availability:
 					coefficient === null ? (n ? "partial" : "unavailable") : "available",

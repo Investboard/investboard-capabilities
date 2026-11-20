@@ -118,6 +118,7 @@ function evaluate(
 						(flow) => flow.type !== "dividend" || flow.date !== openingDate,
 					),
 				},
+		rules.includeOpeningDividends,
 	);
 	if (!request) return unavailable("scope_history_missing");
 	const history = prepareHistory(request);

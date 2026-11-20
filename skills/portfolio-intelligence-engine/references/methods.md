@@ -24,7 +24,7 @@ non-cash portion.
 - A stated class of cash, bonds, gold, crypto, real estate or commodities
   wins over the class a fund reports; a stated equities, alternatives or
   unknown class gives way to it.
-- Compute with unrounded values and weights. Round only the displayed result. A constituent's whole-portfolio weight is the fund's weight times the
+- Compute with unrounded values and weights. Round only the displayed result. A constituent's valued-portfolio weight is the fund's weight times the
   constituent's weight in the fund. Direct holdings and constituents with the
   same identity (ISIN first, ticker otherwise) and class merge into one
   position, whose provenance lists each part. A company held through an equity
@@ -76,7 +76,7 @@ into a portfolio-wide figure.
 
 ## Concentration
 
-Companies are grouped across share classes (US CUSIP prefix), depositary
+A supplied issuer name can connect distinct security listings. Companies are grouped across share classes (US CUSIP prefix), depositary
 receipts (verified name) and other lines of one issuer (normalized name). A
 fund's uncovered remainder stays in the denominator, so company weights are
 lower bounds and `attributedCoverage` is the attributed share.
@@ -88,7 +88,7 @@ withheld. A measured issuer above `concentrationMeasuredIssuer` of the equity pa
 
 ## Coverage and status
 
-`coverage` splits the whole portfolio into transparent, held whole by nature
+`coverage` splits the valued portfolio into transparent, held whole by nature
 (opaqueInherent) and pending missing data (opaquePending). The status is
 `partial` with `unvalued_holdings`, `fund_holdings_missing` or
 `classification_degraded`; the last applies when classifiable equity is at

@@ -72,6 +72,28 @@ describe("close-to-close distributed income", () => {
 		}
 	});
 
+	it("does not refuse a selected basket for unassigned withholding tax on its opening dividend", () => {
+		const before = window("2026-10-16", "2026-10-20");
+		const after = window("2026-10-20", "2026-10-24");
+		const cost = { date: dividend.date, holdingId: null, fees: 0, taxes: 2 };
+		const scoped = { scopeHoldingIds: ["payer"], recordedCosts: [cost] };
+		expect(evaluatePerformance({ ...before, ...scoped }).reasonCodes).toContain(
+			"scope_history_missing",
+		);
+		expect(calculation({ ...after, ...scoped }).wealthBridge).toMatchObject({
+			distributedIncome: 0,
+			recordedTaxes: 0,
+		});
+		expect(
+			calculation({ ...before, recordedCosts: [cost] }).wealthBridge,
+		).toMatchObject({ distributedIncome: 10, recordedTaxes: 2 });
+		const legacy = replayPerformance({
+			methodologyVersion: "actual-position-performance-v4",
+			request: { ...after, ...scoped },
+		});
+		expect(legacy.reasonCodes).toContain("scope_history_missing");
+	});
+
 	it("includes only closing-date income in the 365-day money-weighted return", () => {
 		const input = request({
 			asOfDate: "2026-10-20",

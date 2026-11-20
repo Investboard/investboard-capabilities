@@ -105,7 +105,7 @@ describe("buildRequestFromCsv", () => {
 		expect(summary).toContain(`Alder Inc.`);
 		expect(summary).toContain(`${(alder.weight * 100).toFixed(1)}%`);
 		expect(summary).toContain("Pending");
-		expect(summary).toContain("of the whole portfolio");
+		expect(summary).toContain("of the valued portfolio");
 	});
 
 	it("refuses a fund row without a class, so a bond fund is never looked through by default", () => {
@@ -201,6 +201,56 @@ it("shows a small measured weight and discloses an observed issuer below the boo
 	expect(summary).toContain("Small company: <0.1% (via fund <0.1%)");
 	expect(summary).toContain("largest observed issuer Measured issuer 50.0%");
 	expect(summary).not.toContain("effective companies");
+});
+
+it("keeps a missing valuation unknown when the row also carries a portfolio percentage", () => {
+	const request = buildRequestFromCsv(
+		"as_of,base_currency,holding_id,holding_name,holding_type,value,portfolio_weight_pct,listing_currency,asset_class\n2026-01-30,EUR,f,Fund,fund,9000,90,EUR,equities\n2026-01-30,EUR,c,Cash,cash,,10,EUR,cash",
+		null,
+		null,
+	);
+	expect(request.holdings.map((row) => row.value)).toEqual([9000, null]);
+	expect(summarize(analyzePortfolio(request))).toContain(
+		"Not valued, outside every figure: c",
+	);
+});
+
+it("rounds concentration bounds outwards and displays the valued-book top ten including cash", () => {
+	const result = analyzePortfolio({
+		asOf: "2026-01-30",
+		baseCurrency: "EUR",
+		holdings: [
+			{
+				id: "cash",
+				name: "Cash EUR",
+				kind: "cash",
+				assetClass: "cash",
+				value: 10000,
+				listingCurrency: "EUR",
+			},
+			{
+				id: "equity",
+				name: "One issuer",
+				kind: "security",
+				assetClass: "equities",
+				value: 8000,
+				listingCurrency: "EUR",
+			},
+			{
+				id: "opaque",
+				name: "Unresolved",
+				kind: "fund",
+				assetClass: "equities",
+				value: 2000,
+				listingCurrency: "EUR",
+			},
+		],
+	});
+	const summary = summarize(result);
+	expect(summary).toContain("Cash EUR: 50.0%");
+	expect(summary).toContain("Top ten holdings: 90.0% of the valued portfolio");
+	expect(summary).toContain("0.64 (lower)");
+	expect(summary).toContain("1.5625 effective companies (upper)");
 });
 
 describe("isEntry", () => {

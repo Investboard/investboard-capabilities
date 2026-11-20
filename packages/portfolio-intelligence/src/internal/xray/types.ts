@@ -98,6 +98,7 @@ export interface IssuerGroup {
 	value: number;
 	weight: number;
 	grouped: boolean;
+	positionIds: string[];
 	breakdown: MergedPosition[];
 }
 export interface OverlapPairV2 {

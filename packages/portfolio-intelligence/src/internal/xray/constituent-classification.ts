@@ -1,4 +1,5 @@
 /** Re-basing a fund's sector and country breakdown onto its individual constituents. */
+import { constituentWeights } from "./constituent-weights.js";
 import { normalizeCountry } from "./country.js";
 import { isEquityAxisEtf } from "./equity-axis.js";
 import { normalizeSector } from "./sector.js";
@@ -57,7 +58,10 @@ export function applyConstituentVectors(
 	return etfInputs.map((etf) => {
 		if (!isEquityAxisEtf(etf) || etf.constituents.length === 0) return etf;
 		const { countryVector, sectorVector, industryVector } =
-			composeConstituentVectors(etf.constituents, classifyByIsin);
+			composeConstituentVectors(
+				[...constituentWeights(etf.constituents).entries.values()],
+				classifyByIsin,
+			);
 		if (!countryVector && !sectorVector && !industryVector) return etf;
 		return {
 			...etf,

@@ -25,9 +25,11 @@ function identityOf(
 	profiles: ReadonlyMap<string, SecurityProfile>,
 ): IssuerIdentityLike {
 	const profile = position.isin ? profiles.get(position.isin) : undefined;
-	const verifiedName = profile?.name ? profile.name : null;
+	const verifiedName =
+		profile?.issuerName?.trim() || profile?.name?.trim() || null;
 	const receipt =
 		hasDepositaryReceiptMarker(position.name, position.ticker) ||
+		hasDepositaryReceiptMarker(profile?.name, null) ||
 		hasDepositaryReceiptMarker(verifiedName, null);
 	if (verifiedName) return { verifiedName, receipt, source: "caller" };
 	return { verifiedName: null, receipt, source: receipt ? "row_name" : "none" };

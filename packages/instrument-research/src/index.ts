@@ -14,13 +14,14 @@ import {
 	referenceCorrelation,
 	windowPoints,
 } from "./internal/analytics.js";
+import { fisherInterval, legacyFisherInterval } from "./internal/statistics.js";
 import { investmentReading } from "./internal/investment.js";
 import { requireInput, requireJson, shape } from "./internal/input-guards.js";
 
 export type * from "./types.js";
 export { ResearchInputError } from "./validation.js";
 export { LIMITS } from "./limits.js";
-export const METHODOLOGY_VERSION = "instrument-research-v2" as const;
+export const METHODOLOGY_VERSION = "instrument-research-v3" as const;
 const LEGACY_VERSION = "instrument-research-v1" as const;
 
 function finiteCalculation(value: unknown): void {
@@ -143,6 +144,9 @@ function comparePair(
 			horizon,
 			request.reportingCurrency,
 			request.asOf.slice(0, 10),
+			methodologyVersion === METHODOLOGY_VERSION
+				? fisherInterval
+				: legacyFisherInterval,
 		),
 	);
 	finiteCalculation(result.correlations);
@@ -156,6 +160,7 @@ function validateSnapshot(
 	shape(snapshot, ["methodologyVersion", "request"], "Snapshot");
 	requireInput(
 		snapshot.methodologyVersion === METHODOLOGY_VERSION ||
+			snapshot.methodologyVersion === "instrument-research-v2" ||
 			snapshot.methodologyVersion === LEGACY_VERSION,
 		"Unsupported snapshot methodology",
 	);

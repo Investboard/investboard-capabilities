@@ -2,6 +2,8 @@
 
 ## 0.4.0 (unreleased)
 
+- Use effective fund weights consistently for holdings, classification and overlap. Keep the residuals of distinct same-ticker funds separate. Honor caller-supplied issuer identities and include every contributing row in issuer exposures.
+- Retain the measured coefficient inside Fisher intervals for near-perfect and perfect pairs.
 - Portfolio intelligence v4 preserves constituent values, weights and provenance through aggregation. It applies the 80% attribution floor to HHI and effective issuer count separately from observed issuer exposure.
 - Weekly correlation v2 measures two or more eligible holdings. An unknown holding value withholds weighted book figures while dated observed pairs remain available. The near-zero correlation band is named `low_linear`.
 - Replay older snapshots with the original methodology version.

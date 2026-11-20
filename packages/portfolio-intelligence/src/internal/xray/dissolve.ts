@@ -1,4 +1,4 @@
-import { AmountSum } from "../precision.js";
+import { constituentWeights } from "./constituent-weights.js";
 /** Dissolving funds into constituent positions plus a residual for the part not covered. Equity funds only. */
 import {
 	isNeverLookedThroughClass,
@@ -80,42 +80,21 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 } {
 	const exposures: DissolvedExposure[] = [];
 	const dissolutions: EtfDissolution[] = [];
+	// Keep existing residual IDs for unique tickers. Distinct funds can share a ticker.
+	const fundByTicker = new Map<string, string>();
+	const ambiguousTickers = new Set<string>();
+	for (const etf of etfs) {
+		const ticker = etf.ticker.trim().toUpperCase();
+		const id = positionIdentity(etf.isin, ticker) ?? ticker;
+		if (fundByTicker.has(ticker) && fundByTicker.get(ticker) !== id)
+			ambiguousTickers.add(ticker);
+		fundByTicker.set(ticker, id);
+	}
 	for (const etf of holdNeverLookedThroughFundsWhole(etfs)) {
 		const constituentClass = fundAssetClass(etf);
-		const valid = new Map<
-			string,
-			{
-				id: string;
-				isin: string | null;
-				ticker: string | null;
-				name: string;
-				weight: number;
-			}
-		>();
-		const coveredWeights = new AmountSum();
-		for (const c of etf.constituents) {
-			if (!(c.weight > 0)) continue;
-			const id = positionIdentity(c.isin, c.identifier);
-			if (!id) continue;
-			const weight = Math.min(c.weight, 1);
-			coveredWeights.add(weight);
-			const existing = valid.get(id);
-			if (existing) {
-				existing.weight += weight;
-				continue;
-			}
-			valid.set(id, {
-				id,
-				isin: c.isin?.trim().toUpperCase() ?? null,
-				ticker: c.identifier?.trim().toUpperCase() || null,
-				name: c.name || c.identifier,
-				weight,
-			});
-		}
-		const rawCovered = coveredWeights.value;
-		const scale = rawCovered > 1 ? 1 / rawCovered : 1;
-		for (const v of valid.values()) {
-			const w = v.weight * scale;
+		const { entries, covered } = constituentWeights(etf.constituents);
+		for (const v of entries.values()) {
+			const w = v.weight;
 			exposures.push({
 				id: v.id,
 				isin: v.isin,
@@ -130,7 +109,6 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 				residual: false,
 			});
 		}
-		const covered = Math.min(rawCovered, 1);
 		const status: EtfDissolution["status"] =
 			covered === 0
 				? "none"
@@ -139,8 +117,12 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 					: "partial";
 		const uncoveredValue = etf.value * (1 - covered);
 		if (uncoveredValue > 0) {
+			const ticker = etf.ticker.trim().toUpperCase();
+			const residualKey = ambiguousTickers.has(ticker)
+				? positionIdentity(etf.isin, ticker)
+				: ticker;
 			exposures.push({
-				id: `${RESIDUAL_ID_PREFIX}${etf.ticker.toUpperCase()}`,
+				id: `${RESIDUAL_ID_PREFIX}${residualKey}`,
 				isin: null,
 				ticker: null,
 				name: etf.name,
