@@ -239,7 +239,8 @@ function weightOf(row) {
 	return pctValue / 100;
 }
 
-const pct = (weight) => `${(weight * 100).toFixed(1)}%`;
+const pct = (weight) =>
+	weight > 0 && weight < 0.0005 ? "<0.1%" : `${(weight * 100).toFixed(1)}%`;
 
 /** A plain-text summary of a PortfolioResult. Every line states its basis. */
 export function summarize(result) {
@@ -269,7 +270,7 @@ export function summarize(result) {
 	lines.push(
 		c.status === "available"
 			? `Concentration over ${pct(c.attributedCoverage)} of the equity part: index ${c.hhi.value.toFixed(3)} (${c.hhi.bound}), ${c.effectiveIssuers ? `about ${c.effectiveIssuers.value.toFixed(1)} effective companies (${c.effectiveIssuers.bound})` : "no effective number"}, largest ${c.largestIssuer?.name ?? "none"} ${c.largestIssuer ? pct(c.largestIssuer.weight) : ""} of the equity part`
-			: `Concentration withheld (${c.refusal}): only ${pct(c.attributedCoverage)} of the equity part could be attributed to companies`,
+			: `Concentration withheld (${c.refusal}): only ${pct(c.attributedCoverage)} of the equity part could be attributed to companies${c.largestIssuer ? `; largest observed issuer ${c.largestIssuer.name} ${pct(c.largestIssuer.weight)} of the equity part` : ""}`,
 	);
 	lines.push(
 		`Coverage of the whole portfolio: seen through ${pct(result.coverage.transparent)}, held whole ${pct(result.coverage.opaqueInherent)}, pending ${pct(result.coverage.opaquePending)}`,

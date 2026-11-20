@@ -76,8 +76,9 @@ figure.
   whole (cash, bond, gold and crypto funds are never looked through), what
   share is unclassified and which holdings were not valued. Never present a
   partial picture as complete.
-- Concentration figures below full coverage are bounds: say "at least" for
-  the index and "at most" for the effective number of companies.
+- Keep raw position weights through all totals and round only the displayed result.
+- Below 80% equity issuer attribution, report measured issuer exposure separately and withhold the index and effective count. From 80% up to full coverage, say “at least” for the index and “at most” for the effective count.
+- A partial correlation window can have measured pairs: give their dates, sample size, coefficient and interval. An unknown valuation leaves the weighted portfolio mean unavailable.
 - Keep measured facts, hypothetical illustrations and interpretation apart.
   Historical correlation describes the observed period, not the future.
 - End with review questions or missing evidence, not a trade instruction.

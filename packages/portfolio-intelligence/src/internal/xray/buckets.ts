@@ -20,12 +20,6 @@ export interface DimensionBucket {
 		weight: number;
 	} | null;
 }
-function round2(v: number): number {
-	return Math.round(v * 100) / 100;
-}
-function round4(v: number): number {
-	return Number(v.toFixed(4));
-}
 export function finalizeDimensionBuckets(
 	groups: Map<
 		string,
@@ -53,18 +47,17 @@ function finalize(
 			const sorted = g.contributors.sort((a, b) => b.weight - a.weight);
 			const top = sorted.slice(0, CONTRIBUTORS_CAP);
 			const rest = sorted.slice(CONTRIBUTORS_CAP);
-			const bucketWeight = valuedTotal > 0 ? round4(g.value / valuedTotal) : 0;
-			const topWeightSum = top.reduce((s, c) => s + c.weight, 0);
+			const bucketWeight = valuedTotal > 0 ? g.value / valuedTotal : 0;
 			return {
 				key,
 				weight: bucketWeight,
-				value: round2(g.value),
+				value: g.value,
 				contributors: top,
 				contributorsTail:
 					rest.length > 0
 						? {
 								count: rest.length,
-								weight: round4(Math.max(0, bucketWeight - topWeightSum)),
+								weight: rest.reduce((sum, row) => sum + row.weight, 0),
 							}
 						: null,
 			};
@@ -135,7 +128,7 @@ export function holdingAssetClassBuckets(
 			value: g.value,
 			contributors: Array.from(g.byId.values()).map(({ value, ...c }) => ({
 				...c,
-				weight: valuedTotal > 0 ? round4(value / valuedTotal) : 0,
+				weight: valuedTotal > 0 ? value / valuedTotal : 0,
 			})),
 		});
 	}
@@ -170,7 +163,7 @@ export function currencyBuckets(
 			id: r.id,
 			label: r.name,
 			isin: r.isin,
-			weight: valuedTotal > 0 ? Number((r.value / valuedTotal).toFixed(4)) : 0,
+			weight: valuedTotal > 0 ? r.value / valuedTotal : 0,
 		});
 		groups.set(key, g);
 	}

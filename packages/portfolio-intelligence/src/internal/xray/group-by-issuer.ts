@@ -3,12 +3,6 @@ import { foldCompanyParts } from "./company-fold.js";
 import { isResidualId } from "./identity.js";
 import { canonicalIssuerIdentities } from "./issuer-identities.js";
 import type { IssuerGroup, MergedPosition } from "./types.js";
-function round2(v: number): number {
-	return Math.round(v * 100) / 100;
-}
-function round4(v: number): number {
-	return Number(v.toFixed(4));
-}
 export function groupByIssuer(merged: MergedPosition[]): IssuerGroup[] {
 	const positions = foldCompanyParts(merged);
 	interface Acc {
@@ -45,8 +39,8 @@ export function groupByIssuer(merged: MergedPosition[]): IssuerGroup[] {
 			return {
 				key: g.key,
 				name: leader?.name ?? g.name,
-				value: round2(g.value),
-				weight: round4(g.weight),
+				value: g.value,
+				weight: g.weight,
 				grouped: breakdown.length > 1,
 				breakdown,
 			};

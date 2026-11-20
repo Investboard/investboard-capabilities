@@ -118,8 +118,10 @@ describe("measureConcentration", () => {
 				provenance: { direct: 0, viaFunds: [] },
 			}),
 		]);
-		expect(result.status).toBe("available");
-		expect(result.hhi?.bound).toBe("lower");
+		expect(result.status).toBe("refused");
+		expect(result.largestIssuer?.weight).toBe(0.3);
+		expect(result.hhi).toBeNull();
+		expect(result.effectiveIssuers).toBeNull();
 	});
 });
 

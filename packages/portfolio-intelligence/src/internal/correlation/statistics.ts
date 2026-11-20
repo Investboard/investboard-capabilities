@@ -39,7 +39,7 @@ export function pearson(xs: WeeklySeries, ys: WeeklySeries): Correlation {
 		syy += dy * dy;
 	}
 	if (sxx <= 0 || syy <= 0) return { r: null, n };
-	return { r: sxy / Math.sqrt(sxx * syy), n };
+	return { r: Math.max(-1, Math.min(1, sxy / Math.sqrt(sxx * syy))), n };
 }
 export function fisherInterval(
 	r: number,
@@ -60,7 +60,7 @@ export function correlationBand(r: number | null, n: number): CorrelationBand {
 	if (spanned >= 2) return "undetermined";
 	if (r >= 0.7) return "close";
 	if (r >= 0.3) return "partial";
-	if (r >= -0.3) return "independent";
+	if (r >= -0.3) return "low_linear";
 	return "opposite";
 }
 export function intervalsDisjoint(a: Correlation, b: Correlation): boolean {

@@ -12,10 +12,12 @@ export interface DiversificationReading {
 export function readDiversification(
 	holdings: readonly DiversificationHolding[],
 	anchor: string,
+	valuationComplete = true,
 ): DiversificationReading {
 	const states = new Map(
 		DIVERSIFICATION_WINDOWS.map(
-			(w) => [w, computeWindow(holdings, anchor, w)] as const,
+			(w) =>
+				[w, computeWindow(holdings, anchor, w, valuationComplete)] as const,
 		),
 	);
 	const five = states.get("5y")!;

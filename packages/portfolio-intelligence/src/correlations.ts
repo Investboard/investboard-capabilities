@@ -19,7 +19,7 @@ import {
 } from "./validation.js";
 
 export const CORRELATION_METHODOLOGY_VERSION =
-	"weekly-common-sample-correlation-v1" as const;
+	"weekly-common-sample-correlation-v2" as const;
 
 export type CorrelationWindow = WindowReading;
 
@@ -80,18 +80,34 @@ export function measureCorrelations(
 				exclusion: "no_market_series",
 			};
 		if (h.priceCurrency === request.baseCurrency)
-			return { id: h.id, valueBase: value, dailyBase: daily, exclusion: null };
+			return {
+				id: h.id,
+				valueBase: value,
+				dailyBase: daily,
+				exclusion: null,
+				closeBasis: h.closeBasis,
+			};
 		const fx = (rates.get(h.priceCurrency) ?? []).map((r) => ({
 			date: r.date,
 			value: r.rateToBase,
 		}));
 		const converted = fx.length > 0 ? toBaseDaily(daily, fx) : [];
 		return converted.length > 0
-			? { id: h.id, valueBase: value, dailyBase: converted, exclusion: null }
+			? {
+					id: h.id,
+					valueBase: value,
+					dailyBase: converted,
+					exclusion: null,
+					closeBasis: h.closeBasis,
+				}
 			: { id: h.id, valueBase: value, dailyBase: null, exclusion: "no_fx" };
 	});
 
-	const reading = readDiversification(holdings, anchor);
+	const reading = readDiversification(
+		holdings,
+		anchor,
+		request.holdings.every((h) => h.value !== null),
+	);
 	return freeze({
 		methodologyVersion: CORRELATION_METHODOLOGY_VERSION,
 		baseCurrency: request.baseCurrency,
@@ -113,7 +129,7 @@ export function replayCorrelations(
 		snapshot.methodologyVersion !== CORRELATION_METHODOLOGY_VERSION
 	)
 		throw new PortfolioInputError(
-			`This snapshot was saved with methodology ${String(snapshot?.methodologyVersion)}; this version replays ${CORRELATION_METHODOLOGY_VERSION}`,
+			`This snapshot was saved with methodology ${String(snapshot?.methodologyVersion)}; this version replays ${CORRELATION_METHODOLOGY_VERSION}. Use the original package for historical replay, or explicitly call measureCorrelations(snapshot.request) for a new evaluation`,
 		);
 	return measureCorrelations(snapshot.request);
 }

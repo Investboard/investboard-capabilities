@@ -161,6 +161,48 @@ describe("buildRequestFromCsv", () => {
 	});
 });
 
+it("shows a small measured weight and discloses an observed issuer below the book coverage floor", () => {
+	const asOf = "2025-01-31";
+	const common = { assetClass: "equities" as const, listingCurrency: "EUR" };
+	const result = analyzePortfolio({
+		asOf,
+		baseCurrency: "EUR",
+		holdings: [
+			{
+				...common,
+				id: "issuer",
+				name: "Measured issuer",
+				kind: "security",
+				value: 5000,
+			},
+			{
+				...common,
+				id: "fund",
+				name: "Synthetic fund",
+				kind: "fund",
+				value: 5000,
+			},
+		],
+		funds: [
+			{
+				holdingId: "fund",
+				reportedClass: "equities",
+				holdings: {
+					status: "listed",
+					asOf,
+					constituents: [
+						{ id: "tiny", name: "Small company", weight: 0.000031234 },
+					],
+				},
+			},
+		],
+	});
+	const summary = summarize(result);
+	expect(summary).toContain("Small company: <0.1% (via fund <0.1%)");
+	expect(summary).toContain("largest observed issuer Measured issuer 50.0%");
+	expect(summary).not.toContain("effective companies");
+});
+
 describe("isEntry", () => {
 	it("recognizes the script when it is run through a symlink", () => {
 		const dir = mkdtempSync(join(tmpdir(), "pi-entry-"));

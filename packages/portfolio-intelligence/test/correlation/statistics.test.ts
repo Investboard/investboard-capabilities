@@ -46,10 +46,10 @@ describe("fisherInterval", () => {
 describe("correlationBand", () => {
 	it("names the band of the point value when the interval is narrow enough", () => {
 		expect(correlationBand(0.5, 52)).toBe("partial");
-		expect(correlationBand(0.2, 52)).toBe("independent");
+		expect(correlationBand(0.2, 52)).toBe("low_linear");
 		expect(correlationBand(0.72, 260)).toBe("close");
 		expect(correlationBand(-0.45, 260)).toBe("opposite");
-		expect(correlationBand(0.05, 260)).toBe("independent");
+		expect(correlationBand(0.05, 260)).toBe("low_linear");
 	});
 	it("says too short when the interval spans two boundaries", () => {
 		expect(correlationBand(0.5, 12)).toBe("undetermined");

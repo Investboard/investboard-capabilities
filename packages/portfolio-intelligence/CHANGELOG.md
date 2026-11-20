@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 (unreleased)
+
+- Portfolio intelligence v4 preserves constituent values, weights and provenance through aggregation. It applies the 80% attribution floor to HHI and effective issuer count separately from observed issuer exposure.
+- Weekly correlation v2 measures two or more eligible holdings. An unknown holding value withholds weighted book figures while dated observed pairs remain available. The near-zero correlation band is named `low_linear`.
+- Replay older snapshots with the original methodology version.
+
 ## 0.3.0 (unreleased)
 
 Methodology `portfolio-intelligence-v3`. Currency interpretation is now part of the machine-readable contract.

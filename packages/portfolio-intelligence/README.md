@@ -23,7 +23,7 @@ Build a source tarball; registry publication is a separate release step:
 pnpm --filter @investboard/portfolio-intelligence build
 pnpm --dir packages/portfolio-intelligence pack --pack-destination /tmp
 # In your application:
-pnpm add /tmp/investboard-portfolio-intelligence-0.3.0.tgz
+pnpm add /tmp/investboard-portfolio-intelligence-0.4.0.tgz
 ```
 
 The ESM package exports these functions and their TypeScript request and result types:
@@ -64,7 +64,7 @@ Only funds that can hold listed companies are looked through. **A cash, bond, go
 
 The resolved class takes a specific stated class (cash, bonds, gold, crypto, real estate, commodities) over the reported one; a stated `equities`, `alternatives` or `unknown` gives way to the class the fund reports. Real estate is for holdings that own buildings, which you state on the holding: an ETF of real-estate companies is a stock fund, so a fund whose `reportedClass` is `real_estate` reads as equities. A fund's own listed constituents always win over a read-through list.
 
-A looked-through fund contributes each constituent at fund value × constituent weight. Constituent weights above a total of 1 are scaled down; the uncovered remainder stays as one residual row in the fund's class, and a fund is fully covered at 98%. Constituents and direct holdings with the same identity and class merge into one position whose provenance lists the direct share and each fund's share. A company held through an equity fund and through a fund of another class (real estate, commodities) is one position per class: the equity part carries the sector and region, the other part stays in its class without them. Issuer groups and concentration still count one company. A fund held by a fund stays one position: there is no recursive look-through.
+The numeric result preserves unrounded position values, weights, provenance and aggregate exposures. Round only for display. A looked-through fund contributes each constituent at fund value × constituent weight. Constituent weights above a total of 1 are scaled down; the uncovered remainder stays as one residual row in the fund's class, and a fund is fully covered at 98%. Constituents and direct holdings with the same identity and class merge into one position whose provenance lists the direct share and each fund's share. A company held through an equity fund and through a fund of another class (real estate, commodities) is one position per class: the equity part carries the sector and region, the other part stays in its class without them. Issuer groups and concentration still count one company. A fund held by a fund stays one position: there is no recursive look-through.
 
 ## Exposures
 
@@ -111,7 +111,7 @@ Fund-pair overlap is `sum(min(weightA, weightB))` over the companies two funds s
 
 Concentration is measured over the equity part, grouped by company: US share classes by their CUSIP prefix, depositary receipts by the verified company name in their profile, and other lines by their normalized company name. A fund's uncovered remainder stays in the denominator, so each company weight is a lower bound and `attributedCoverage` is the share that could be attributed.
 
-`hhi` is the sum of squared company weights and `effectiveIssuers` is its inverse. Below full coverage they are labeled **lower** and **upper** bounds; at full coverage, **exact**. Below 80% attributed coverage both are withheld (`status: "refused"`), unless a single company is measured above 10% of the equity part: a measured concentration is never withheld. `topTenWeight` is the ten largest positions' share of the whole portfolio.
+`hhi` is the sum of squared company weights and `effectiveIssuers` is its inverse. Below full coverage they are labeled **lower** and **upper** bounds; at full coverage, **exact**. Below 80% attributed coverage both are withheld (`status: "refused"`), including when a measured issuer exceeds 10%. That observed issuer exposure is still returned in `largestIssuer`. `topTenWeight` is the ten largest positions' share of the whole portfolio.
 
 ## Coverage and unknowns
 
@@ -121,19 +121,19 @@ Concentration is measured over the equity part, grouped by company: US share cla
 
 ## Correlations
 
-`CorrelationRequest` declares `asOf`, `baseCurrency`, the holdings with their values and price currencies, daily or weekly `closes`, and `fx` where one unit of a currency equals `rateToBase` units of the base currency.
+`CorrelationRequest` declares `asOf`, `baseCurrency`, the holdings with their values, price currencies and optional caller-declared `closeBasis` (`price` or `total_return`), daily or weekly `closes`, and `fx` where one unit of a currency equals `rateToBase` units of the base currency.
 
 - Closes become weekly closes on Fridays, ending on the last Friday strictly before `asOf`. Returns are week over week.
 - A foreign close converts at the latest rate on or before its date, at most four days old; without any rate the holding is excluded as `no_fx`.
 - Windows are 52, 156, 260 and 520 weeks. A holding needs returns in 80% of a window's weeks (`short_history`); a constant series is excluded (`flat_series`), never given a coefficient of 0. All pairs share one common sample of weeks.
-- A window is `insufficient_history` with fewer than three eligible holdings or below 60% of portfolio value. Excluded value stays in the denominator.
-- Each pair has a Pearson coefficient, a Fisher 95% interval and a band: close from 0.7, partial from 0.3, independent from -0.3, otherwise opposite, and undetermined when the interval spans two or more boundaries. Pairs at 0.95 or above are near-duplicates. Groups form by average linkage while the mean correlation between them is at least 0.7. The value-weighted mean correlation, the ten worst weeks and the 5-year versus 1-year band changes are reported.
+- A window is `insufficient_history` with fewer than two eligible holdings or below 60% of portfolio value. Excluded known value stays in the denominator. A missing holding value makes the whole-book denominator unknown. A window with sufficient common history for two or more valued holdings then returns `partial`, its actual date range, observed pairs, sample counts and intervals. Its covered value share, weighted mean and largest group share are null. Each measured window lists the `seriesBasis` of its eligible holdings, using `unspecified` when the caller supplies no basis.
+- Each pair has a Pearson coefficient, a Fisher 95% interval and a band: close from 0.7, partial from 0.3, low_linear from -0.3, otherwise opposite, and undetermined when the interval spans two or more boundaries. Pairs at 0.95 or above are near-duplicates. Groups form by average linkage while the mean correlation between them is at least 0.7. The value-weighted mean correlation, the ten worst weeks and the 5-year versus 1-year band changes are reported.
 
 Historical correlation describes the observed period. It is distinct from holdings overlap and does not predict future diversification.
 
 ## Retained evidence and replay
 
-Every result carries a `snapshot` with the methodology version and a copy of the request. `replayPortfolioAnalysis` now accepts `portfolio-intelligence-v3` only. A v1/v2 snapshot is refused with an explicit migration message: use the original package/version for its documented historical replay, or deliberately pass `snapshot.request` to `analyzePortfolio` for a **new** evaluation with a new snapshot. Never overwrite or relabel the old snapshot. `replayCorrelations` retains its existing independent method and behavior. Results are deep-frozen; the caller's request is never changed.
+Every result carries an immutable snapshot with its input and methodology. `replayPortfolioAnalysis` accepts `portfolio-intelligence-v4`. `replayCorrelations` accepts `weekly-common-sample-correlation-v2`. Replay older snapshots with their original package version. To run a new evaluation under the current methodology, pass the saved request to the corresponding analysis function and keep the new snapshot separately.
 
 ## Bounds and verification
 

@@ -281,6 +281,10 @@ export function validateCorrelationRequest(request: CorrelationRequest): void {
 		ids.add(holding.id);
 		if (holding.value !== null) amount(holding.value, `Holding ${holding.id}:`);
 		currency(holding.priceCurrency, `Holding ${holding.id}: priceCurrency`);
+		require(holding.closeBasis === undefined ||
+			holding.closeBasis === "price" ||
+			holding.closeBasis ===
+				"total_return", `Holding ${holding.id}: invalid closeBasis`);
 	}
 	require(Array.isArray(request.closes), "closes must be an array");
 	const counts = new Map<string, number>();

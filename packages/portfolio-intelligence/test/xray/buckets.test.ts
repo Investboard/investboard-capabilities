@@ -160,10 +160,11 @@ describe("holdingAssetClassBuckets (the Basis line, by holding)", () => {
 		const bucket = buckets[0]!;
 		expect(bucket.contributorsTail).not.toBeNull();
 		const topWeightSum = bucket.contributors.reduce((s, c) => s + c.weight, 0);
-		const reconciled = Number(
-			(topWeightSum + bucket.contributorsTail!.weight).toFixed(4),
+		expect(bucket.contributorsTail!.weight).toBeCloseTo(2 / 7, 14);
+		expect(topWeightSum + bucket.contributorsTail!.weight).toBeCloseTo(
+			bucket.weight,
+			14,
 		);
-		expect(reconciled).toBe(bucket.weight);
 	});
 	it("pairs with the look-through: the merged positions under each class sum to that class's slice", () => {
 		const world = fund("WRLD.DE", "IESYN6451620", "equities", 50000, [

@@ -43,7 +43,7 @@ export const METHOD_CONSTANTS = Object.freeze({
 	correlationGroupThreshold: GROUP_THRESHOLD,
 	correlationFxMaxAgeDays: FX_MAX_AGE_DAYS,
 	correlationWorstWeeks: WORST_WEEKS,
-	bandIndependentFrom: BAND_BOUNDARIES[0],
+	bandLowLinearFrom: BAND_BOUNDARIES[0],
 	bandPartialFrom: BAND_BOUNDARIES[1],
 	bandCloseFrom: BAND_BOUNDARIES[2],
 });

@@ -18,5 +18,5 @@ export function topTenBookConcentration(
 		.sort((a, b) => b - a)
 		.slice(0, TOP_N)
 		.reduce((s, w) => s + w, 0);
-	return Math.min(Number(sum.toFixed(4)), 1);
+	return Math.min(sum, 1);
 }

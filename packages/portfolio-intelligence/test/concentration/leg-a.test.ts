@@ -236,7 +236,7 @@ describe("verdictAtCap: one implementation of the cap-dependent verdict", () => 
 		});
 	}
 });
-describe("isApproachingCap: the band is compared in basis points", () => {
+describe("isApproachingCap: the band is compared at calculation precision", () => {
 	it("an issuer exactly on the 75 % line is approaching at every legal cap", () => {
 		const missed: number[] = [];
 		for (let capPct = 1; capPct <= 100; capPct++) {
@@ -259,6 +259,7 @@ describe("isApproachingCap: the band is compared in basis points", () => {
 	});
 	it("a weight a basis point below the line is not approaching", () => {
 		expect(isApproachingCap(0.2999, 0.4)).toBe(false);
+		expect(isApproachingCap(0.2999999, 0.4)).toBe(false);
 		expect(isApproachingCap(0.3, 0.4)).toBe(true);
 	});
 	it("stays below the band above the line and rounds no breach into it", () => {

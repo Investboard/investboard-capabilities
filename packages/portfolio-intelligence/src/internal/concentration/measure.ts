@@ -7,11 +7,11 @@
 import type { Bounded, Concentration } from "../../types.js";
 import { topTenBookConcentration } from "../xray/top-ten.js";
 import type { MergedPosition } from "../xray/types.js";
+import { isBookSeenThrough } from "./leg-a.js";
 import { evaluateIssuerConcentration } from "./from-lookthrough.js";
 
 /** The cap is required by the engine but plays no part in the figures reported here. */
 export const NEUTRAL_CAP_PCT = 10;
-const FULL = 1 - 1e-12;
 
 export function measureConcentration(
 	classified: readonly MergedPosition[],
@@ -20,8 +20,10 @@ export function measureConcentration(
 		rows: classified,
 		capPct: NEUTRAL_CAP_PCT,
 	});
-	const complete = result.coverage >= FULL;
-	const largest = result.maxIssuer;
+	const complete = result.unattributed === 0;
+	// The policy verdict can withhold its cap assessment at low coverage.
+	// Descriptive analysis can still report the largest identified issuer.
+	const largest = result.issuers[0];
 	const base = {
 		attributedCoverage: result.coverage,
 		topTenWeight: topTenBookConcentration(classified),
@@ -33,10 +35,10 @@ export function measureConcentration(
 				}
 			: null,
 	};
-	if (result.refusal !== null)
+	if (!isBookSeenThrough(result))
 		return {
 			status: "refused",
-			refusal: result.refusal,
+			refusal: result.refusal ?? "coverage_below_floor",
 			...base,
 			hhi: null,
 			effectiveIssuers: null,

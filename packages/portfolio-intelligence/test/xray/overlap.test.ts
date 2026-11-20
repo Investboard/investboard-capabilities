@@ -174,16 +174,15 @@ describe("detectOverlaps", () => {
 		const p = detectOverlaps([mk("A.DE"), mk("B.DE")])[0]!;
 		expect(p.sharedTail).toEqual({
 			count: 1,
-			weight: Number((2e-7).toFixed(4)),
+			weight: 2e-7,
 		});
-		expect(p.sharedTail?.weight).toBe(0);
 		const topSum = p.sharedHoldings.reduce(
 			(s, h) => s + Math.min(h.weightInA, h.weightInB),
 			0,
 		);
 		expect(
 			Math.abs(topSum + (p.sharedTail?.weight ?? 0) - p.overlapShare),
-		).toBeLessThan(21 * 5e-5);
+		).toBeLessThan(21 * Number.EPSILON);
 	});
 	it("never floors a real tail to zero when the rounded top sides overshoot", () => {
 		const mk = (ticker: string) =>

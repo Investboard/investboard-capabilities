@@ -14,12 +14,6 @@ interface FoldablePosition {
 		}>;
 	};
 }
-function round2(v: number): number {
-	return Math.round(v * 100) / 100;
-}
-function round4(v: number): number {
-	return Number(v.toFixed(4));
-}
 export function foldCompanyParts<T extends FoldablePosition>(
 	positions: readonly T[],
 ): T[] {
@@ -48,12 +42,12 @@ function foldParts<T extends FoldablePosition>(id: string, parts: T[]): T {
 		...base,
 		id,
 		name: own?.name ?? base.name,
-		value: round2(sum((p) => p.value)),
-		weight: round4(sum((p) => p.weight)),
+		value: sum((p) => p.value),
+		weight: sum((p) => p.weight),
 		...(uncertain ? { issuerScopeUncertain: true } : {}),
 		provenance: {
 			...base.provenance,
-			direct: round4(sum((p) => p.provenance.direct)),
+			direct: sum((p) => p.provenance.direct),
 			directValue: sum((p) => p.provenance.directValue ?? 0),
 			viaFunds: parts
 				.flatMap((p) => [...p.provenance.viaFunds])

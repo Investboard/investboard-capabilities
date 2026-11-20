@@ -4,9 +4,6 @@ import { positionIdentity } from "./identity.js";
 import type { EngineEtfInput, OverlapPairV2 } from "./types.js";
 export const OVERLAP_NOISE_FLOOR = 0.01;
 export const MAX_SHARED_HOLDINGS = 20;
-function round4(v: number): number {
-	return Number(v.toFixed(4));
-}
 interface ConstituentWeight {
 	weight: number;
 	name: string;
@@ -54,8 +51,8 @@ function buildPair(a: EtfWeights, b: EtfWeights): OverlapPairV2 | null {
 		shared.push({
 			id,
 			name: wa.name,
-			weightInA: round4(wa.weight),
-			weightInB: round4(wb.weight),
+			weightInA: wa.weight,
+			weightInB: wb.weight,
 			common,
 			combined: wa.weight + wb.weight,
 		});
@@ -72,7 +69,7 @@ function buildPair(a: EtfWeights, b: EtfWeights): OverlapPairV2 | null {
 		etfB: b.ticker,
 		isinA: a.isin,
 		isinB: b.isin,
-		overlapShare: round4(clampedCommonWeight),
+		overlapShare: clampedCommonWeight,
 		sharedCount: shared.length,
 		sharedHoldings: top.map((h) => ({
 			id: h.id,
@@ -81,9 +78,7 @@ function buildPair(a: EtfWeights, b: EtfWeights): OverlapPairV2 | null {
 			weightInB: h.weightInB,
 		})),
 		sharedTail:
-			rest.length > 0
-				? { count: rest.length, weight: round4(restWeight) }
-				: null,
+			rest.length > 0 ? { count: rest.length, weight: restWeight } : null,
 	};
 }
 export function detectOverlaps(etfs: EngineEtfInput[]): OverlapPairV2[] {

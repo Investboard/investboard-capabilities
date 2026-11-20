@@ -1,3 +1,4 @@
+import { AmountSum } from "../precision.js";
 /** Dissolving funds into constituent positions plus a residual for the part not covered. Equity funds only. */
 import {
 	isNeverLookedThroughClass,
@@ -73,7 +74,6 @@ export function lookThroughDissolutionTally(
 	return tally;
 }
 export const FULL_DISSOLUTION_THRESHOLD = 0.98;
-const RESIDUAL_MIN_VALUE = 0.01;
 export function dissolveEtfs(etfs: EngineEtfInput[]): {
 	exposures: DissolvedExposure[];
 	dissolutions: EtfDissolution[];
@@ -82,21 +82,29 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 	const dissolutions: EtfDissolution[] = [];
 	for (const etf of holdNeverLookedThroughFundsWhole(etfs)) {
 		const constituentClass = fundAssetClass(etf);
-		const valid: {
-			id: string;
-			isin: string | null;
-			ticker: string | null;
-			name: string;
-			weight: number;
-		}[] = [];
-		let rawCovered = 0;
+		const valid = new Map<
+			string,
+			{
+				id: string;
+				isin: string | null;
+				ticker: string | null;
+				name: string;
+				weight: number;
+			}
+		>();
+		const coveredWeights = new AmountSum();
 		for (const c of etf.constituents) {
 			if (!(c.weight > 0)) continue;
 			const id = positionIdentity(c.isin, c.identifier);
 			if (!id) continue;
 			const weight = Math.min(c.weight, 1);
-			rawCovered += weight;
-			valid.push({
+			coveredWeights.add(weight);
+			const existing = valid.get(id);
+			if (existing) {
+				existing.weight += weight;
+				continue;
+			}
+			valid.set(id, {
 				id,
 				isin: c.isin?.trim().toUpperCase() ?? null,
 				ticker: c.identifier?.trim().toUpperCase() || null,
@@ -104,8 +112,9 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 				weight,
 			});
 		}
+		const rawCovered = coveredWeights.value;
 		const scale = rawCovered > 1 ? 1 / rawCovered : 1;
-		for (const v of valid) {
+		for (const v of valid.values()) {
 			const w = v.weight * scale;
 			exposures.push({
 				id: v.id,
@@ -129,7 +138,7 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 					? "full"
 					: "partial";
 		const uncoveredValue = etf.value * (1 - covered);
-		if (uncoveredValue > RESIDUAL_MIN_VALUE) {
+		if (uncoveredValue > 0) {
 			exposures.push({
 				id: `${RESIDUAL_ID_PREFIX}${etf.ticker.toUpperCase()}`,
 				isin: null,

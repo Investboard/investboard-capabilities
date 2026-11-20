@@ -31,24 +31,38 @@ import type {
 export type * from "./types.js";
 export { PerformanceInputError } from "./validation.js";
 export { LIMITS } from "./limits.js";
-export const METHODOLOGY_VERSION = "actual-position-performance-v4" as const;
+export const METHODOLOGY_VERSION = "actual-position-performance-v5" as const;
+const V4 = "actual-position-performance-v4" as const;
 const V3 = "actual-position-performance-v3" as const;
 
 /**
- * The rules a methodology version calculates by. v4 annualizes both returns
- * from 365 days and judges half-cent transfer ties against the addends; v3
- * annualized the time-weighted return only beyond 365 days and judged them
- * against the net. Standalone fees exist only in v4 requests.
+ * v5 excludes dividends on the opening close. v4 and v3 counted them.
+ * v4 also introduced standalone fees, annualization from 365 days and
+ * half-cent transfer ties judged against the summed amounts.
  */
 const RULES = {
 	[METHODOLOGY_VERSION]: {
 		annualizationMinDays: 365,
 		transferNoise: "addends",
+		includeOpeningDividends: false,
 	},
-	[V3]: { annualizationMinDays: 366, transferNoise: "total" },
+	[V4]: {
+		annualizationMinDays: 365,
+		transferNoise: "addends",
+		includeOpeningDividends: true,
+	},
+	[V3]: {
+		annualizationMinDays: 366,
+		transferNoise: "total",
+		includeOpeningDividends: true,
+	},
 } as const satisfies Record<
 	PerformanceMethodologyVersion,
-	{ annualizationMinDays: number; transferNoise: "addends" | "total" }
+	{
+		annualizationMinDays: number;
+		transferNoise: "addends" | "total";
+		includeOpeningDividends: boolean;
+	}
 >;
 
 /** A fee booked on its own is money paid in that buys nothing, at portfolio level. */
@@ -92,7 +106,19 @@ function evaluate(
 	});
 	if (!original.ledgerComplete) return unavailable("incomplete_ledger");
 	if (original.snapshots.length < 2) return unavailable("insufficient_history");
-	const request = projectScope(original);
+	// Apply the close-to-close boundary before basket selection: even an
+	// unassigned dividend at the opening close belongs to the preceding window.
+	const openingDate = original.snapshots[0]!.date;
+	const request = projectScope(
+		rules.includeOpeningDividends
+			? original
+			: {
+					...original,
+					cashFlows: original.cashFlows.filter(
+						(flow) => flow.type !== "dividend" || flow.date !== openingDate,
+					),
+				},
+	);
 	if (!request) return unavailable("scope_history_missing");
 	const history = prepareHistory(request);
 	const transfers = valueTransfers(request, history, rules.transferNoise);
@@ -233,7 +259,7 @@ export function replayPerformance(
 	shape(snapshot, ["methodologyVersion", "request"], "Snapshot");
 	const version = snapshot.methodologyVersion;
 	requireInput(
-		version === METHODOLOGY_VERSION || version === V3,
+		version === METHODOLOGY_VERSION || version === V4 || version === V3,
 		"Unsupported snapshot methodology",
 	);
 	return evaluate(snapshot.request, version);

@@ -51,7 +51,7 @@ import type {
 import { freeze } from "./internal/freeze.js";
 import { validatePortfolioRequest } from "./validation.js";
 
-export const METHODOLOGY_VERSION = "portfolio-intelligence-v3" as const;
+export const METHODOLOGY_VERSION = "portfolio-intelligence-v4" as const;
 
 function fundKey(isin: string | null | undefined, ticker: string): string {
 	return positionIdentity(normalizeIsin(isin), ticker) ?? ticker;

@@ -1,3 +1,4 @@
+import { AmountSum } from "../precision.js";
 /** Sector, country and region buckets from fund breakdowns and direct classifications, with explicit unknown mass. */
 import type { BucketContributor } from "./buckets.js";
 import {
@@ -31,7 +32,6 @@ export interface ClassificationResult {
 	buckets: ClassificationBucket[];
 	coverage: number;
 }
-const RESIDUAL_MIN_VALUE = 0.005;
 function assembleBuckets(
 	acc: Map<string, number>,
 	totalValue: number,
@@ -64,19 +64,20 @@ export function proRateVector(
 	const valid = (vector ?? []).filter(
 		(v) => v.weight > 0 && Number.isFinite(v.weight),
 	);
-	const sum = valid.reduce((s, v) => s + v.weight, 0);
+	const weights = new AmountSum();
+	for (const entry of valid) weights.add(entry.weight);
+	const sum = weights.value;
 	if (valid.length === 0 || sum <= 0) return { entries: [], unknown: value };
 	const scale = sum > 1 ? 1 / sum : 1;
-	let covered = 0;
+
 	const entries = valid.map((v) => {
 		const share = value * v.weight * scale;
-		covered += share;
 		return { key: v.key, value: share };
 	});
-	const remainder = value - covered;
+	const remainder = value * Math.max(0, 1 - sum);
 	return {
 		entries,
-		unknown: remainder > RESIDUAL_MIN_VALUE ? remainder : 0,
+		unknown: remainder,
 	};
 }
 export function classificationBuckets(input: {
