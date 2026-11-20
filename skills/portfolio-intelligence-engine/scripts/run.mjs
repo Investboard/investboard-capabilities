@@ -12,6 +12,7 @@ import {
 	realpathSync,
 	writeFileSync,
 } from "node:fs";
+import { formatBound } from "../../../packages/portfolio-intelligence/examples/format-bound.mjs";
 import { join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -105,6 +106,10 @@ export function buildRequestFromCsv(
 	fundHoldingsCsv,
 	securitiesCsv,
 ) {
+	return prepareCsvInput(portfolioCsv, fundHoldingsCsv, securitiesCsv).request;
+}
+
+function prepareCsvInput(portfolioCsv, fundHoldingsCsv, securitiesCsv) {
 	const portfolio = parseCsv(portfolioCsv);
 	if (portfolio.length === 0) throw new Error("The portfolio file has no rows");
 	const asOf = one(portfolio, "as_of", "as_of date");
@@ -114,6 +119,7 @@ export function buildRequestFromCsv(
 		"base currency",
 	).toUpperCase();
 
+	const usesMoney = portfolio.some((row) => text(row.value) !== null);
 	const holdings = portfolio.map((r) => {
 		const type = (r.holding_type ?? "").toLowerCase();
 		const kind = FUND_TYPES.has(type)
@@ -142,7 +148,7 @@ export function buildRequestFromCsv(
 			name: r.holding_name || r.holding_id,
 			isin: text(r.isin),
 			ticker: text(r.ticker),
-			value: number(r.value) ?? number(r.portfolio_weight_pct),
+			value: usesMoney ? number(r.value) : number(r.portfolio_weight_pct),
 			listingCurrency: r.listing_currency.toUpperCase(),
 			assetClass,
 		};
@@ -154,6 +160,7 @@ export function buildRequestFromCsv(
 		profiles.set(r.isin.toUpperCase(), {
 			isin: r.isin.toUpperCase(),
 			name: text(r.name),
+			issuerName: text(r.issuer_name),
 			sector: text(r.sector),
 			industry: text(r.industry),
 			country: text(r.country),
@@ -222,11 +229,14 @@ export function buildRequestFromCsv(
 		});
 
 	return {
-		asOf,
-		baseCurrency,
-		holdings,
-		funds,
-		securities: [...profiles.values()],
+		usesMoney,
+		request: {
+			asOf,
+			baseCurrency,
+			holdings,
+			funds,
+			securities: [...profiles.values()],
+		},
 	};
 }
 
@@ -239,20 +249,33 @@ function weightOf(row) {
 	return pctValue / 100;
 }
 
-const pct = (weight) => `${(weight * 100).toFixed(1)}%`;
+const pct = (weight) =>
+	weight > 0 && weight < 0.0005 ? "<0.1%" : `${(weight * 100).toFixed(1)}%`;
 
 /** A plain-text summary of a PortfolioResult. Every line states its basis. */
-export function summarize(result) {
+function coveragePct(fraction) {
+	const display = pct(fraction);
+	if (fraction < 0.8 && display === "80.0%") return "<80%";
+	if (fraction < 1 && display === "100.0%") return "<100%";
+	return display;
+}
+
+export function summarize(result, basis = "valued portfolio") {
 	const lines = [];
 	lines.push(
 		`Status: ${result.status}${result.reasonCodes.length ? ` (${result.reasonCodes.join(", ")})` : ""}`,
 	);
 	lines.push(
-		`Basis by holding, share of the whole portfolio: ${result.basis.map((b) => `${b.key} ${pct(b.weight)}`).join(", ")}`,
+		`Basis by holding, share of the ${basis}: ${result.basis.map((b) => `${b.key} ${pct(b.weight)}`).join(", ")}`,
 	);
-	lines.push("Largest companies, share of the whole portfolio:");
+	lines.push(
+		`Top ten holdings: ${pct(result.concentration.topTenWeight)} of the ${basis}`,
+	);
+	lines.push(
+		`Largest individual position rows, share of the ${basis} (asset-class parts shown separately):`,
+	);
 	for (const p of result.positions
-		.filter((p) => !p.residual && p.assetClass !== "cash")
+		.filter((p) => !p.residual)
 		.sort((a, b) => b.weight - a.weight)
 		.slice(0, 10)) {
 		const parts = [];
@@ -268,11 +291,11 @@ export function summarize(result) {
 	const c = result.concentration;
 	lines.push(
 		c.status === "available"
-			? `Concentration over ${pct(c.attributedCoverage)} of the equity part: index ${c.hhi.value.toFixed(3)} (${c.hhi.bound}), ${c.effectiveIssuers ? `about ${c.effectiveIssuers.value.toFixed(1)} effective companies (${c.effectiveIssuers.bound})` : "no effective number"}, largest ${c.largestIssuer?.name ?? "none"} ${c.largestIssuer ? pct(c.largestIssuer.weight) : ""} of the equity part`
-			: `Concentration withheld (${c.refusal}): only ${pct(c.attributedCoverage)} of the equity part could be attributed to companies`,
+			? `Concentration over ${coveragePct(c.attributedCoverage)} of the equity part: index ${formatBound(c.hhi)} (${c.hhi.bound}), ${c.effectiveIssuers ? `${formatBound(c.effectiveIssuers)} effective companies (${c.effectiveIssuers.bound})` : "no effective number"}, largest ${c.largestIssuer?.name ?? "none"} ${c.largestIssuer ? pct(c.largestIssuer.weight) : ""} of the equity part`
+			: `Concentration withheld (${c.refusal}): only ${coveragePct(c.attributedCoverage)} of the equity part could be attributed to companies${c.largestIssuer ? `; largest observed issuer ${c.largestIssuer.name} ${pct(c.largestIssuer.weight)} of the equity part` : ""}`,
 	);
 	lines.push(
-		`Coverage of the whole portfolio: seen through ${pct(result.coverage.transparent)}, held whole ${pct(result.coverage.opaqueInherent)}, pending ${pct(result.coverage.opaquePending)}`,
+		`Coverage of the ${basis}: seen through ${pct(result.coverage.transparent)}, held whole ${pct(result.coverage.opaqueInherent)}, pending ${pct(result.coverage.opaquePending)}`,
 	);
 	const pending = result.funds
 		.filter((f) => f.treatment === "pending")
@@ -289,7 +312,7 @@ export function summarize(result) {
 	lines.push("Currency exposure is a country/name estimate, not verified corporate exposure or hedge policy. Name hints do not establish hedge ratios; verified stress handoff is ineligible.");
 	const sector = result.dimensions.sector;
 	lines.push(
-		`Sectors, share of the whole portfolio (classified ${pct(sector.coverage)} of the equity part): ${sector.buckets.map((b) => `${b.key} ${pct(b.weight)}`).join(", ")}`,
+		`Sectors, share of the ${basis} (classified ${pct(sector.coverage)} of the equity part): ${sector.buckets.map((b) => `${b.key} ${pct(b.weight)}`).join(", ")}`,
 	);
 	if (result.valuation.unvalued.length)
 		lines.push(
@@ -316,7 +339,7 @@ async function main() {
 		process.exit(2);
 	}
 	const read = (path) => (path ? readFileSync(resolve(path), "utf8") : null);
-	const request = buildRequestFromCsv(
+	const { request, usesMoney } = prepareCsvInput(
 		read(options.portfolio),
 		read(options["fund-holdings"]),
 		read(options.securities),
@@ -345,7 +368,13 @@ async function main() {
 		join(out, "snapshot.json"),
 		`${JSON.stringify(result.snapshot, null, 2)}\n`,
 	);
-	console.log(summarize(result));
+	if (!usesMoney)
+		console.log(
+			"The inputs are percentages. Saved values are notional units of supplied weight.",
+		);
+	console.log(
+		summarize(result, usesMoney ? "valued portfolio" : "supplied weight total"),
+	);
 	console.log(
 		`\nSaved ${join(out, "result.json")} and ${join(out, "snapshot.json")}`,
 	);

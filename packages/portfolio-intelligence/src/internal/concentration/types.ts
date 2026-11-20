@@ -30,6 +30,7 @@ export interface LegAResult {
 	approaching: boolean;
 	coverage: number;
 	equityBookValue: number;
+	unattributed: number;
 	refusal: ConcentrationRefusal | null;
 	hhi: number;
 	effectiveN: number | null;

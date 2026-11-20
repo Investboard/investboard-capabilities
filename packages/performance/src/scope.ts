@@ -5,12 +5,15 @@ import { sumMoney } from "./internal/money/cents.js";
 /** A fixed basket, including closed positions, supplies NAV and every flow. */
 export function projectScope(
 	input: PerformanceRequest,
+	includeOpeningActivity: boolean,
 ): PerformanceRequest | null {
 	if (!input.scopeHoldingIds) return input;
 	const ids = new Set(input.scopeHoldingIds);
 	const first = input.snapshots[0]!.date;
 	const last = input.snapshots.at(-1)!.date;
-	const inside = (date: string) => date >= first && date <= last;
+	const inside = (date: string) =>
+		(date > first || (includeOpeningActivity && date === first)) &&
+		date <= last;
 	if (
 		input.cashFlows.some(
 			(flow) => inside(flow.date) && flow.holdingId === null,

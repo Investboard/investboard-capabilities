@@ -51,8 +51,12 @@ export function fisherInterval(
 	n: number,
 ): readonly [number, number] | null {
 	if (n <= 3) return null;
-	const rc = Math.max(-0.999999, Math.min(0.999999, r));
-	const z = Math.atanh(rc);
+	const z = Math.atanh(r);
 	const se = 1 / Math.sqrt(n - 3);
 	return [Math.tanh(z - Z_95 * se), Math.tanh(z + Z_95 * se)];
+}
+
+/** Historical v1/v2 replay used a fixed cap on the Fisher transform. */
+export function legacyFisherInterval(r: number, n: number) {
+	return fisherInterval(Math.max(-0.999999, Math.min(0.999999, r)), n);
 }

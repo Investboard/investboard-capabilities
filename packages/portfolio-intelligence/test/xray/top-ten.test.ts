@@ -23,16 +23,16 @@ describe("topTenBookConcentration", () => {
 		expect(topTenBookConcentration(ascending)).not.toBe(0.55);
 	});
 	it("sums everything on a book of fewer than ten positions", () => {
-		expect(topTenBookConcentration(rows(3, 0.2))).toBe(0.6);
-		expect(topTenBookConcentration(rows(10, 0.05))).toBe(0.5);
+		expect(topTenBookConcentration(rows(3, 0.2))).toBeCloseTo(0.6, 15);
+		expect(topTenBookConcentration(rows(10, 0.05))).toBeCloseTo(0.5, 15);
 	});
 	it("returns zero for an empty book", () => {
 		expect(topTenBookConcentration([])).toBe(0);
 	});
 	it("excludes residual remainder rows, and ranks without them", () => {
 		const book = [row("residual:WRLD", 0.4), ...rows(10, 0.06)];
-		expect(topTenBookConcentration(book)).toBe(0.6);
-		expect(topTenBookConcentration(rows(10, 0.06))).toBe(0.6);
+		expect(topTenBookConcentration(book)).toBeCloseTo(0.6, 15);
+		expect(topTenBookConcentration(rows(10, 0.06))).toBeCloseTo(0.6, 15);
 	});
 	it("ignores a non-finite weight instead of poisoning the figure", () => {
 		const book = [
@@ -41,13 +41,13 @@ describe("topTenBookConcentration", () => {
 			row("isin:INF", Number.POSITIVE_INFINITY),
 			row("isin:EQ1", 0.2),
 		];
-		expect(topTenBookConcentration(book)).toBe(0.5);
+		expect(topTenBookConcentration(book)).toBeCloseTo(0.5, 15);
 	});
 	it("caps at 1", () => {
-		expect(topTenBookConcentration(rows(12, 0.1))).toBe(1);
+		expect(topTenBookConcentration(rows(12, 0.1))).toBeCloseTo(1, 15);
 	});
-	it("rounds to the merge engine's four-decimal weight precision", () => {
+	it("preserves all digits of the measured weight", () => {
 		const book = [row("isin:A", 0.123456), row("isin:B", 0.111111)];
-		expect(topTenBookConcentration(book)).toBe(0.2346);
+		expect(topTenBookConcentration(book)).toBe(0.234567);
 	});
 });

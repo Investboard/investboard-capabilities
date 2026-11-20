@@ -164,7 +164,8 @@ export type FundamentalPeriod = {
 /** New calculations pin v2; saved v1 snapshots replay under version 1 rules. */
 export type MethodologyVersion =
 	| "instrument-research-v1"
-	| "instrument-research-v2";
+	| "instrument-research-v2"
+	| "instrument-research-v3";
 export type Snapshot<T> = {
 	methodologyVersion: MethodologyVersion;
 	request: T;

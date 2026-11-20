@@ -6,12 +6,6 @@ import type {
 	EngineDirectHolding,
 	MergedPosition,
 } from "./types.js";
-function round2(v: number): number {
-	return Math.round(v * 100) / 100;
-}
-function round4(v: number): number {
-	return Number(v.toFixed(4));
-}
 export function mergeByIdentity(
 	direct: EngineDirectHolding[],
 	exposures: DissolvedExposure[],
@@ -111,14 +105,14 @@ export function mergeByIdentity(
 			isin: a.isin,
 			ticker: a.ticker,
 			name: a.name,
-			value: round2(a.value),
-			weight: safeTotal > 0 ? round4(a.value / safeTotal) : 0,
+			value: a.value,
+			weight: safeTotal > 0 ? a.value / safeTotal : 0,
 			assetClass: a.assetClass,
 			...(a.issuerScopeUncertain ? { issuerScopeUncertain: true } : {}),
 			sektor: null,
 			region: null,
 			provenance: {
-				direct: safeTotal > 0 ? round4(a.directValue / safeTotal) : 0,
+				direct: safeTotal > 0 ? a.directValue / safeTotal : 0,
 				directValue: a.directValue,
 				viaFunds: Array.from(a.viaFunds.entries())
 					.map(([, v]) => ({
@@ -126,8 +120,8 @@ export function mergeByIdentity(
 						...(v.id ? { id: v.id } : {}),
 						value: v.value,
 						...(v.name ? { name: v.name } : {}),
-						weight: safeTotal > 0 ? round4(v.value / safeTotal) : 0,
-						shareInEtf: round4(v.shareInEtf),
+						weight: safeTotal > 0 ? v.value / safeTotal : 0,
+						shareInEtf: v.shareInEtf,
 					}))
 					.sort((x, y) => y.weight - x.weight),
 			},

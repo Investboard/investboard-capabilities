@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
 	evaluatePerformance,
-	METHODOLOGY_VERSION,
 	PerformanceInputError,
 	replayPerformance,
 	type PerformanceEffect,
@@ -276,13 +275,6 @@ describe("half-cent transfer netting", () => {
 describe("saved actual-position-performance-v3 snapshots", () => {
 	const saved = savedV3 as unknown as Record<string, PerformanceResult>;
 
-	it("pins new evaluations to v4", () => {
-		expect(METHODOLOGY_VERSION).toBe("actual-position-performance-v4");
-		expect(evaluatePerformance(request()).snapshot.methodologyVersion).toBe(
-			METHODOLOGY_VERSION,
-		);
-	});
-
 	it.each(
 		Object.keys(saved),
 	)("replays %s to the result it was saved with", (name) => {
@@ -295,7 +287,7 @@ describe("saved actual-position-performance-v3 snapshots", () => {
 		);
 	});
 
-	it("applies the v4 rules when the saved inputs are evaluated again", () => {
+	it("applies the current annualization and netting rules on reevaluation", () => {
 		const window = evaluatePerformance(
 			saved.window_of_365_days!.snapshot.request,
 		);

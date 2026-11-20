@@ -24,7 +24,7 @@ non-cash portion.
 - A stated class of cash, bonds, gold, crypto, real estate or commodities
   wins over the class a fund reports; a stated equities, alternatives or
   unknown class gives way to it.
-- A constituent's whole-portfolio weight is the fund's weight times the
+- Compute with unrounded values and weights. Round only the displayed result. A constituent's valued-portfolio weight is the fund's weight times the
   constituent's weight in the fund. Direct holdings and constituents with the
   same identity (ISIN first, ticker otherwise) and class merge into one
   position, whose provenance lists each part. A company held through an equity
@@ -62,7 +62,7 @@ survive; unreported mass stays unknown. Missing/partial/unknown hedge policies
 withhold the net allocation. Source-backed declarations are not independently
 verified by the module, and require separate identity/source/policy verification
 before any verified stress handoff. See the package README for the input contract
-and explicit v1/v2 historical replay versus v3 re-evaluation boundary.
+and version-specific replay and deliberate re-evaluation.
 
 ## Overlap
 
@@ -76,7 +76,7 @@ into a portfolio-wide figure.
 
 ## Concentration
 
-Companies are grouped across share classes (US CUSIP prefix), depositary
+A supplied issuer name can connect distinct security listings. Companies are grouped across share classes (US CUSIP prefix), depositary
 receipts (verified name) and other lines of one issuer (normalized name). A
 fund's uncovered remainder stays in the denominator, so company weights are
 lower bounds and `attributedCoverage` is the attributed share.
@@ -84,12 +84,11 @@ lower bounds and `attributedCoverage` is the attributed share.
 `hhi` is the sum of squared company weights over attributed companies and
 `effectiveIssuers` its inverse. Below full coverage they are a **lower** and an
 **upper** bound. Below `concentrationCoverageFloor` attributed coverage both are
-withheld, unless one company is measured above `concentrationMeasuredIssuer` of
-the equity part. `topTenWeight` sums the `topPositions` largest positions.
+withheld. A measured issuer above `concentrationMeasuredIssuer` of the equity part can still be reported separately. `topTenWeight` sums the `topPositions` largest positions.
 
 ## Coverage and status
 
-`coverage` splits the whole portfolio into transparent, held whole by nature
+`coverage` splits the valued portfolio into transparent, held whole by nature
 (opaqueInherent) and pending missing data (opaquePending). The status is
 `partial` with `unvalued_holdings`, `fund_holdings_missing` or
 `classification_degraded`; the last applies when classifiable equity is at
@@ -107,10 +106,10 @@ least `classificationMinEquity` of the portfolio and less than
   never given 0. All pairs share one common sample of weeks.
 - A window needs `correlationMinHoldings` eligible holdings and
   `correlationCoveredValueFloor` of portfolio value; otherwise it is
-  insufficient. Excluded value stays in the denominator.
+  insufficient. Excluded known value stays in the denominator. When a holding value is missing, report the dated pairs from eligible valued holdings as partial evidence. The weighted mean and covered share are unavailable. Report the stated closing-series basis for the observed pair, including price-only or unspecified basis.
 - Pearson coefficients with a Fisher 95% interval. Bands: close from
-  `bandCloseFrom`, partial from `bandPartialFrom`, independent from
-  `bandIndependentFrom`, otherwise opposite; undetermined when the interval
+  `bandCloseFrom`, partial from `bandPartialFrom`, low linear correlation from
+  `bandLowLinearFrom`, otherwise opposite; undetermined when the interval
   spans two boundaries. Near-duplicates from `correlationNearDuplicate`. Groups
   by average linkage while their mean correlation is at least
   `correlationGroupThreshold`. The `correlationWorstWeeks` worst weeks are
@@ -137,11 +136,11 @@ overlap and does not predict future diversification.
 | `correlationWeeks10y` | 520 |
 | `correlationEligibleShare` | 0.8 |
 | `correlationCoveredValueFloor` | 0.6 |
-| `correlationMinHoldings` | 3 |
+| `correlationMinHoldings` | 2 |
 | `correlationNearDuplicate` | 0.95 |
 | `correlationGroupThreshold` | 0.7 |
 | `correlationFxMaxAgeDays` | 4 |
 | `correlationWorstWeeks` | 10 |
-| `bandIndependentFrom` | -0.3 |
+| `bandLowLinearFrom` | -0.3 |
 | `bandPartialFrom` | 0.3 |
 | `bandCloseFrom` | 0.7 |

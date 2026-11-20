@@ -1,12 +1,9 @@
 /** Fund-pair overlap: the weight two funds hold in common, security by security. */
 import { mergeEtfInputsByFund } from "./fund-identity.js";
-import { positionIdentity } from "./identity.js";
+import { constituentWeights } from "./constituent-weights.js";
 import type { EngineEtfInput, OverlapPairV2 } from "./types.js";
 export const OVERLAP_NOISE_FLOOR = 0.01;
 export const MAX_SHARED_HOLDINGS = 20;
-function round4(v: number): number {
-	return Number(v.toFixed(4));
-}
 interface ConstituentWeight {
 	weight: number;
 	name: string;
@@ -24,20 +21,6 @@ interface EtfWeights {
 	isin: string | null;
 	map: Map<string, ConstituentWeight>;
 }
-function buildConstituentMap(
-	etf: EngineEtfInput,
-): Map<string, ConstituentWeight> {
-	const map = new Map<string, ConstituentWeight>();
-	for (const c of etf.constituents) {
-		if (!(c.weight > 0)) continue;
-		const id = positionIdentity(c.isin, c.identifier);
-		if (!id) continue;
-		const existing = map.get(id);
-		if (existing) existing.weight += c.weight;
-		else map.set(id, { weight: c.weight, name: c.name || c.identifier });
-	}
-	return map;
-}
 function compareSharedNames(x: SharedName, y: SharedName): number {
 	if (y.common !== x.common) return y.common - x.common;
 	if (y.combined !== x.combined) return y.combined - x.combined;
@@ -54,8 +37,8 @@ function buildPair(a: EtfWeights, b: EtfWeights): OverlapPairV2 | null {
 		shared.push({
 			id,
 			name: wa.name,
-			weightInA: round4(wa.weight),
-			weightInB: round4(wb.weight),
+			weightInA: wa.weight,
+			weightInB: wb.weight,
 			common,
 			combined: wa.weight + wb.weight,
 		});
@@ -72,7 +55,7 @@ function buildPair(a: EtfWeights, b: EtfWeights): OverlapPairV2 | null {
 		etfB: b.ticker,
 		isinA: a.isin,
 		isinB: b.isin,
-		overlapShare: round4(clampedCommonWeight),
+		overlapShare: clampedCommonWeight,
 		sharedCount: shared.length,
 		sharedHoldings: top.map((h) => ({
 			id: h.id,
@@ -81,16 +64,14 @@ function buildPair(a: EtfWeights, b: EtfWeights): OverlapPairV2 | null {
 			weightInB: h.weightInB,
 		})),
 		sharedTail:
-			rest.length > 0
-				? { count: rest.length, weight: round4(restWeight) }
-				: null,
+			rest.length > 0 ? { count: rest.length, weight: restWeight } : null,
 	};
 }
 export function detectOverlaps(etfs: EngineEtfInput[]): OverlapPairV2[] {
 	const funds: EtfWeights[] = mergeEtfInputsByFund(etfs).map((etf) => ({
 		ticker: etf.ticker,
 		isin: etf.isin?.trim().toUpperCase() || null,
-		map: buildConstituentMap(etf),
+		map: constituentWeights(etf.constituents).entries,
 	}));
 	const pairs: OverlapPairV2[] = [];
 	for (let i = 0; i < funds.length; i++) {

@@ -1,3 +1,4 @@
+import { formatBound } from "./format-bound.mjs";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
@@ -74,7 +75,7 @@ console.log("Source-backed model (not independently verified):", analyzePortfoli
 
 const { hhi, effectiveIssuers, attributedCoverage } = result.concentration;
 console.log(
-	`Concentration over ${pct(attributedCoverage)} of the equity part: index ${hhi.value.toFixed(3)} (${hhi.bound} bound), about ${effectiveIssuers.value.toFixed(1)} effective companies (${effectiveIssuers.bound} bound)`,
+	`Concentration over ${pct(attributedCoverage)} of the equity part: index ${formatBound(hhi)} (${hhi.bound} bound), ${formatBound(effectiveIssuers)} effective companies (${effectiveIssuers.bound} bound)`,
 );
 assert.equal(hhi.bound, "lower");
 

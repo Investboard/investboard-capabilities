@@ -1,3 +1,4 @@
+import type { CloseBasis } from "../../types.js";
 /** Correlation types and the method's fixed constants (windows, eligibility, floors, bands). */
 export type DiversificationWindow = "1y" | "3y" | "5y" | "10y";
 export const WINDOW_WEEKS: Readonly<Record<DiversificationWindow, number>> = {
@@ -15,14 +16,14 @@ export const DIVERSIFICATION_WINDOWS: readonly DiversificationWindow[] = [
 export const GROUP_THRESHOLD = 0.7;
 export const ELIGIBLE_SHARE = 0.8;
 export const COVERED_VALUE_FLOOR = 0.6;
-export const MIN_HOLDINGS = 3;
+export const MIN_HOLDINGS = 2;
 export const WORST_WEEKS = 10;
 export const FX_MAX_AGE_DAYS = 4;
 export const NEAR_DUPLICATE = 0.95;
 export type CorrelationBand =
 	| "close"
 	| "partial"
-	| "independent"
+	| "low_linear"
 	| "opposite"
 	| "undetermined";
 export type ExclusionReason =
@@ -38,6 +39,7 @@ export interface DatedValue {
 export interface DiversificationHolding {
 	readonly id: string;
 	readonly valueBase: number;
+	readonly closeBasis?: CloseBasis;
 	readonly dailyBase: readonly DatedValue[] | null;
 	readonly exclusion: ExclusionReason | null;
 }

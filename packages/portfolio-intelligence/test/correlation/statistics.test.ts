@@ -37,6 +37,13 @@ describe("fisherInterval", () => {
 		expect(lo).toBeCloseTo(0.262979, 6);
 		expect(hi).toBeCloseTo(0.680103, 6);
 	});
+	it.each([
+		-1, -0.99999999, 0.99999999, 1,
+	])("contains its measured coefficient at %d", (r) => {
+		const [lo, hi] = fisherInterval(r, 52)!;
+		expect(lo).toBeLessThanOrEqual(r);
+		expect(hi).toBeGreaterThanOrEqual(r);
+	});
 	it("narrows with five and ten years", () => {
 		const five = fisherInterval(0.5, 260)!;
 		expect(five[0]).toBeCloseTo(0.402849, 6);
@@ -46,10 +53,10 @@ describe("fisherInterval", () => {
 describe("correlationBand", () => {
 	it("names the band of the point value when the interval is narrow enough", () => {
 		expect(correlationBand(0.5, 52)).toBe("partial");
-		expect(correlationBand(0.2, 52)).toBe("independent");
+		expect(correlationBand(0.2, 52)).toBe("low_linear");
 		expect(correlationBand(0.72, 260)).toBe("close");
 		expect(correlationBand(-0.45, 260)).toBe("opposite");
-		expect(correlationBand(0.05, 260)).toBe("independent");
+		expect(correlationBand(0.05, 260)).toBe("low_linear");
 	});
 	it("says too short when the interval spans two boundaries", () => {
 		expect(correlationBand(0.5, 12)).toBe("undetermined");

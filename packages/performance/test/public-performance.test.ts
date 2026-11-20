@@ -341,7 +341,7 @@ describe("public performance API, synthetic history", () => {
 					{
 						id: "income",
 						holdingId: "fund",
-						date: "2026-01-01",
+						date: "2026-01-05",
 						type: "dividend",
 						amount: 100,
 					},

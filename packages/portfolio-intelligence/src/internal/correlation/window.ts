@@ -1,3 +1,4 @@
+import type { CloseBasis } from "../../types.js";
 /** One window's reading: eligible holdings, the common sample of weeks, the matrix, groups and worst weeks. */
 import type { PairChange } from "./changes.js";
 import { averageLinkage } from "./groups.js";
@@ -5,6 +6,7 @@ import {
 	type HoldingReading,
 	type PairReading,
 	readFigures,
+	readPairs,
 } from "./matrix.js";
 import { pearson } from "./statistics.js";
 import {
@@ -42,6 +44,10 @@ export interface WindowAvailable {
 	readonly to: string;
 	readonly weeks: number;
 	readonly commonWeeks: number;
+	readonly seriesBasis: ReadonlyArray<{
+		id: string;
+		basis: CloseBasis | "unspecified";
+	}>;
 	readonly coverage: {
 		readonly analyzedCount: number;
 		readonly totalCount: number;
@@ -66,7 +72,33 @@ export interface WindowInsufficient {
 	readonly status: "insufficient_history";
 	readonly window: DiversificationWindow;
 }
-export type WindowReading = WindowAvailable | WindowInsufficient;
+/** Observed return pairs remain measurable when a portfolio weight is unknown. */
+export interface WindowPartial {
+	readonly status: "partial";
+	readonly reason: "insufficient_valued_coverage";
+	readonly window: DiversificationWindow;
+	readonly from: string;
+	readonly to: string;
+	readonly weeks: number;
+	readonly commonWeeks: number;
+	readonly seriesBasis: ReadonlyArray<{
+		id: string;
+		basis: CloseBasis | "unspecified";
+	}>;
+	readonly pairs: readonly PairReading[];
+	readonly weightedMeanCorrelation: null;
+	readonly largestGroupShare: null;
+	readonly coverage: {
+		readonly analyzedCount: number;
+		readonly totalCount: number;
+		readonly coveredValueShare: null;
+		readonly exclusions: readonly Exclusion[];
+	};
+}
+export type WindowReading =
+	| WindowAvailable
+	| WindowPartial
+	| WindowInsufficient;
 export interface WindowState {
 	readonly reading: WindowReading;
 	readonly returns: ReadonlyMap<string, ReadonlyArray<number | null>>;
@@ -113,6 +145,7 @@ export function computeWindow(
 	holdings: readonly DiversificationHolding[],
 	anchor: string,
 	window: DiversificationWindow,
+	valuationComplete = true,
 ): WindowState {
 	const weeks = WINDOW_WEEKS[window];
 	const need = Math.ceil(ELIGIBLE_SHARE * weeks);
@@ -188,16 +221,13 @@ export function computeWindow(
 	if (
 		eligible.length < MIN_HOLDINGS ||
 		bookValue <= 0 ||
-		covered < COVERED_VALUE_FLOOR * bookValue
+		(valuationComplete && covered < COVERED_VALUE_FLOOR * bookValue)
 	) {
 		return empty;
 	}
 	const ids = [...eligible]
 		.sort((a, b) => a.id.localeCompare(b.id))
 		.map((h) => h.id);
-	const share = new Map(
-		eligible.map((h) => [h.id, h.valueBase / bookValue] as const),
-	);
 	const onCommon = new Map(
 		ids.map((id) => [id, commonSeries(returns.get(id)!, common)] as const),
 	);
@@ -208,6 +238,49 @@ export function computeWindow(
 			if (r === null) throw new Error(`no correlation for ${a} and ${b}`);
 			return r;
 		}),
+	);
+	const anchorDay = dayNumber(anchor);
+	const sample = {
+		from: isoFromDayNumber(anchorDay - 7 * (weeks - common[0]!)),
+		to: isoFromDayNumber(
+			anchorDay - 7 * (weeks - 1 - common[common.length - 1]!),
+		),
+		weeks,
+		commonWeeks: common.length,
+		seriesBasis: eligible
+			.map((h) => ({
+				id: h.id,
+				basis: h.closeBasis ?? ("unspecified" as const),
+			}))
+			.sort((a, b) => a.id.localeCompare(b.id)),
+	};
+	const coverage = {
+		analyzedCount: ids.length,
+		totalCount: holdings.length,
+		exclusions: exclusions.sort(
+			(a, b) =>
+				(holdings.find((h) => h.id === b.id)?.valueBase ?? 0) -
+					(holdings.find((h) => h.id === a.id)?.valueBase ?? 0) ||
+				a.id.localeCompare(b.id),
+		),
+	};
+	if (!valuationComplete) {
+		return {
+			...empty,
+			reading: {
+				status: "partial",
+				reason: "insufficient_valued_coverage",
+				window,
+				...sample,
+				pairs: readPairs(ids, corr, common.length),
+				weightedMeanCorrelation: null,
+				largestGroupShare: null,
+				coverage: { ...coverage, coveredValueShare: null },
+			},
+		};
+	}
+	const share = new Map(
+		eligible.map((h) => [h.id, h.valueBase / bookValue] as const),
 	);
 	const clusters = averageLinkage(corr).map((c) => c.map((i) => ids[i]!));
 	const groups: Group[] = clusters
@@ -260,27 +333,12 @@ export function computeWindow(
 		),
 		worstWeeksCount: worst.length,
 	});
-	const anchorDay = dayNumber(anchor);
-	const firstCommon = common[0] as number;
 	return {
 		reading: {
 			status: "available",
 			window,
-			from: isoFromDayNumber(anchorDay - 7 * (weeks - firstCommon)),
-			to: anchor,
-			weeks,
-			commonWeeks: common.length,
-			coverage: {
-				analyzedCount: ids.length,
-				totalCount: holdings.length,
-				coveredValueShare: covered / bookValue,
-				exclusions: [...exclusions].sort(
-					(a, b) =>
-						(holdings.find((h) => h.id === b.id)?.valueBase ?? 0) -
-							(holdings.find((h) => h.id === a.id)?.valueBase ?? 0) ||
-						a.id.localeCompare(b.id),
-				),
-			},
+			...sample,
+			coverage: { ...coverage, coveredValueShare: covered / bookValue },
 			weightedMeanCorrelation: figures.weightedMeanCorrelation,
 			largestGroupShare: groups[0]?.valueShare ?? null,
 			order: figures.order,

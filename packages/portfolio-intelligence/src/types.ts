@@ -293,6 +293,8 @@ export interface PortfolioSnapshot {
 
 export type CorrelationWindowName = "1y" | "3y" | "5y" | "10y";
 
+export type CloseBasis = "price" | "total_return";
+
 export interface CorrelationRequest {
 	/** The analysis date, YYYY-MM-DD; the matrix ends on the last Friday before it. */
 	asOf: string;
@@ -302,6 +304,8 @@ export interface CorrelationRequest {
 		name?: string;
 		value: number | null;
 		priceCurrency: string;
+		/** What the supplied closing series represents; omitted when unknown. */
+		closeBasis?: CloseBasis;
 	}>;
 	/** Daily closes in each holding's price currency. */
 	closes: Array<{ id: string; date: string; close: number }>;

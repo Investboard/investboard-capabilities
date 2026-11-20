@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.2.0 (unreleased)
+## 0.3.0 (unreleased)
+
+- Use the measured Pearson coefficient for Fisher intervals, including the limits at −1 and 1. New calculations pin `instrument-research-v3`. Replay of v1 and v2 snapshots preserves their historical interval calculation.
+
+## 0.2.0
 
 - A valid window with only two observations now returns its cumulative return and drawdown and leaves `annualizedVolatility` null, instead of raising `ResearchInputError`. Sample volatility needs at least two returns. Such a request previously failed, so no saved snapshot is affected.
 - A contribution illustration with zero total contributions reports `contributionReturn: null` instead of `0`: a return on no money is undefined. `InvestmentReading.contributionReturn` is now typed `number | null`.
