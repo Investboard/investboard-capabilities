@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	evaluatePerformance,
+	METHODOLOGY_VERSION,
 	replayPerformance,
 	PerformanceInputError,
 	type PerformanceRequest,
@@ -294,9 +295,7 @@ describe("public audit regressions", () => {
 		"actual-position-performance-v2",
 	])("requires explicit recalculation of %s inputs", (methodologyVersion) => {
 		const result = evaluatePerformance(incoming(1.005, 1.01));
-		expect(result.snapshot.methodologyVersion).toBe(
-			"actual-position-performance-v4",
-		);
+		expect(result.snapshot.methodologyVersion).toBe(METHODOLOGY_VERSION);
 		const legacy = {
 			...result.snapshot,
 			methodologyVersion,

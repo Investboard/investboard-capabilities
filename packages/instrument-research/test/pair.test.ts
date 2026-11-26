@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluateInstrumentPair } from "../src/index.js";
+import { evaluateInstrumentPair, replayInstrumentPair } from "../src/index.js";
 import { pair } from "./fixtures.js";
 
 describe("exact-listing common weekly observations", () => {
@@ -15,6 +15,22 @@ describe("exact-listing common weekly observations", () => {
 		expect(c.leftBasis).toBe("distribution_adjusted");
 		expect(c.rightBasis).toBe("price");
 		expect(c.interval95?.[0]).toBeGreaterThan(0.99);
+		expect(c.interval95![1]).toBeGreaterThanOrEqual(c.coefficient!);
+		for (const version of [
+			"instrument-research-v1",
+			"instrument-research-v2",
+		] as const) {
+			const previous = replayInstrumentPair({
+				methodologyVersion: version,
+				request: pair(),
+			}).correlations[0]!;
+			expect(previous.interval95![1]).toBeCloseTo(
+				Math.tanh(
+					Math.atanh(0.999999) + 1.96 / Math.sqrt(previous.sampleCount - 3),
+				),
+				14,
+			);
+		}
 		expect(result.interpretation).toBe("descriptive_pair_not_portfolio_risk");
 	});
 	it("warns when a price-only series is compared with a distribution-adjusted series", () => {

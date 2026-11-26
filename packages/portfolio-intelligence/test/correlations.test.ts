@@ -154,7 +154,7 @@ describe("measureCorrelations", () => {
 			],
 		});
 		const one = result.windows[0]!;
-		if (one.status !== "available") throw new Error("expected a reading");
+		if (one.status !== "partial") throw new Error("expected a reading");
 		const reasons = Object.fromEntries(
 			one.coverage.exclusions.map((e) => [e.id, e.reason]),
 		);

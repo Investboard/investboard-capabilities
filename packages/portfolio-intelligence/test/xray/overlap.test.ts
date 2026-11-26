@@ -81,7 +81,7 @@ describe("detectOverlaps", () => {
 		);
 		expect(topSum + (p.sharedTail?.weight ?? 0)).toBeCloseTo(p.overlapShare, 3);
 	});
-	it("parts sum ABOVE the clamped overlapShare on un-normalised weights (SHARED_TAIL_DOC)", () => {
+	it("reconciles each shared weight to the bounded overlap for two overreported funds", () => {
 		const overweight = (ticker: string) => ({
 			ticker,
 			isin: null,
@@ -103,8 +103,12 @@ describe("detectOverlaps", () => {
 				(s, h) => s + Math.min(h.weightInA, h.weightInB),
 				0,
 			) + (p.sharedTail?.weight ?? 0);
-		expect(partsSum).toBeCloseTo(1.5, 6);
-		expect(partsSum).toBeGreaterThan(p.overlapShare);
+		expect(p.sharedHoldings.map((h) => h.weightInA)).toEqual([
+			1 / 3,
+			1 / 3,
+			1 / 3,
+		]);
+		expect(partsSum).toBeCloseTo(p.overlapShare, 14);
 	});
 	it("measures the COMMON weight (sum of per-name minima), never the average of one-sided shares", () => {
 		const single = {
@@ -174,16 +178,15 @@ describe("detectOverlaps", () => {
 		const p = detectOverlaps([mk("A.DE"), mk("B.DE")])[0]!;
 		expect(p.sharedTail).toEqual({
 			count: 1,
-			weight: Number((2e-7).toFixed(4)),
+			weight: 2e-7,
 		});
-		expect(p.sharedTail?.weight).toBe(0);
 		const topSum = p.sharedHoldings.reduce(
 			(s, h) => s + Math.min(h.weightInA, h.weightInB),
 			0,
 		);
 		expect(
 			Math.abs(topSum + (p.sharedTail?.weight ?? 0) - p.overlapShare),
-		).toBeLessThan(21 * 5e-5);
+		).toBeLessThan(21 * Number.EPSILON);
 	});
 	it("never floors a real tail to zero when the rounded top sides overshoot", () => {
 		const mk = (ticker: string) =>

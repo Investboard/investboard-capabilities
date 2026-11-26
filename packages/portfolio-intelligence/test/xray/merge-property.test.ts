@@ -45,11 +45,11 @@ describe("merge value conservation (property)", () => {
 			const merged = mergeByIdentity([], exposures, inputTotal);
 			const mergedTotal = merged.reduce((s, p) => s + p.value, 0);
 			expect(Math.abs(mergedTotal - inputTotal)).toBeLessThan(
-				0.011 * Math.max(1, merged.length),
+				Number.EPSILON * inputTotal * Math.max(1, exposures.length),
 			);
 		});
 	});
-	it("provenance parts ≈ whole: direct + Σ viaFunds.weight matches weight within rounding drift", () => {
+	it("provenance parts ≈ whole: direct + Σ viaFunds.weight matches weight within floating-point precision", () => {
 		forAll(200, (g) => {
 			const etfs = g.array(1, 5, () => etf(g));
 			const capped = capToUnitSum(etfs);
@@ -61,7 +61,7 @@ describe("merge value conservation (property)", () => {
 					p.provenance.direct +
 					p.provenance.viaFunds.reduce((s, v) => s + v.weight, 0);
 				expect(Math.abs(p.weight - parts)).toBeLessThanOrEqual(
-					1e-4 * (1 + p.provenance.viaFunds.length),
+					Number.EPSILON * (1 + exposures.length),
 				);
 			}
 		});

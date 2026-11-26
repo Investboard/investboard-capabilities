@@ -20,9 +20,13 @@ describe("parseCsv", () => {
 
 describe("buildRequestFromCsv", () => {
 	it("refuses unknown listing denomination instead of declaring the portfolio base", () => {
-		expect(() => buildRequestFromCsv(
-			"as_of,base_currency,holding_id,holding_type,portfolio_weight_pct,asset_class\n2026-10-30,EUR,a,stock,100,equities\n", null, null,
-		)).toThrow(/listing_currency.*valuation unit/);
+		expect(() =>
+			buildRequestFromCsv(
+				"as_of,base_currency,holding_id,holding_type,portfolio_weight_pct,asset_class\n2026-10-30,EUR,a,stock,100,equities\n",
+				null,
+				null,
+			),
+		).toThrow(/listing_currency.*valuation unit/);
 	});
 	it("builds the example request", () => {
 		const request = buildRequestFromCsv(
@@ -105,7 +109,7 @@ describe("buildRequestFromCsv", () => {
 		expect(summary).toContain(`Alder Inc.`);
 		expect(summary).toContain(`${(alder.weight * 100).toFixed(1)}%`);
 		expect(summary).toContain("Pending");
-		expect(summary).toContain("of the whole portfolio");
+		expect(summary).toContain("of the valued portfolio");
 	});
 
 	it("refuses a fund row without a class, so a bond fund is never looked through by default", () => {
@@ -159,6 +163,98 @@ describe("buildRequestFromCsv", () => {
 		);
 		expect(alder?.sector).toBe("technology");
 	});
+});
+
+it("shows a small measured weight and discloses an observed issuer below the book coverage floor", () => {
+	const asOf = "2025-01-31";
+	const common = { assetClass: "equities" as const, listingCurrency: "EUR" };
+	const result = analyzePortfolio({
+		asOf,
+		baseCurrency: "EUR",
+		holdings: [
+			{
+				...common,
+				id: "issuer",
+				name: "Measured issuer",
+				kind: "security",
+				value: 5000,
+			},
+			{
+				...common,
+				id: "fund",
+				name: "Synthetic fund",
+				kind: "fund",
+				value: 5000,
+			},
+		],
+		funds: [
+			{
+				holdingId: "fund",
+				reportedClass: "equities",
+				holdings: {
+					status: "listed",
+					asOf,
+					constituents: [
+						{ id: "tiny", name: "Small company", weight: 0.000031234 },
+					],
+				},
+			},
+		],
+	});
+	const summary = summarize(result);
+	expect(summary).toContain("Small company: <0.1% (via fund <0.1%)");
+	expect(summary).toContain("largest observed issuer Measured issuer 50.0%");
+	expect(summary).not.toContain("effective companies");
+});
+
+it("keeps a missing valuation unknown when the row also carries a portfolio percentage", () => {
+	const request = buildRequestFromCsv(
+		"as_of,base_currency,holding_id,holding_name,holding_type,value,portfolio_weight_pct,listing_currency,asset_class\n2026-01-30,EUR,f,Fund,fund,9000,90,EUR,equities\n2026-01-30,EUR,c,Cash,cash,,10,EUR,cash",
+		null,
+		null,
+	);
+	expect(request.holdings.map((row) => row.value)).toEqual([9000, null]);
+	expect(summarize(analyzePortfolio(request))).toContain(
+		"Not valued, outside every figure: c",
+	);
+});
+
+it("rounds concentration bounds outwards and displays the valued-book top ten including cash", () => {
+	const result = analyzePortfolio({
+		asOf: "2026-01-30",
+		baseCurrency: "EUR",
+		holdings: [
+			{
+				id: "cash",
+				name: "Cash EUR",
+				kind: "cash",
+				assetClass: "cash",
+				value: 10000,
+				listingCurrency: "EUR",
+			},
+			{
+				id: "equity",
+				name: "One issuer",
+				kind: "security",
+				assetClass: "equities",
+				value: 8000,
+				listingCurrency: "EUR",
+			},
+			{
+				id: "opaque",
+				name: "Unresolved",
+				kind: "fund",
+				assetClass: "equities",
+				value: 2000,
+				listingCurrency: "EUR",
+			},
+		],
+	});
+	const summary = summarize(result);
+	expect(summary).toContain("Cash EUR: 50.0%");
+	expect(summary).toContain("Top ten holdings: 90.0% of the valued portfolio");
+	expect(summary).toContain("0.64 (lower)");
+	expect(summary).toContain("1.5625 effective companies (upper)");
 });
 
 describe("isEntry", () => {

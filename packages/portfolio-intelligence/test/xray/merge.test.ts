@@ -62,15 +62,14 @@ describe("mergeByIdentity", () => {
 		const merged = mergeByIdentity([], exposures, 50000);
 		expect(merged.find((p) => p.id === "residual:WRLD.DE")).toBeDefined();
 	});
-	it("sorts by weight descending and rounds (value 2dp, weight 4dp)", () => {
+	it("sorts by weight descending with unrounded portfolio weights", () => {
 		const { exposures } = dissolveEtfs([WRLD]);
 		const merged = mergeByIdentity([DIRECT_AAPL], exposures, 60000);
 		for (let i = 1; i < merged.length; i++) {
 			expect(merged[i - 1]!.weight).toBeGreaterThanOrEqual(merged[i]!.weight);
 		}
 		for (const p of merged) {
-			expect(p.value).toBeCloseTo(Math.round(p.value * 100) / 100, 10);
-			expect(p.weight).toBeCloseTo(Number(p.weight.toFixed(4)), 10);
+			expect(p.weight).toBe(p.value / 60000);
 		}
 	});
 	it("keeps an ISIN-less direct holding and its ISIN-keyed exposure APART", () => {

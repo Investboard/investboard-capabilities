@@ -173,7 +173,10 @@ export function computeDimensions(args: {
 		economicCurrency: {
 			...toDimension(economic),
 			qualification: currencyQualification(),
-			nameInferredHedgeWeight: economic.hedged.reduce((s, h) => s + h.weight, 0),
+			nameInferredHedgeWeight: economic.hedged.reduce(
+				(s, h) => s + h.weight,
+				0,
+			),
 			nameInferredHedges: economic.hedged.map((h) => ({
 				id: h.id,
 				name: h.label,

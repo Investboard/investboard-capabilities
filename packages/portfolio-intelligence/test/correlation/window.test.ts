@@ -157,7 +157,7 @@ describe("computeWindow, no group of two or more", () => {
 		);
 		expect(r.weightedMeanCorrelation).toBeCloseTo(-0.0421172974, 9);
 		expect(r.pairs.map((p) => `${p.a}|${p.b}`)).toEqual(["Q|R", "P|R", "P|Q"]);
-		expect(r.pairs.every((p) => p.band === "independent")).toBe(true);
+		expect(r.pairs.every((p) => p.band === "low_linear")).toBe(true);
 		expect(r.changes).toBeNull();
 	});
 });
@@ -177,9 +177,10 @@ describe("computeWindow, a series that never moved", () => {
 	});
 });
 describe("computeWindow, refusals", () => {
-	it("refuses with fewer than three eligible holdings", () => {
+	it("requires two eligible holdings for a measured pair", () => {
 		const two = oneYearBook().filter((h) => h.id === "A" || h.id === "B");
-		expect(computeWindow(two, ANCHOR, "1y").reading.status).toBe(
+		expect(computeWindow(two, ANCHOR, "1y").reading.status).toBe("available");
+		expect(computeWindow(two.slice(0, 1), ANCHOR, "1y").reading.status).toBe(
 			"insufficient_history",
 		);
 	});

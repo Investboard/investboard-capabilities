@@ -98,10 +98,11 @@ export interface PerformanceRequest {
 	readonly scopeHoldingIds?: readonly string[];
 }
 
-/** v4 is pinned by new evaluations; a saved v3 snapshot replays under its own rules. */
+/** v5 is pinned by new evaluations. Saved snapshots replay under their own rules. */
 export type PerformanceMethodologyVersion =
 	| "actual-position-performance-v3"
-	| "actual-position-performance-v4";
+	| "actual-position-performance-v4"
+	| "actual-position-performance-v5";
 
 export interface PerformanceSnapshot {
 	readonly methodologyVersion: PerformanceMethodologyVersion;

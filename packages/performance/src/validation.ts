@@ -146,7 +146,7 @@ function array(value: unknown, max: number): asserts value is unknown[] {
 
 export function validateRequest(
 	input: unknown,
-	methodologyVersion: PerformanceMethodologyVersion = "actual-position-performance-v4",
+	methodologyVersion: PerformanceMethodologyVersion,
 ): asserts input is PerformanceRequest {
 	requireJson(input);
 	shape(

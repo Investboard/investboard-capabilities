@@ -32,7 +32,7 @@ npm pack
 Install the generated tarball in your application:
 
 ```sh
-npm install /path/to/investboard-capabilities/packages/performance/investboard-performance-0.4.0.tgz
+npm install /path/to/investboard-capabilities/packages/performance/investboard-performance-0.5.0.tgz
 ```
 
 The package provides ESM JavaScript and TypeScript declarations through its root export. Its two calculation functions are `evaluatePerformance(request)` and `replayPerformance(snapshot)`. It also exports `PerformanceInputError`, `METHODOLOGY_VERSION`, `LIMITS`, and the public [types](src/types.ts).
@@ -93,7 +93,7 @@ The public names `buy` and `sell` describe security funding into and out of the 
 | `recordedCosts` | Optional dated fees and taxes; omitted means unknown, `[]` means no recorded costs, `taxes: null` preserves unknown taxes, `standalone: true` marks a fee booked on its own |
 | `scopeHoldingIds` | Optional fixed historical basket; NAV and flows are rebuilt before every metric is calculated |
 
-For an in-window buy or sell effect after the opening date, supply a cash flow with the **same ID, holding, type and date**. Opening-date funding is already embedded in the first NAV and is excluded from return funding; opening-date dividends remain income. A flow with no known holding uses explicit `holdingId: null`. Such capital lowers coverage or makes it unknown; it is never silently assigned to a holding.
+For an in-window buy or sell effect after the opening date, supply a cash flow with the **same ID, holding, type and date**. Opening-date funding is already embedded in the first NAV. The performance window runs from the opening close to the closing close. A dividend dated on the shared close between two windows belongs only to the window ending on that date. This rule applies to both returns, holding attribution and the wealth bridge. A flow with no known holding uses explicit `holdingId: null`. Unassigned capital lowers coverage or makes it unknown.
 
 Caller-selected baskets can represent asset classes or depots. Classification and identity evidence belong to the caller. The engine selects a fixed set of IDs, including their closed history; it does not claim historical look-through classification. A selected basket requires complete valuations and assignable flows and costs. Otherwise it returns `scope_history_missing`, rather than combining selected NAV with whole-book returns. `calculation.scope.navBasis` distinguishes supplied NAV from reconstructed basket NAV.
 
@@ -148,9 +148,9 @@ Inputs must be plain JSON data. Unknown fields, explicit `undefined`, accessors,
 
 `LIMITS` caps each request at 200 positions, 5,000 snapshots, 10,000 combined effects/flows/cost rows, 100,000 combined price/FX points and one million position/date cells. Supplied and calculated wealth is capped at one billion reporting-currency units; quantities at one billion; FX rates at one million. This version assumes two-decimal accounting units, including for currencies whose native minor-unit conventions differ. It is not arbitrary-precision accounting.
 
-`result.snapshot` defensively copies the complete request, including basket selection, and pins `actual-position-performance-v4`. `replayPerformance` validates the saved version and recalculates only those inputs under that version's rules. It refuses unsupported methodology versions. Snapshots are unsigned and may contain sensitive caller-supplied history; storage, access control and retention belong to your application. No provider, authentication, database, account, app UI or hosted-service implementation is included.
+`result.snapshot` defensively copies the complete request, including basket selection and the original dated flows, and pins `actual-position-performance-v5`. The opening snapshot already includes activity on its date. An unassigned opening-date dividend or tax therefore does not block a later selected-basket window. Unassigned costs inside the measured window still prevent allocation to a selected basket. `replayPerformance` validates the saved version and recalculates those inputs under that version's rules. Snapshots are unsigned and may contain sensitive caller-supplied history. Your application controls their storage, access and retention. No provider, authentication, database, account, app UI or hosted-service implementation is included.
 
-Package 0.4.0 introduces methodology v4: standalone fees, one 365-day annualization threshold for both returns, and half-cent ties judged against the summed amounts. A saved v3 snapshot still replays under the v3 rules and returns the result it was saved with: the time-weighted return annualizes only beyond 365 days, transfer ties are judged against the net, and a v3 request cannot declare a standalone fee. To apply the v4 rules to saved inputs, call `evaluatePerformance(savedSnapshot.request)` and retain the new v4 snapshot. v1 and v2 snapshots remain refused with `PerformanceInputError`. See the [changelog](CHANGELOG.md).
+Package 0.5.0 introduces the close-to-close dividend rule in methodology v5. Saved v4 and v3 snapshots replay with their original treatment of opening-date dividends. V4 introduced standalone fees, a common 365-day annualization threshold and half-cent ties judged against the summed amounts. To apply the current rules to saved inputs, call `evaluatePerformance(savedSnapshot.request)` and retain the new v5 snapshot. Unsupported v1 and v2 snapshots raise `PerformanceInputError`. See the [changelog](CHANGELOG.md).
 
 The pure return, position-replay and attribution algorithms are adapted from Investboard's performance engine. The public request validation, evidence assembly and package boundary are independently maintained here. Future calculation changes require a compatibility decision for saved methodology versions.
 

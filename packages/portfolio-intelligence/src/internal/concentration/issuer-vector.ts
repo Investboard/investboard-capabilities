@@ -1,3 +1,4 @@
+import { AmountSum } from "../precision.js";
 import { normalizeAssetClass } from "../xray/asset-class.js";
 import type {
 	ConcentrationPosition,
@@ -49,43 +50,40 @@ export function aggregateByIssuer(
 	entries: readonly CountedPosition[],
 	unattributedInBookValue = 0,
 ): IssuerVectorResult {
-	let bookValue = unattributedInBookValue;
-	for (const e of entries) {
-		if (e.inBook) bookValue += e.pos.value;
+	const named = new AmountSum();
+	const unknown = new AmountSum();
+	unknown.add(unattributedInBookValue);
+	const byIssuer = new Map<string, { name: string; amount: AmountSum }>();
+	for (const { inBook, attributable, pos } of entries) {
+		if (!inBook) continue;
+		if (!attributable) {
+			unknown.add(pos.value);
+			continue;
+		}
+		named.add(pos.value);
+		const issuer = byIssuer.get(pos.issuerId) ?? {
+			name: pos.issuerName,
+			amount: new AmountSum(),
+		};
+		issuer.amount.add(pos.value);
+		byIssuer.set(pos.issuerId, issuer);
 	}
-	if (bookValue <= 0) {
+	const bookValue = named.value + unknown.value;
+	if (bookValue <= 0)
 		return { issuers: [], attributed: 0, unattributed: 0, bookValue: 0 };
-	}
-	const byIssuer = new Map<
-		string,
-		{
-			name: string;
-			value: number;
-		}
-	>();
-	let attributedValue = 0;
-	for (const e of entries) {
-		if (!e.attributable) continue;
-		attributedValue += e.pos.value;
-		const existing = byIssuer.get(e.pos.issuerId);
-		if (existing) {
-			existing.value += e.pos.value;
-		} else {
-			byIssuer.set(e.pos.issuerId, {
-				name: e.pos.issuerName,
-				value: e.pos.value,
-			});
-		}
-	}
-	const issuers: IssuerWeight[] = [];
-	for (const [issuerId, agg] of byIssuer) {
-		issuers.push({
+	const issuers: IssuerWeight[] = Array.from(
+		byIssuer,
+		([issuerId, issuer]) => ({
 			issuerId,
-			issuerName: agg.name,
-			weight: agg.value / bookValue,
-		});
-	}
+			issuerName: issuer.name,
+			weight: issuer.amount.value / bookValue,
+		}),
+	);
 	issuers.sort((a, b) => b.weight - a.weight);
-	const attributed = attributedValue / bookValue;
-	return { issuers, attributed, unattributed: 1 - attributed, bookValue };
+	return {
+		issuers,
+		attributed: named.value / bookValue,
+		unattributed: unknown.value / bookValue,
+		bookValue,
+	};
 }

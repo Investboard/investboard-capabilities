@@ -118,13 +118,16 @@ describe("classificationBuckets", () => {
 			6,
 		);
 	});
-	it("an uncovered remainder BELOW the residual floor mints NO unknown bucket; just above it DOES", () => {
+	it("retains unknown classification value even below half a cent", () => {
 		const below = classificationBuckets({
 			etfs: [etf(1, [{ key: "technology", weight: 0.999 }])],
 			direct: [],
 			totalValue: 1,
 		});
-		expect(below.buckets.find((b) => b.key === "unknown")).toBeUndefined();
+		expect(below.buckets.find((b) => b.key === "unknown")?.value).toBeCloseTo(
+			0.001,
+			14,
+		);
 		const above = classificationBuckets({
 			etfs: [etf(100, [{ key: "technology", weight: 0.99 }])],
 			direct: [],

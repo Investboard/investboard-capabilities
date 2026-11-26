@@ -33,7 +33,11 @@ export function reportedCurrencyDimension(
 	const byHolding: ReportedCurrencyHolding[] = [];
 	let equityValue = 0;
 	for (const holding of request.holdings) {
-		if (!eligible.has(holding.id) || holding.value === null || holding.value <= 0)
+		if (
+			!eligible.has(holding.id) ||
+			holding.value === null ||
+			holding.value <= 0
+		)
 			continue;
 		const value = holding.value;
 		equityValue += value;
@@ -58,15 +62,19 @@ export function reportedCurrencyDimension(
 		} else {
 			net.set("unknown", value);
 			reasons.push(
-				!hedge ? "hedge_policy_missing"
-					: hedge.status === "partial" ? "partial_hedge_not_modeled"
-						: hedge.status === "unknown" ? "hedge_policy_unknown"
+				!hedge
+					? "hedge_policy_missing"
+					: hedge.status === "partial"
+						? "partial_hedge_not_modeled"
+						: hedge.status === "unknown"
+							? "hedge_policy_unknown"
 							: "economic_exposure_missing",
 			);
 		}
 		for (const [key, amount] of net)
 			totals.set(key, (totals.get(key) ?? 0) + amount);
-		const singleAssigned = [...net].filter(([, amount]) => amount > 0).length === 1;
+		const singleAssigned =
+			[...net].filter(([, amount]) => amount > 0).length === 1;
 		byHolding.push({
 			holdingId: holding.id,
 			isin: holding.isin ?? null,
@@ -76,9 +84,12 @@ export function reportedCurrencyDimension(
 			method,
 			reasonCodes: reasons,
 			buckets: bucketsOf(net, valuedTotal),
-			stressHandoff: method !== "unknown" && singleAssigned && (net.get("unknown") ?? 0) === 0
-				? "independent_verification_required"
-				: "unavailable",
+			stressHandoff:
+				method !== "unknown" &&
+				singleAssigned &&
+				(net.get("unknown") ?? 0) === 0
+					? "independent_verification_required"
+					: "unavailable",
 		});
 	}
 	const unknownValue = totals.get("unknown") ?? 0;
@@ -86,7 +97,9 @@ export function reportedCurrencyDimension(
 	return {
 		status: !(assignedValue > 0)
 			? "unavailable"
-			: unknownValue > 0 ? "partial" : "available",
+			: unknownValue > 0
+				? "partial"
+				: "available",
 		basis: "caller_supplied_source",
 		independentlyVerified: false,
 		scope: "equity",
@@ -101,9 +114,21 @@ export function reportedCurrencyDimension(
 	};
 }
 
-function bucketsOf(totals: ReadonlyMap<string, number>, total: number): Bucket[] {
+function bucketsOf(
+	totals: ReadonlyMap<string, number>,
+	total: number,
+): Bucket[] {
 	return [...totals]
-		.map(([key, value]) => ({ key, value, weight: total > 0 ? value / total : 0 }))
-		.sort((a, b) => a.key === "unknown" ? 1 : b.key === "unknown" ? -1
-			: b.value - a.value || a.key.localeCompare(b.key));
+		.map(([key, value]) => ({
+			key,
+			value,
+			weight: total > 0 ? value / total : 0,
+		}))
+		.sort((a, b) =>
+			a.key === "unknown"
+				? 1
+				: b.key === "unknown"
+					? -1
+					: b.value - a.value || a.key.localeCompare(b.key),
+		);
 }

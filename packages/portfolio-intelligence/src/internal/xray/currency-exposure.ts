@@ -231,9 +231,6 @@ export interface CurrencyExposureResult {
 	coverage: number;
 	hedged: HedgedFund[];
 }
-function round4(v: number): number {
-	return Number(v.toFixed(4));
-}
 class HolderLedger {
 	private readonly acc = new Map<string, Map<string, number>>();
 	private readonly meta = new Map<
@@ -276,7 +273,7 @@ class HolderLedger {
 					id,
 					label: m?.label ?? id,
 					isin: m?.isin ?? null,
-					weight: round4(v / totalValue),
+					weight: v / totalValue,
 				});
 			}
 			out.set(key, { value, contributors });
@@ -340,7 +337,7 @@ export function currencyExposure(input: {
 			isin: f.isin,
 			currency: f.hedge?.currency ?? null,
 			value: f.value,
-			weight: round4(f.value / totalValue),
+			weight: f.value / totalValue,
 		}))
 		.sort((a, b) => b.value - a.value);
 	return {

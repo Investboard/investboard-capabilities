@@ -3,8 +3,14 @@
  * with direct holdings, and the exposures, overlap, concentration and coverage
  * measured on it. The order of work follows Investboard's X-Ray.
  */
-import { currencyQualification, reportedCurrencyDimension } from "./currency-evidence.js";
-import { isEquityAxisDirect, isEquityAxisEtf } from "./internal/xray/equity-axis.js";
+import {
+	currencyQualification,
+	reportedCurrencyDimension,
+} from "./currency-evidence.js";
+import {
+	isEquityAxisDirect,
+	isEquityAxisEtf,
+} from "./internal/xray/equity-axis.js";
 import { measureConcentration } from "./internal/concentration/measure.js";
 import { classificationGate } from "./internal/coverage/classification-gate.js";
 import {
@@ -51,7 +57,7 @@ import type {
 import { freeze } from "./internal/freeze.js";
 import { validatePortfolioRequest } from "./validation.js";
 
-export const METHODOLOGY_VERSION = "portfolio-intelligence-v3" as const;
+export const METHODOLOGY_VERSION = "portfolio-intelligence-v4" as const;
 
 function fundKey(isin: string | null | undefined, ticker: string): string {
 	return positionIdentity(normalizeIsin(isin), ticker) ?? ticker;
@@ -133,7 +139,11 @@ function emptyResult(
 				nameInferredHedgeWeight: 0,
 				nameInferredHedges: [],
 			},
-			reportedEconomicCurrency: reportedCurrencyDimension(request, new Set<string>(), 0),
+			reportedEconomicCurrency: reportedCurrencyDimension(
+				request,
+				new Set<string>(),
+				0,
+			),
 		},
 		overlap: [],
 		concentration: {
@@ -192,7 +202,8 @@ export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 		resolveFundInput(h, fundInputs.get(h.id), overrides),
 	);
 	const etfInputs = applyProfilesToFunds(
-		mergeEtfInputsByFund(resolvedFunds), profiles,
+		mergeEtfInputsByFund(resolvedFunds),
+		profiles,
 	);
 	const direct = toEngineDirectHoldings(directHoldings, profiles);
 	const { exposures, dissolutions } = dissolveEtfs(etfInputs);
@@ -246,14 +257,22 @@ export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 			name: g.name,
 			value: g.value,
 			weight: g.weight,
-			positionIds: g.breakdown.map((p) => p.id),
+			positionIds: g.positionIds,
 		})),
 		dimensions: {
 			...dimensions,
-			reportedEconomicCurrency: reportedCurrencyDimension(request, new Set([
-				...fundHoldings.filter((_, i) => isEquityAxisEtf(resolvedFunds[i]!)).map((h) => h.id),
-				...directHoldings.filter((h) => isEquityAxisDirect(h)).map((h) => h.id),
-			]), valuedTotal),
+			reportedEconomicCurrency: reportedCurrencyDimension(
+				request,
+				new Set([
+					...fundHoldings
+						.filter((_, i) => isEquityAxisEtf(resolvedFunds[i]!))
+						.map((h) => h.id),
+					...directHoldings
+						.filter((h) => isEquityAxisDirect(h))
+						.map((h) => h.id),
+				]),
+				valuedTotal,
+			),
 		},
 		overlap: pairs.map((p) => toOverlap(p, holdingOf)),
 		concentration,

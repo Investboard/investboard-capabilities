@@ -1,6 +1,11 @@
 # Changelog
 
-## 0.4.0 (unreleased)
+## 0.5.0 (unreleased)
+
+- In methodology `actual-position-performance-v5`, dividends belong to the window after its opening close through its closing close. A €10 dividend on October 20 contributes €10 to October 16–20, €0 to October 20–24, and €10 to October 16–24. Whole-book and selected-basket returns, attribution and the wealth bridge use the same dates.
+- Saved v3 and v4 snapshots replay under their respective historical rules, including opening-date dividends. Evaluate the saved request to obtain a v5 snapshot.
+
+## 0.4.0
 
 - Fees booked on their own: a recorded cost with the new optional `standalone: true` is money paid into the book that buys nothing. Its fee enters the flow series on its date as a contribution with no value added, so the time-weighted and money-weighted returns both fall by it, and the wealth bridge counts it in `securityFunding` as well as `recordedFees`. For example, a fee of 10 on the middle valuation date of a 10,000 book that then rises to 11,000 lowers the return from 10% to 9.89%. Previously such a fee was absent from both returns and reappeared as an equal unexplained residual in the bridge. Recorded costs without the marker, such as fees inside a trade, keep their treatment.
 - The attribution reports standalone fees at portfolio level in the new optional `recordedCostContribution` and `recordedCostContributionPp`, present only when the request records a standalone fee. They are excluded from the residual and never count as unlinked capital, so the explanation reconciles without an unexplained line.

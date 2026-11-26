@@ -1,14 +1,8 @@
 /** Grouping positions by company: share classes, receipts and bonds of one issuer together. */
 import { foldCompanyParts } from "./company-fold.js";
-import { isResidualId } from "./identity.js";
+import { companyIdOf, isResidualId } from "./identity.js";
 import { canonicalIssuerIdentities } from "./issuer-identities.js";
 import type { IssuerGroup, MergedPosition } from "./types.js";
-function round2(v: number): number {
-	return Math.round(v * 100) / 100;
-}
-function round4(v: number): number {
-	return Number(v.toFixed(4));
-}
 export function groupByIssuer(merged: MergedPosition[]): IssuerGroup[] {
 	const positions = foldCompanyParts(merged);
 	interface Acc {
@@ -20,6 +14,13 @@ export function groupByIssuer(merged: MergedPosition[]): IssuerGroup[] {
 	}
 	const groups = new Map<string, Acc>();
 	const identities = canonicalIssuerIdentities(positions);
+	const rowIds = new Map<string, string[]>();
+	for (const row of merged) {
+		const company = companyIdOf(row.id);
+		const ids = rowIds.get(company);
+		if (ids) ids.push(row.id);
+		else rowIds.set(company, [row.id]);
+	}
 	for (const [index, p] of positions.entries()) {
 		if (isResidualId(p.id)) continue;
 		const key = identities.keys[index] ?? p.id;
@@ -44,10 +45,13 @@ export function groupByIssuer(merged: MergedPosition[]): IssuerGroup[] {
 			const leader = breakdown[0] ?? g.members[0];
 			return {
 				key: g.key,
-				name: leader?.name ?? g.name,
-				value: round2(g.value),
-				weight: round4(g.weight),
+				name: leader?.issuerIdentity?.verifiedName ?? leader?.name ?? g.name,
+				value: g.value,
+				weight: g.weight,
 				grouped: breakdown.length > 1,
+				positionIds: breakdown.flatMap(
+					(p) => rowIds.get(companyIdOf(p.id)) ?? [],
+				),
 				breakdown,
 			};
 		})

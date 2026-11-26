@@ -89,10 +89,11 @@ export interface Figures {
 		readonly correlation: number;
 	}>;
 }
-export function readFigures(input: FiguresInput): Figures {
-	const { ids, corr, share, groups, commonWeeks } = input;
-	const index = new Map(ids.map((id, i) => [id, i] as const));
-	const at = (id: string) => index.get(id) as number;
+export function readPairs(
+	ids: readonly string[],
+	corr: Matrix,
+	commonWeeks: number,
+): PairReading[] {
 	const pairs: PairReading[] = [];
 	for (let a = 0; a < ids.length; a++) {
 		for (let b = a + 1; b < ids.length; b++) {
@@ -113,6 +114,13 @@ export function readFigures(input: FiguresInput): Figures {
 			x.a.localeCompare(y.a) ||
 			x.b.localeCompare(y.b),
 	);
+	return pairs;
+}
+export function readFigures(input: FiguresInput): Figures {
+	const { ids, corr, share, groups, commonWeeks } = input;
+	const index = new Map(ids.map((id, i) => [id, i] as const));
+	const at = (id: string) => index.get(id) as number;
+	const pairs = readPairs(ids, corr, commonWeeks);
 	const order = displayOrder(ids, groups, corr);
 	const matrix = order.map((a) => order.map((b) => corr[at(a)]![at(b)]!));
 	const all = ids.map((_, i) => i);

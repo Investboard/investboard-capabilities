@@ -1,3 +1,4 @@
+import { comparisonShare } from "../precision.js";
 import { type EscalationBand, escalationTierFor } from "./escalation.js";
 import { buildIssuerVector } from "./issuer-vector.js";
 import type {
@@ -58,14 +59,18 @@ export function issuerCapTierFor(input: {
 	);
 }
 export function isApproachingCap(weight: number, capFraction: number): boolean {
-	const basisPoints = (share: number) => Math.round(share * 10000);
-	return basisPoints(weight) >= basisPoints(APPROACHING_RATIO * capFraction);
+	return (
+		comparisonShare(weight) >= comparisonShare(APPROACHING_RATIO * capFraction)
+	);
 }
 export function isBookSeenThrough(input: {
 	issuers: readonly IssuerWeight[];
 	coverage: number;
 }): boolean {
-	return input.issuers.length > 0 && input.coverage >= COVERAGE_REFUSE_FLOOR;
+	return (
+		input.issuers.length > 0 &&
+		comparisonShare(input.coverage) >= COVERAGE_REFUSE_FLOOR
+	);
 }
 export interface CapVerdict {
 	maxIssuer: IssuerWeight | null;
@@ -79,8 +84,8 @@ export function verdictAtCap(input: {
 	capFraction: number;
 }): CapVerdict {
 	const weight = input.maxIssuer.weight;
-	const breached = weight > input.capFraction;
-	if (!breached && input.coverage < COVERAGE_REFUSE_FLOOR) {
+	const breached = comparisonShare(weight) > comparisonShare(input.capFraction);
+	if (!breached && comparisonShare(input.coverage) < COVERAGE_REFUSE_FLOOR) {
 		return {
 			maxIssuer: null,
 			breached: false,
@@ -124,6 +129,7 @@ export function evaluateLegA(input: {
 		capFraction,
 		coverage,
 		equityBookValue: bookValue,
+		unattributed,
 		hhi,
 		effectiveN,
 		maxIssuer: verdict.maxIssuer,

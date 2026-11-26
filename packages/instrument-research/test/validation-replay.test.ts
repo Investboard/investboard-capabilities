@@ -143,9 +143,13 @@ describe("public JSON boundary and retained replay", () => {
 		expect(legacyPair.snapshot.methodologyVersion).toBe(
 			"instrument-research-v1",
 		);
-		const currentPair = evaluateInstrumentPair(mixed);
+		const v2 = replayInstrumentPair({
+			...savedPair,
+			methodologyVersion: "instrument-research-v2",
+		});
+		expect(v2.reasons).toContain("mixed_return_basis");
 		expect({
-			...currentPair,
+			...v2,
 			snapshot: legacyPair.snapshot,
 			reasons: legacyPair.reasons,
 		}).toEqual(legacyPair);
