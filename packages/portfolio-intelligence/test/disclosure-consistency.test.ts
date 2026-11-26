@@ -161,3 +161,52 @@ it("returns all position IDs contributing to a grouped issuer value", () => {
 			.reduce((s, p) => s + p.value, 0),
 	).toBe(g.value);
 });
+
+it.each([
+	false,
+	true,
+])("does not choose a listing from conflicting symbols for one ISIN (reverse: %s)", (reverse) => {
+	const constituents = [
+		{ ...share, id: "ALPHA-X", name: "ALPHA-X", weight: 0.6 },
+		{ ...share, id: "ALPHA-Y", name: "ALPHA-Y", weight: 0.4 },
+	];
+	const result = analyzePortfolio({
+		...base,
+		holdings: [first],
+		funds: [
+			{
+				holdingId: first.id,
+				holdings: {
+					status: "listed",
+					asOf: base.asOf,
+					constituents: reverse ? constituents.reverse() : constituents,
+				},
+			},
+		],
+	});
+	expect(result.positions).toMatchObject([
+		{ isin: share.isin, ticker: null, name: share.isin, value: 100 },
+	]);
+});
+
+it("keys a third same-ticker fund with a malformed ISIN by the ticker", () => {
+	const fallback = { ...first, id: "fallback", isin: "N/A" };
+	const result = analyzePortfolio({
+		...base,
+		holdings: [first, second, fallback],
+		funds: [first, second].map((fund) => ({
+			holdingId: fund.id,
+			holdings: { status: "listed", asOf: base.asOf, constituents: [share] },
+		})),
+	});
+	const residual = result.positions.find(
+		(position) => position.id === "residual:ticker:FUND",
+	);
+	expect(residual).toMatchObject({
+		value: 100,
+		viaFunds: [{ holdingId: fallback.id }],
+	});
+	expect(
+		result.funds.find((fund) => fund.holdingId === fallback.id)?.treatment,
+	).toBe("pending");
+});

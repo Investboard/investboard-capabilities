@@ -69,6 +69,11 @@ export interface WindowAvailable {
 	readonly changes: readonly PairChange[] | null;
 }
 export interface WindowInsufficient {
+	readonly reason:
+		| "fewer_than_two_holdings"
+		| "flat_series"
+		| "short_history"
+		| "insufficient_valued_coverage";
 	readonly status: "insufficient_history";
 	readonly window: DiversificationWindow;
 }
@@ -211,11 +216,10 @@ export function computeWindow(
 		});
 	}
 	const covered = eligible.reduce((s, h) => s + h.valueBase, 0);
-	const empty: WindowState = {
-		reading: { status: "insufficient_history", window },
+	const noWeights = {
 		returns,
 		common,
-		weights: new Map(),
+		weights: new Map<string, number>(),
 		need,
 	};
 	if (
@@ -223,7 +227,19 @@ export function computeWindow(
 		bookValue <= 0 ||
 		(valuationComplete && covered < COVERED_VALUE_FLOOR * bookValue)
 	) {
-		return empty;
+		const reason = !valuationComplete
+			? "insufficient_valued_coverage"
+			: holdings.length < MIN_HOLDINGS
+				? "fewer_than_two_holdings"
+				: eligible.length >= MIN_HOLDINGS
+					? "insufficient_valued_coverage"
+					: exclusions.some((e) => e.reason === "flat_series")
+						? "flat_series"
+						: "short_history";
+		return {
+			...noWeights,
+			reading: { status: "insufficient_history", window, reason },
+		};
 	}
 	const ids = [...eligible]
 		.sort((a, b) => a.id.localeCompare(b.id))
@@ -266,7 +282,7 @@ export function computeWindow(
 	};
 	if (!valuationComplete) {
 		return {
-			...empty,
+			...noWeights,
 			reading: {
 				status: "partial",
 				reason: "insufficient_valued_coverage",

@@ -24,7 +24,7 @@ import {
 } from "./validation.js";
 
 export const CORRELATION_METHODOLOGY_VERSION =
-	"weekly-common-sample-correlation-v3" as const;
+	"weekly-common-sample-correlation-v4" as const;
 
 export type CorrelationWindow = WindowReading;
 

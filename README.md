@@ -13,7 +13,7 @@ Start with **[portfolio look-through](packages/portfolio-intelligence)**, **[por
 In a project using Node 22 or newer, install the released Portfolio Intelligence package and analyze a synthetic holding:
 
 ```sh
-npm install https://github.com/Investboard/investboard-capabilities/releases/download/capabilities-2026-11-26/investboard-portfolio-intelligence-0.5.0.tgz
+npm install https://github.com/Investboard/investboard-capabilities/releases/download/portfolio-intelligence-v0.6.0/investboard-portfolio-intelligence-0.6.0.tgz
 
 node --input-type=module <<'JS'
 import { analyzePortfolio } from "@investboard/portfolio-intelligence";
@@ -103,7 +103,7 @@ Run the synthetic GBP/CHF example with `pnpm example:research`. See the [API, ev
 
 The [portfolio look-through module](packages/portfolio-intelligence) is adapted from Investboard's X-Ray and Diversification engines. Supply your holdings and the constituent lists of your funds to see each company's share of your whole portfolio, held directly and through each fund. Measure exposures by asset class, sector, country, region and currency, the overlap between funds, and concentration in single companies with explicit bounds. Supply price history to read how your holdings moved together over 1, 3, 5 and 10 years.
 
-Only equity funds are looked through: cash, bond, gold and crypto funds stay whole in their class. Funds without a list, unvalued holdings and unclassified companies remain visible as missing data. The recorded app parity check covers the v2 numeric corpus of seven synthetic portfolios. The catalogue pins the Investboard app commit used for that check.
+Only equity funds are looked through: cash, bond, gold and crypto funds stay whole in their class. Funds without a list, unvalued holdings and unclassified companies remain visible as missing data. The [catalogue](capabilities.json) records which app commits were checked locally and the scope of each parity claim.
 
 Run the synthetic example with `pnpm example:intelligence`. See the [API, look-through rules and replay](packages/portfolio-intelligence/README.md), or let an AI agent run it with the [Portfolio Intelligence engine skill](skills/portfolio-intelligence-engine).
 
@@ -124,7 +124,7 @@ Ready to add a capability to your own engine? **[Build the stress-testing module
 
 ## Replay a saved calculation
 
-Find the saved snapshot's exact `methodologyVersion` in the [release index](releases.json). The entry gives the package version, GitHub release tag and source commit for archived packages. Download the matching `.tgz` from [GitHub Releases](https://github.com/Investboard/investboard-capabilities/releases), install it with `npm install ./<archive>.tgz`, then call the package's replay function with the saved snapshot. Use a separate project when you need an older package version alongside the current one.
+Find the saved snapshot's exact `methodologyVersion` in the [release index](releases.json). The entry gives the package version, GitHub release tag and source commit for archived packages. Entries marked planned refer to upcoming releases and can be built from source. Download the matching `.tgz` from [GitHub Releases](https://github.com/Investboard/investboard-capabilities/releases), install it with `npm install ./<archive>.tgz`, then call the package's replay function with the saved snapshot. Use a separate project when you need an older package version alongside the current one.
 
 ## Available modules
 

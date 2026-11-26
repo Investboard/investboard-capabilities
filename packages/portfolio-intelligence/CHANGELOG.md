@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 (2026-11-27)
+
+- Group duplicate disclosures of one constituent ISIN before choosing its listing symbol. Conflicting symbols leave the listing unresolved, and the combined weight still contributes to exposure and overlap.
+- Use the same validated fund identity for folding, residuals, and overlap. Malformed fund ISINs fall back to ticker identity.
+- Correlation v4 preserves the Investboard app's reason for windows without enough eligible history, a varying series, or enough valued coverage. The correlation arithmetic is unchanged.
+- Replay v5 portfolio and v3 correlation snapshots using the published 0.5.0 archive.
+
 ## 0.5.0 (2026-11-26)
 
 - Portfolio intelligence v5 rejects future-dated fund and index disclosures. The CSV runner requires one real disclosure date per fund and keeps replay input export opt-in.

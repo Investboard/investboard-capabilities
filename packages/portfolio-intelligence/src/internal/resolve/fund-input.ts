@@ -22,6 +22,7 @@ import {
 	resolveFundClass,
 } from "../xray/asset-class.js";
 import { normalizeCountry } from "../xray/country.js";
+import { normalisedIsin } from "../xray/fund-key.js";
 import { normalizeSector } from "../xray/sector.js";
 import type {
 	ClassificationVectorEntry,
@@ -62,7 +63,7 @@ function base(
 ): EngineEtfInput {
 	return {
 		ticker: holding.ticker ?? holding.id,
-		isin: normalizeIsin(holding.isin),
+		isin: normalisedIsin(holding.isin),
 		name: holding.name,
 		value: holding.value,
 		underlyingAssetClass: assetClass,
@@ -78,7 +79,7 @@ export function resolveFundInput(
 	fund: FundInput | undefined,
 	overrides: ReadonlyMap<string, FundOverride>,
 ): EngineEtfInput {
-	const isin = normalizeIsin(holding.isin);
+	const isin = normalisedIsin(holding.isin);
 	const override = isin ? overrides.get(isin) : undefined;
 	if (override?.heldWhole)
 		return {

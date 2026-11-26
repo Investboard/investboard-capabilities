@@ -29,12 +29,22 @@
 		},
 		{
 			"package": "@investboard/portfolio-intelligence",
+			"version": "0.6.0",
+			"tag": "portfolio-intelligence-v0.6.0",
+			"methodologies": [
+				"portfolio-intelligence-v6",
+				"weekly-common-sample-correlation-v4"
+			]
+		},
+		{
+			"package": "@investboard/portfolio-intelligence",
 			"version": "0.5.0",
 			"tag": "capabilities-2026-11-26",
 			"methodologies": [
 				"portfolio-intelligence-v5",
 				"weekly-common-sample-correlation-v3"
-			]
+			],
+			"sourceCommit": "9e52e1d5d380f23712375599a91cf48cbbbe9c96"
 		},
 		{
 			"package": "@investboard/rebalancing",

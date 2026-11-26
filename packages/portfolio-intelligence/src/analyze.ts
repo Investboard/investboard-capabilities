@@ -37,7 +37,8 @@ import {
 import { holdingAssetClassBuckets } from "./internal/xray/buckets.js";
 import { mergeEtfInputsByFund } from "./internal/xray/fund-identity.js";
 import { groupByIssuer } from "./internal/xray/group-by-issuer.js";
-import { isResidualId, positionIdentity } from "./internal/xray/identity.js";
+import { fundIdentity } from "./internal/xray/fund-key.js";
+import { isResidualId } from "./internal/xray/identity.js";
 import { mergeByIdentity } from "./internal/xray/merge.js";
 import { detectOverlaps } from "./internal/xray/overlap.js";
 import type {
@@ -58,10 +59,10 @@ import type {
 import { freeze } from "./internal/freeze.js";
 import { validatePortfolioRequest } from "./validation.js";
 
-export const METHODOLOGY_VERSION = "portfolio-intelligence-v5" as const;
+export const METHODOLOGY_VERSION = "portfolio-intelligence-v6" as const;
 
 function fundKey(isin: string | null | undefined, ticker: string): string {
-	return positionIdentity(normalizeIsin(isin), ticker) ?? ticker;
+	return fundIdentity({ isin: isin ?? null, ticker }) ?? ticker;
 }
 
 function treatmentOf(

@@ -25,7 +25,7 @@ Build a tarball from the repository root:
 pnpm --filter @investboard/portfolio-intelligence build
 pnpm --dir packages/portfolio-intelligence pack --pack-destination /tmp
 # In your application:
-pnpm add /tmp/investboard-portfolio-intelligence-0.5.0.tgz
+pnpm add /tmp/investboard-portfolio-intelligence-0.6.0.tgz
 ```
 
 The ESM package exports these functions and their TypeScript request and result types:
@@ -48,7 +48,7 @@ Also exported: `METHODOLOGY_VERSION`, `CORRELATION_METHODOLOGY_VERSION`, `METHOD
 - **Securities** are profiles by ISIN: name, sector, industry, country and class. A profile with `assetClass: null` is a fund's own profile and never describes a directly held line.
 - **Fund overrides** by ISIN either correct a fund's class (`heldWhole: false`) or hold it whole in a class (`heldWhole: true`), for example a futures fund whose listed collateral is not its exposure.
 
-Positions are identified by ISIN first and ticker otherwise. The same fund held at two accounts is folded into one fund by ISIN.
+Positions are identified by ISIN first and ticker otherwise. The same fund held at two accounts is folded into one fund by ISIN. Multiple disclosure rows for one constituent ISIN contribute their combined weight. Conflicting listing symbols leave that constituent’s ticker unresolved.
 
 ## Look-through and the equities-only rule
 
@@ -135,7 +135,7 @@ Historical correlation describes the observed period. It is distinct from holdin
 
 ## Retained evidence and replay
 
-Every result carries an immutable snapshot with its input and methodology. `replayPortfolioAnalysis` accepts `portfolio-intelligence-v5`. `replayCorrelations` accepts `weekly-common-sample-correlation-v3`. Find the matching historical tarball in the [release index](../../releases.json). To run a new evaluation under the current methodology, pass the saved request to the corresponding analysis function and keep the new snapshot separately.
+Every result carries an immutable snapshot with its input and methodology. `replayPortfolioAnalysis` accepts `portfolio-intelligence-v6`. `replayCorrelations` accepts `weekly-common-sample-correlation-v4`. Find the matching historical tarball in the [release index](../../releases.json). To run a new evaluation under the current methodology, pass the saved request to the corresponding analysis function and keep the new snapshot separately.
 
 ## Bounds and verification
 
@@ -150,7 +150,7 @@ pnpm example:intelligence
 pnpm format:check
 ```
 
-The [catalogue](../../capabilities.json) records app parity on the seven synthetic portfolios for the v2 numeric corpus. The local standalone suite runs those fixtures and checks current behavior. App parity for later methodology versions remains unverified.
+The [catalogue](../../capabilities.json) records a local app comparison across the seven synthetic portfolios, an ambiguous constituent listing, and complete, foreign-currency and partially valued correlation requests. The released 0.5.0 archive passed 11 of 12 checks, retaining a conflicting listing symbol that the app withheld. The 0.6.0 candidate passed all 12. Correlation v4 also carries the app's unavailable-history reasons.
 
 ## Use it with an AI agent
 

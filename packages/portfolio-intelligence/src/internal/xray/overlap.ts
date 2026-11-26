@@ -1,6 +1,7 @@
 /** Fund-pair overlap: the weight two funds hold in common, security by security. */
 import { mergeEtfInputsByFund } from "./fund-identity.js";
 import { constituentWeights } from "./constituent-weights.js";
+import { normalisedIsin } from "./fund-key.js";
 import type { EngineEtfInput, OverlapPairV2 } from "./types.js";
 export const OVERLAP_NOISE_FLOOR = 0.01;
 export const MAX_SHARED_HOLDINGS = 20;
@@ -70,7 +71,7 @@ function buildPair(a: EtfWeights, b: EtfWeights): OverlapPairV2 | null {
 export function detectOverlaps(etfs: EngineEtfInput[]): OverlapPairV2[] {
 	const funds: EtfWeights[] = mergeEtfInputsByFund(etfs).map((etf) => ({
 		ticker: etf.ticker,
-		isin: etf.isin?.trim().toUpperCase() || null,
+		isin: normalisedIsin(etf.isin),
 		map: constituentWeights(etf.constituents).entries,
 	}));
 	const pairs: OverlapPairV2[] = [];
