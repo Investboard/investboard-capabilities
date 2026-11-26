@@ -1,0 +1,128 @@
+{
+	"schemaVersion": 1,
+	"artifacts": [
+		{
+			"package": "@investboard/goal-planning",
+			"version": "0.2.0",
+			"tag": "capabilities-2026-11-26",
+			"methodologies": ["goal-cash-schedule-v1", "goal-cash-schedule-v2"]
+		},
+		{
+			"package": "@investboard/instrument-research",
+			"version": "0.3.0",
+			"tag": "capabilities-2026-11-26",
+			"methodologies": [
+				"instrument-research-v1",
+				"instrument-research-v2",
+				"instrument-research-v3"
+			]
+		},
+		{
+			"package": "@investboard/performance",
+			"version": "0.5.0",
+			"tag": "capabilities-2026-11-26",
+			"methodologies": [
+				"actual-position-performance-v3",
+				"actual-position-performance-v4",
+				"actual-position-performance-v5"
+			]
+		},
+		{
+			"package": "@investboard/portfolio-intelligence",
+			"version": "0.5.0",
+			"tag": "capabilities-2026-11-26",
+			"methodologies": [
+				"portfolio-intelligence-v5",
+				"weekly-common-sample-correlation-v3"
+			]
+		},
+		{
+			"package": "@investboard/rebalancing",
+			"version": "0.5.0",
+			"tag": "capabilities-2026-11-26",
+			"methodologies": [
+				"rebalance-comparison-v4",
+				"rebalance-comparison-v5",
+				"contribution-projection-v3"
+			]
+		},
+		{
+			"package": "@investboard/stress-test",
+			"version": "0.3.0",
+			"tag": "capabilities-2026-11-26",
+			"methodologies": [
+				"whole-wealth-currency-replay-v5",
+				"whole-wealth-currency-replay-v6"
+			]
+		},
+		{
+			"package": "@investboard/performance",
+			"version": "0.1.0",
+			"tag": "capabilities-2026-11-26",
+			"sourceCommit": "6d4965f1fe7a5007970b6438494bbee1e8f3a5d3",
+			"methodologies": ["actual-position-performance-v1"]
+		},
+		{
+			"package": "@investboard/performance",
+			"version": "0.2.0",
+			"tag": "capabilities-2026-11-26",
+			"sourceCommit": "e6d386ace3302d2ea47f17b393d0782b3e9feb22",
+			"methodologies": ["actual-position-performance-v2"]
+		},
+		{
+			"package": "@investboard/portfolio-intelligence",
+			"version": "0.1.0",
+			"tag": "capabilities-2026-11-26",
+			"sourceCommit": "4a82ee265e4b0220403e099e8575b5190691e379",
+			"methodologies": ["portfolio-intelligence-v1"]
+		},
+		{
+			"package": "@investboard/portfolio-intelligence",
+			"version": "0.2.0",
+			"tag": "capabilities-2026-11-26",
+			"sourceCommit": "34793a7db3515541b60eb432f7a41787a2bf08dd",
+			"methodologies": ["portfolio-intelligence-v2"]
+		},
+		{
+			"package": "@investboard/portfolio-intelligence",
+			"version": "0.3.0",
+			"tag": "capabilities-2026-11-26",
+			"sourceCommit": "c365121bc9a92f9962bfcd9e2f4ffc44d1b871f8",
+			"methodologies": [
+				"portfolio-intelligence-v3",
+				"weekly-common-sample-correlation-v1"
+			]
+		},
+		{
+			"package": "@investboard/portfolio-intelligence",
+			"version": "0.4.0",
+			"tag": "capabilities-2026-11-26",
+			"sourceCommit": "1e8ac2ee0485840c94fa21a922f97a6614837ebc",
+			"methodologies": [
+				"portfolio-intelligence-v4",
+				"weekly-common-sample-correlation-v2"
+			]
+		},
+		{
+			"package": "@investboard/rebalancing",
+			"version": "0.1.0",
+			"tag": "capabilities-2026-11-26",
+			"sourceCommit": "c9dbb74d27d24f3373dcd66d327acd4fb0343e58",
+			"methodologies": ["rebalance-comparison-v1"]
+		},
+		{
+			"package": "@investboard/rebalancing",
+			"version": "0.2.0",
+			"tag": "capabilities-2026-11-26",
+			"sourceCommit": "a5ac25095cc360f50ef7c89b0a426c5fa3c7513a",
+			"methodologies": ["rebalance-comparison-v2", "contribution-projection-v1"]
+		},
+		{
+			"package": "@investboard/rebalancing",
+			"version": "0.3.0",
+			"tag": "capabilities-2026-11-26",
+			"sourceCommit": "6d43bb7654598db77c00f23c88bed4c01cff512a",
+			"methodologies": ["rebalance-comparison-v3", "contribution-projection-v2"]
+		}
+	]
+}

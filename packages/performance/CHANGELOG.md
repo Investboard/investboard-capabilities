@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0 (unreleased)
+## 0.5.0 (2026-11-26)
 
 - In methodology `actual-position-performance-v5`, dividends belong to the window after its opening close through its closing close. A €10 dividend on October 20 contributes €10 to October 16–20, €0 to October 20–24, and €10 to October 16–24. Whole-book and selected-basket returns, attribution and the wealth bridge use the same dates.
 - Saved v3 and v4 snapshots replay under their respective historical rules, including opening-date dividends. Evaluate the saved request to obtain a v5 snapshot.

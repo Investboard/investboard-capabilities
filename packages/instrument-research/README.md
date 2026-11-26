@@ -17,13 +17,15 @@ The example uses synthetic GBP and CHF listings, direct GBP-to-CHF FX, and USD f
 
 ## Use it in your project
 
-Build a source tarball; registry publication is a separate release step:
+Install a versioned tarball from [GitHub Releases](https://github.com/Investboard/investboard-capabilities/releases), or build an archive from this checkout.
+
+Build a tarball from the repository root:
 
 ```sh
 pnpm --filter @investboard/instrument-research build
 pnpm --dir packages/instrument-research pack --pack-destination /tmp
 # In your application:
-pnpm add /tmp/investboard-instrument-research-0.2.0.tgz
+pnpm add /tmp/investboard-instrument-research-0.3.0.tgz
 ```
 
 The ESM package exports these functions and their TypeScript request/result types:

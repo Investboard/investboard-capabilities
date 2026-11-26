@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import {
 	LIMITS,
+	analyzePortfolio,
+	measureCorrelations,
+	replayPortfolioAnalysis,
+	replayCorrelations,
 	PortfolioInputError,
 	validateCorrelationRequest,
 	validatePortfolioRequest,
 } from "../src/index.js";
-import type { PortfolioRequest } from "../src/index.js";
+import type { CorrelationRequest, PortfolioRequest } from "../src/index.js";
 
 function book(): PortfolioRequest {
 	return {
@@ -171,5 +175,110 @@ describe("correlation request validation", () => {
 				closes: [{ id: "a", date: "2026-10-01", close: 0 }],
 			}),
 		).toThrow(/close/i);
+	});
+});
+
+describe("point-in-time evidence", () => {
+	it("uses same-day lists and refuses later fund and index disclosures", () => {
+		const input = book();
+		const fund = input.funds![0]!;
+		if (fund.holdings.status !== "listed")
+			throw new Error("expected a fund list");
+		fund.holdings.asOf = input.asOf;
+		expect(analyzePortfolio(input).constituentsAsOf).toBe(input.asOf);
+
+		fund.holdings.asOf = "2026-11-01";
+		expect(() => analyzePortfolio(input)).toThrow(
+			/world.*holdings.*after the analysis/,
+		);
+		const { constituents, asOf } = fund.holdings;
+		fund.holdings = { status: "missing" };
+		fund.readThrough = {
+			index: "Synthetic Index",
+			fundName: "Synthetic Index Fund",
+			asOf,
+			constituents,
+		};
+		expect(() => analyzePortfolio(input)).toThrow(
+			/world.*readThrough.*after the analysis/,
+		);
+	});
+});
+
+function marketBook(): CorrelationRequest {
+	const holdings = [
+		{ id: "a", value: 100, priceCurrency: "USD" },
+		{ id: "b", value: 100, priceCurrency: "EUR" },
+		{ id: "c", value: 100, priceCurrency: "EUR" },
+	];
+	const dates = Array.from({ length: 53 }, (_, i) =>
+		new Date(Date.UTC(2023, 0, 6 + 7 * i)).toISOString().slice(0, 10),
+	);
+	return {
+		asOf: "2024-01-06",
+		baseCurrency: "EUR",
+		holdings,
+		closes: dates.flatMap((date, i) =>
+			holdings.map(({ id }, j) => ({ id, date, close: 100 + (i % (j + 2)) })),
+		),
+		fx: dates.map((date) => ({ date, currency: "USD", rateToBase: 0.9 })),
+	};
+}
+
+describe("JSON results and replay", () => {
+	it("rejects unsupported or non-JSON metadata, and never evaluates accessors", () => {
+		const portfolio = { ...book(), metadata: { note: "external context" } };
+		expect(() => analyzePortfolio(portfolio)).toThrow(
+			/unsupported field metadata/,
+		);
+		expect(() => analyzePortfolio({ ...book(), metadata: 5n })).toThrow(
+			PortfolioInputError,
+		);
+
+		const cyclic = { ...marketBook(), metadata: {} };
+		cyclic.metadata = cyclic;
+		expect(() => measureCorrelations(cyclic)).toThrow(/cycle/);
+		let getterCalls = 0;
+		const correlation = Object.defineProperty(marketBook(), "holdings", {
+			enumerable: true,
+			get() {
+				getterCalls++;
+				return [];
+			},
+		});
+		expect(() => measureCorrelations(correlation)).toThrow(/data properties/);
+		expect(getterCalls).toBe(0);
+	});
+
+	it("replays canonical snapshots with optional undefined fields omitted", () => {
+		const input = book();
+		input.holdings[0]!.ticker = undefined;
+		const result = analyzePortfolio(input);
+		expect(result.snapshot.request.holdings[0]).not.toHaveProperty("ticker");
+		expect(
+			replayPortfolioAnalysis(JSON.parse(JSON.stringify(result.snapshot))),
+		).toStrictEqual(result);
+
+		const correlation = measureCorrelations(marketBook());
+		const window = correlation.windows[0]!;
+		expect(window.status).toBe("available");
+		if (window.status !== "available")
+			throw new Error("expected one-year correlations");
+		expect(window.pairs).toHaveLength(3);
+		expect(
+			window.pairs.every((pair) => Number.isFinite(pair.correlation)),
+		).toBe(true);
+		expect(
+			replayCorrelations(JSON.parse(JSON.stringify(correlation.snapshot))),
+		).toStrictEqual(correlation);
+	});
+
+	it("rejects extreme finite closes and rates before they can overflow", () => {
+		const input = marketBook();
+		input.closes[0]!.close = 1e308;
+		expect(() => measureCorrelations(input)).toThrow(/close.*market range/i);
+		input.closes[0]!.close = LIMITS.maxMarketValue;
+		input.fx![0]!.rateToBase = Number.MIN_VALUE;
+		expect(() => measureCorrelations(input)).toThrow(/FX rate.*market range/i);
 	});
 });

@@ -1,3 +1,4 @@
+import { copyJsonInput, requireFiniteResult } from "./input-data.js";
 /**
  * What a portfolio really owns: the equity look-through of its funds, merged
  * with direct holdings, and the exposures, overlap, concentration and coverage
@@ -57,7 +58,7 @@ import type {
 import { freeze } from "./internal/freeze.js";
 import { validatePortfolioRequest } from "./validation.js";
 
-export const METHODOLOGY_VERSION = "portfolio-intelligence-v4" as const;
+export const METHODOLOGY_VERSION = "portfolio-intelligence-v5" as const;
 
 function fundKey(isin: string | null | undefined, ticker: string): string {
 	return positionIdentity(normalizeIsin(isin), ticker) ?? ticker;
@@ -162,7 +163,7 @@ function emptyResult(
 
 export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 	validatePortfolioRequest(input);
-	const request = structuredClone(input);
+	const request = copyJsonInput(input);
 	const snapshot = { methodologyVersion: METHODOLOGY_VERSION, request };
 
 	const unvalued = request.holdings
@@ -240,7 +241,7 @@ export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 		reasonCodes.push("fund_holdings_missing");
 	if (gate.degraded && gate.reason) reasonCodes.push(gate.reason);
 
-	return freeze({
+	const result: Omit<PortfolioResult, "snapshot"> = {
 		methodologyVersion: METHODOLOGY_VERSION,
 		status: reasonCodes.length > 0 ? "partial" : "available",
 		reasonCodes,
@@ -282,6 +283,7 @@ export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 			opaquePending: coverage.opaquePending,
 		},
 		funds,
-		snapshot,
-	});
+	};
+	requireFiniteResult(result);
+	return freeze({ ...result, snapshot });
 }

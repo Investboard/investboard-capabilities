@@ -4,17 +4,19 @@
 // documented ones (a "note" column, for example) are ignored and never echoed.
 //
 //   node run.mjs --portfolio portfolio.csv [--fund-holdings fund-holdings.csv]
-//                [--securities securities.csv] [--out output-directory]
+//                [--securities securities.csv] [--out new-directory [--export-snapshot]]
 import {
 	existsSync,
 	mkdirSync,
 	readFileSync,
 	realpathSync,
+	rmSync,
 	writeFileSync,
 } from "node:fs";
 import { formatBound } from "../../../packages/portfolio-intelligence/examples/format-bound.mjs";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { parseArgs } from "node:util";
 
 const ASSET_CLASSES = new Set([
 	"equities",
@@ -91,13 +93,23 @@ function text(value) {
 	return value === undefined || value === "" ? null : value;
 }
 
-function one(rows, key, label) {
-	const values = new Set(rows.map((r) => r[key]).filter(Boolean));
-	if (values.size !== 1)
-		throw new Error(
-			`The portfolio file must state one ${label} on every row (found ${values.size})`,
-		);
-	return [...values][0];
+function one(rows, key, scope) {
+	const value = rows[0]?.[key];
+	if (!value || rows.some((row) => row[key] !== value))
+		throw new Error(scope + " must state one " + key + " on every row");
+	return value;
+}
+
+function dateOf(rows, scope) {
+	const date = one(rows, "as_of", scope);
+	const timestamp = Date.parse(date + "T00:00:00Z");
+	if (
+		!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(date) ||
+		!Number.isFinite(timestamp) ||
+		new Date(timestamp).toISOString().slice(0, 10) !== date
+	)
+		throw new Error(scope + " as_of must be a valid YYYY-MM-DD date");
+	return date;
 }
 
 /** Build a PortfolioRequest from CSV text. `fundHoldingsCsv` and `securitiesCsv` may be null. */
@@ -112,11 +124,11 @@ export function buildRequestFromCsv(
 function prepareCsvInput(portfolioCsv, fundHoldingsCsv, securitiesCsv) {
 	const portfolio = parseCsv(portfolioCsv);
 	if (portfolio.length === 0) throw new Error("The portfolio file has no rows");
-	const asOf = one(portfolio, "as_of", "as_of date");
+	const asOf = dateOf(portfolio, "Portfolio");
 	const baseCurrency = one(
 		portfolio,
 		"base_currency",
-		"base currency",
+		"Portfolio",
 	).toUpperCase();
 
 	const usesMoney = portfolio.some((row) => text(row.value) !== null);
@@ -214,12 +226,17 @@ function prepareCsvInput(portfolioCsv, fundHoldingsCsv, securitiesCsv) {
 					...reportedClass,
 					holdings: { status: "missing" },
 				};
+			const disclosureDate = dateOf(rows, "Fund " + h.id);
+			if (disclosureDate > asOf)
+				throw new Error(
+					"Fund " + h.id + " as_of cannot be dated after the portfolio",
+				);
 			return {
 				holdingId: h.id,
 				...reportedClass,
 				holdings: {
 					status: "listed",
-					asOf: rows[0].as_of || asOf,
+					asOf: disclosureDate,
 					constituents: rows.map((r) => ({
 						id: r.company_id,
 						isin: text(r.isin),
@@ -325,23 +342,42 @@ export function summarize(result, basis = "valued portfolio") {
 	return lines.join("\n");
 }
 
-function args(argv) {
-	const out = {};
-	for (let i = 0; i < argv.length; i++) {
-		const key = argv[i];
-		if (key?.startsWith("--")) out[key.slice(2)] = argv[++i];
+/** Write one analysis to a new private directory. Export the replay inputs only on request. */
+export function saveAnalysis(out, result, exportSnapshot) {
+	const { snapshot, ...analysis } = result;
+	const files = [["result.json", JSON.stringify(analysis, null, 2) + "\n"]];
+	if (exportSnapshot)
+		files.push(["snapshot.json", JSON.stringify(snapshot, null, 2) + "\n"]);
+	mkdirSync(dirname(out), { recursive: true, mode: 0o700 });
+	mkdirSync(out, { mode: 0o700 });
+	try {
+		for (const [name, content] of files)
+			writeFileSync(join(out, name), content, { flag: "wx", mode: 0o600 });
+	} catch (error) {
+		rmSync(out, { recursive: true, force: true });
+		throw error;
 	}
-	return out;
+	return files.map(([name]) => join(out, name));
 }
 
 async function main() {
-	const options = args(process.argv.slice(2));
+	const { values: options } = parseArgs({
+		options: {
+			portfolio: { type: "string" },
+			"fund-holdings": { type: "string" },
+			securities: { type: "string" },
+			out: { type: "string" },
+			"export-snapshot": { type: "boolean" },
+		},
+	});
 	if (!options.portfolio) {
 		console.error(
-			"Usage: node run.mjs --portfolio <csv> [--fund-holdings <csv>] [--securities <csv>] [--out <dir>]",
+			"Usage: node run.mjs --portfolio <csv> [--fund-holdings <csv>] [--securities <csv>] [--out <new-directory> [--export-snapshot]]",
 		);
 		process.exit(2);
 	}
+	if (options["export-snapshot"] && !options.out)
+		throw new Error("--export-snapshot requires --out");
 	const read = (path) => (path ? readFileSync(resolve(path), "utf8") : null);
 	const { request, usesMoney } = prepareCsvInput(
 		read(options.portfolio),
@@ -362,26 +398,21 @@ async function main() {
 	}
 	const { analyzePortfolio } = await import(pathToFileURL(engine).href);
 	const result = analyzePortfolio(request);
-	const out = resolve(options.out ?? "portfolio-intelligence-output");
-	mkdirSync(out, { recursive: true });
-	writeFileSync(
-		join(out, "result.json"),
-		`${JSON.stringify(result, null, 2)}\n`,
-	);
-	writeFileSync(
-		join(out, "snapshot.json"),
-		`${JSON.stringify(result.snapshot, null, 2)}\n`,
-	);
 	if (!usesMoney)
 		console.log(
-			"The inputs are percentages. Saved values are notional units of supplied weight.",
+			"The inputs are percentages. Values are notional units of supplied weight.",
 		);
 	console.log(
 		summarize(result, usesMoney ? "valued portfolio" : "supplied weight total"),
 	);
-	console.log(
-		`\nSaved ${join(out, "result.json")} and ${join(out, "snapshot.json")}`,
-	);
+	if (options.out) {
+		const files = saveAnalysis(
+			resolve(options.out),
+			result,
+			options["export-snapshot"],
+		);
+		console.log("\nSaved " + files.join(" and "));
+	}
 }
 
 /** True when `argv1` (the path Node was asked to run) is this module, symlinks resolved. */

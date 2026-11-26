@@ -20,11 +20,12 @@ Use Node 22 or newer and pnpm 9.15.0:
 
 ```sh
 pnpm install --frozen-lockfile
-pnpm typecheck
-pnpm test
-pnpm example
-pnpm format:check
+pnpm release:check
 ```
+
+The release check runs tests, types, builds and examples, formatting, catalogue and methodology checks, and offline installs of current and archived tarballs in fresh consumer projects. It uses Git and tar for historical source snapshots. Run `pnpm release:check /path/to/new-artifact-directory` to retain the verified archives.
+
+Update the package versions, changelogs, `capabilities.json` and the [release index](releases.json) when cutting a release. Preserve existing artifact references and use the original source commit for archived package builds. Run the check from the release commit and attach the verified tarballs to its GitHub Release.
 
 Use focused tests while working on a single module. A pull request should explain what someone can now do, why the calculation or behavior changed, and how to reproduce an example.
 

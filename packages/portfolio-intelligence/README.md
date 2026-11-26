@@ -17,13 +17,15 @@ The example analyzes two synthetic portfolios from [`parity/`](parity). In the f
 
 ## Use it in your project
 
-Build a source tarball; registry publication is a separate release step:
+Install a versioned tarball from [GitHub Releases](https://github.com/Investboard/investboard-capabilities/releases), or build an archive from this checkout.
+
+Build a tarball from the repository root:
 
 ```sh
 pnpm --filter @investboard/portfolio-intelligence build
 pnpm --dir packages/portfolio-intelligence pack --pack-destination /tmp
 # In your application:
-pnpm add /tmp/investboard-portfolio-intelligence-0.4.0.tgz
+pnpm add /tmp/investboard-portfolio-intelligence-0.5.0.tgz
 ```
 
 The ESM package exports these functions and their TypeScript request and result types:
@@ -42,7 +44,7 @@ Also exported: `METHODOLOGY_VERSION`, `CORRELATION_METHODOLOGY_VERSION`, `METHOD
 `PortfolioRequest` declares `asOf`, `baseCurrency`, every holding of the whole portfolio in `holdings` (cash, bonds, gold and crypto included), and optionally `funds`, `securities` and `fundOverrides`.
 
 - **Holdings** carry an `id`, a `kind` (`security`, `fund` or `cash`), a name, optional ISIN and ticker, a `value` already in the base currency, the listing currency and an asset class: `equities`, `bonds`, `gold`, `crypto`, `cash`, `alternatives`, `real_estate`, `commodities` or `unknown`. A holding you could not value is passed with `value: null`; it is listed as unvalued and leaves every denominator.
-- **Funds** describe fund holdings by `holdingId`: a constituent list (`status: "listed"`, each constituent's weight a fraction of 1), `status: "none_reported"` for a fund that publishes no constituents, or `status: "missing"` when you have no list. A fund may also carry the class its own documents report, sector and country breakdowns, and an index list to read through when it publishes none.
+- **Funds** describe fund holdings by `holdingId`: a constituent list (`status: "listed"`, each constituent's weight a fraction of 1), `status: "none_reported"` for a fund that publishes no constituents, or `status: "missing"` when you have no list. A fund may also carry the class its own documents report, sector and country breakdowns, and an index list to read through when it publishes none. Every dated fund disclosure and index list must be effective on or before the analysis date. For a historical analysis, supply the disclosure available for that date or declare the data missing.
 - **Securities** are profiles by ISIN: name, sector, industry, country and class. A profile with `assetClass: null` is a fund's own profile and never describes a directly held line.
 - **Fund overrides** by ISIN either correct a fund's class (`heldWhole: false`) or hold it whole in a class (`heldWhole: true`), for example a futures fund whose listed collateral is not its exposure.
 
@@ -133,11 +135,11 @@ Historical correlation describes the observed period. It is distinct from holdin
 
 ## Retained evidence and replay
 
-Every result carries an immutable snapshot with its input and methodology. `replayPortfolioAnalysis` accepts `portfolio-intelligence-v4`. `replayCorrelations` accepts `weekly-common-sample-correlation-v2`. Replay older snapshots with their original package version. To run a new evaluation under the current methodology, pass the saved request to the corresponding analysis function and keep the new snapshot separately.
+Every result carries an immutable snapshot with its input and methodology. `replayPortfolioAnalysis` accepts `portfolio-intelligence-v5`. `replayCorrelations` accepts `weekly-common-sample-correlation-v3`. Find the matching historical tarball in the [release index](../../releases.json). To run a new evaluation under the current methodology, pass the saved request to the corresponding analysis function and keep the new snapshot separately.
 
 ## Bounds and verification
 
-`LIMITS` permits 2,000 holdings, 500 fund inputs, 10,000 constituents per fund, 50,000 security profiles and values up to `1e12`; correlations accept 200 holdings and 4,000 closes per holding. Invalid input throws `PortfolioInputError` naming the field, including constituent weights given as percentages instead of fractions of 1 and duplicate dates in a series.
+`LIMITS` permits 2,000 holdings, 500 fund inputs, 10,000 constituents per fund, 50,000 security profiles and values up to `1e12`; correlations accept 200 holdings and 4,000 closes per holding. Market prices and FX rates must be within `[1e-9, 1e12]`. Requests accept documented plain-JSON fields, with a maximum depth of 12, 5 million nodes, 2,000 UTF-16 units per string and 32 million total UTF-16 units across strings and object keys. Omit optional fields or pass `undefined` to leave them out of the snapshot. Invalid input throws `PortfolioInputError` naming the field, including constituent weights given as percentages instead of fractions of 1 and duplicate dates in a series.
 
 From the repository root:
 
@@ -148,7 +150,7 @@ pnpm example:intelligence
 pnpm format:check
 ```
 
-The calculation is adapted from Investboard's X-Ray, concentration and diversification engines. The seven synthetic portfolios in [`parity/`](parity) are also run through Investboard's own engine by a parity check in the Investboard application, which fails on any difference in figures; the historic v2 numeric parity commit is recorded in [`capabilities.json`](../../capabilities.json). That receipt does not validate v3 evidence semantics. The updated native/public parity assertions and new currency regressions are **UNRUN** under the founder’s 12 November no-run instruction; no new parity commit or runtime certification is claimed.
+The [catalogue](../../capabilities.json) records app parity on the seven synthetic portfolios for the v2 numeric corpus. The local standalone suite runs those fixtures and checks current behavior. App parity for later methodology versions remains unverified.
 
 ## Use it with an AI agent
 

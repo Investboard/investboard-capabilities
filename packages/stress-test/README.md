@@ -30,6 +30,8 @@ The example uses synthetic investor data and demonstrates quote-currency uncerta
 
 ## Use it in your project
 
+Install a versioned tarball from [GitHub Releases](https://github.com/Investboard/investboard-capabilities/releases), or build an archive from this checkout.
+
 Build a package from this checkout:
 
 ```sh
@@ -43,8 +45,6 @@ Then install the generated tarball from your own project, using the path to your
 ```sh
 npm install /path/to/investboard-capabilities/packages/stress-test/investboard-stress-test-0.3.0.tgz
 ```
-
-The module is distributed as source and buildable packages in this repository. It is not currently published to the npm registry.
 
 ## Calculate a scenario
 

@@ -1,3 +1,4 @@
+import { requireInput as require, validateJsonInput } from "./input-data.js";
 import { LIMITS } from "./limits.js";
 import type {
 	ConstituentInput,
@@ -5,12 +6,7 @@ import type {
 	PortfolioRequest,
 } from "./types.js";
 
-export class PortfolioInputError extends Error {
-	constructor(message: string) {
-		super(message);
-		this.name = "PortfolioInputError";
-	}
-}
+export { PortfolioInputError } from "./input-data.js";
 
 export const ASSET_CLASSES: ReadonlySet<string> = new Set([
 	"equities",
@@ -22,10 +18,6 @@ export const ASSET_CLASSES: ReadonlySet<string> = new Set([
 	"real_estate",
 	"commodities",
 ]);
-
-function require(condition: unknown, message: string): asserts condition {
-	if (!condition) throw new PortfolioInputError(message);
-}
 
 function isObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -52,6 +44,21 @@ export function isIsoDate(value: unknown): value is string {
 
 function date(value: unknown, what: string): asserts value is string {
 	require(isIsoDate(value), `${what} must be a valid YYYY-MM-DD date`);
+}
+
+function evidenceDate(value: unknown, asOf: string, label: string): void {
+	date(value, label);
+	require(value <= asOf, label + " cannot be dated after the analysis");
+}
+
+function marketValue(value: unknown, label: string): void {
+	require(typeof value === "number" &&
+		value >= LIMITS.minMarketValue &&
+		value <= LIMITS.maxMarketValue, label +
+		" must be in the supported market range of " +
+		LIMITS.minMarketValue +
+		" to " +
+		LIMITS.maxMarketValue);
 }
 
 function currency(value: unknown, what: string): asserts value is string {
@@ -93,6 +100,7 @@ function constituents(list: unknown, fundId: string): void {
 		require(isObject(
 			entry,
 		), `Fund ${fundId}: each constituent must be an object`);
+		keys(entry, ["id", "isin", "name", "weight"], "Constituent");
 		text(entry.id, `Fund ${fundId}: constituent id`);
 		text(entry.name, `Fund ${fundId}: constituent name`);
 		optionalText(entry.isin, `Fund ${fundId}: constituent isin`);
@@ -107,12 +115,12 @@ function breakdown(list: unknown, what: string): void {
 	require(Array.isArray(list), `${what} must be an array`);
 	for (const entry of list) {
 		require(isObject(entry), `${what} entries must be objects`);
+		keys(entry, ["key", "weight"], what);
 		text(entry.key, `${what} key`);
 		require(fraction(entry.weight), `${what} weights are fractions of 1`);
 	}
 }
 
-/** Currency evidence is strict: unsupported metadata must not silently acquire meaning. */
 function keys(
 	value: Record<string, unknown>,
 	allowed: readonly string[],
@@ -125,8 +133,7 @@ function currencySource(value: unknown, asOf: string, what: string): void {
 	require(isObject(value), `${what} must carry source provenance`);
 	keys(value, ["reference", "asOf"], what);
 	text(value.reference, `${what} reference`);
-	date(value.asOf, `${what} asOf`);
-	require(value.asOf <= asOf, `${what} cannot be dated after the analysis`);
+	evidenceDate(value.asOf, asOf, what + " asOf");
 }
 function currencyEvidence(value: unknown, asOf: string, what: string): void {
 	if (value === undefined) return;
@@ -187,7 +194,20 @@ function currencyEvidence(value: unknown, asOf: string, what: string): void {
 }
 
 export function validatePortfolioRequest(request: PortfolioRequest): void {
+	validateJsonInput(request);
 	require(isObject(request), "The request must be an object");
+	keys(
+		request,
+		[
+			"asOf",
+			"baseCurrency",
+			"holdings",
+			"funds",
+			"securities",
+			"fundOverrides",
+		],
+		"Portfolio request",
+	);
 	date(request.asOf, "asOf");
 	currency(request.baseCurrency, "baseCurrency");
 	require(Array.isArray(request.holdings), "holdings must be an array");
@@ -196,6 +216,22 @@ export function validatePortfolioRequest(request: PortfolioRequest): void {
 	const kinds = new Map<string, string>();
 	for (const holding of request.holdings) {
 		require(isObject(holding), "Each holding must be an object");
+		keys(
+			holding,
+			[
+				"id",
+				"kind",
+				"name",
+				"isin",
+				"ticker",
+				"value",
+				"listingCurrency",
+				"listingCurrencySource",
+				"currencyEvidence",
+				"assetClass",
+			],
+			"Portfolio holding",
+		);
 		text(holding.id, "Holding id");
 		require(!kinds.has(holding.id), `Duplicate holding id ${holding.id}`);
 		require(holding.kind === "security" ||
@@ -229,6 +265,18 @@ export function validatePortfolioRequest(request: PortfolioRequest): void {
 	const seenFunds = new Set<string>();
 	for (const fund of funds) {
 		require(isObject(fund), "Each fund input must be an object");
+		keys(
+			fund,
+			[
+				"holdingId",
+				"reportedClass",
+				"holdings",
+				"sectorBreakdown",
+				"countryBreakdown",
+				"readThrough",
+			],
+			"Fund",
+		);
 		text(fund.holdingId, "Fund holdingId");
 		const kind = kinds.get(fund.holdingId);
 		require(kind !==
@@ -253,8 +301,17 @@ export function validatePortfolioRequest(request: PortfolioRequest): void {
 			status === "none_reported" ||
 			status ===
 				"missing", `Fund ${fund.holdingId}: holdings status must be listed, none_reported or missing`);
+		keys(
+			fund.holdings,
+			status === "listed" ? ["status", "asOf", "constituents"] : ["status"],
+			"Fund holdings",
+		);
 		if (fund.holdings.status === "listed") {
-			date(fund.holdings.asOf, `Fund ${fund.holdingId}: holdings asOf`);
+			evidenceDate(
+				fund.holdings.asOf,
+				request.asOf,
+				`Fund ${fund.holdingId}: holdings asOf`,
+			);
 			constituents(fund.holdings.constituents, fund.holdingId);
 		}
 		breakdown(fund.sectorBreakdown, `Fund ${fund.holdingId}: sectorBreakdown`);
@@ -269,7 +326,16 @@ export function validatePortfolioRequest(request: PortfolioRequest): void {
 			), `Fund ${fund.holdingId}: readThrough must be an object`);
 			text(read.index, `Fund ${fund.holdingId}: readThrough index`);
 			text(read.fundName, `Fund ${fund.holdingId}: readThrough fundName`);
-			date(read.asOf, `Fund ${fund.holdingId}: readThrough asOf`);
+			keys(
+				read,
+				["index", "fundName", "asOf", "constituents"],
+				"Fund readThrough",
+			);
+			evidenceDate(
+				read.asOf,
+				request.asOf,
+				`Fund ${fund.holdingId}: readThrough asOf`,
+			);
 			constituents(read.constituents, fund.holdingId);
 		}
 	}
@@ -280,6 +346,19 @@ export function validatePortfolioRequest(request: PortfolioRequest): void {
 		LIMITS.securities, `More securities than the limit of ${LIMITS.securities}`);
 	for (const security of securities) {
 		require(isObject(security), "Each security profile must be an object");
+		keys(
+			security,
+			[
+				"isin",
+				"name",
+				"sector",
+				"industry",
+				"country",
+				"issuerName",
+				"assetClass",
+			],
+			"Security profile",
+		);
 		text(security.isin, "Security isin");
 		for (const field of [
 			"name",
@@ -292,8 +371,13 @@ export function validatePortfolioRequest(request: PortfolioRequest): void {
 			optionalText(security[field], `Security ${security.isin}: ${field}`);
 	}
 
-	for (const override of request.fundOverrides ?? []) {
+	const overrides = request.fundOverrides ?? [];
+	require(Array.isArray(overrides) &&
+		overrides.length <=
+			LIMITS.funds, "fundOverrides must be an array within the fund limit");
+	for (const override of overrides) {
 		require(isObject(override), "Each fund override must be an object");
+		keys(override, ["isin", "assetClass", "heldWhole"], "Fund override");
 		text(override.isin, "Fund override isin");
 		assetClass(override.assetClass, `Fund override ${override.isin}`, false);
 		require(typeof override.heldWhole ===
@@ -302,7 +386,13 @@ export function validatePortfolioRequest(request: PortfolioRequest): void {
 }
 
 export function validateCorrelationRequest(request: CorrelationRequest): void {
+	validateJsonInput(request);
 	require(isObject(request), "The request must be an object");
+	keys(
+		request,
+		["asOf", "baseCurrency", "holdings", "closes", "fx"],
+		"Correlation request",
+	);
 	date(request.asOf, "asOf");
 	currency(request.baseCurrency, "baseCurrency");
 	require(Array.isArray(request.holdings), "holdings must be an array");
@@ -311,6 +401,12 @@ export function validateCorrelationRequest(request: CorrelationRequest): void {
 	const ids = new Set<string>();
 	for (const holding of request.holdings) {
 		require(isObject(holding), "Each holding must be an object");
+		keys(
+			holding,
+			["id", "name", "value", "priceCurrency", "closeBasis"],
+			"Correlation holding",
+		);
+		if (holding.name !== undefined) text(holding.name, "Holding name");
 		text(holding.id, "Holding id");
 		require(!ids.has(holding.id), `Duplicate holding id ${holding.id}`);
 		ids.add(holding.id);
@@ -326,23 +422,24 @@ export function validateCorrelationRequest(request: CorrelationRequest): void {
 	for (const close of request.closes) {
 		require(isObject(close), "Each close must be an object");
 		require(ids.has(close.id), `Close for unknown holding ${String(close.id)}`);
+		keys(close, ["id", "date", "close"], "Close");
 		date(close.date, `Close of ${close.id}: date`);
-		require(typeof close.close === "number" &&
-			Number.isFinite(close.close) &&
-			close.close >
-				0, `Close of ${close.id} on ${close.date} must be a positive number`);
+		marketValue(close.close, "Close of " + close.id + " on " + close.date);
 		const count = (counts.get(close.id) ?? 0) + 1;
 		require(count <=
 			LIMITS.closesPerHolding, `Holding ${close.id}: more closes than the limit of ${LIMITS.closesPerHolding}`);
 		counts.set(close.id, count);
 	}
-	for (const rate of request.fx ?? []) {
+	const fx = request.fx ?? [];
+	require(Array.isArray(fx), "fx must be an array");
+	for (const rate of fx) {
 		require(isObject(rate), "Each FX rate must be an object");
+		keys(rate, ["currency", "date", "rateToBase"], "FX rate");
 		currency(rate.currency, "FX currency");
-		date(rate.date, `FX ${rate.currency}: date`);
-		require(typeof rate.rateToBase === "number" &&
-			Number.isFinite(rate.rateToBase) &&
-			rate.rateToBase >
-				0, `FX ${rate.currency} on ${rate.date} must be a positive number`);
+		date(rate.date, "FX date");
+		marketValue(
+			rate.rateToBase,
+			"FX rate for " + rate.currency + " on " + rate.date,
+		);
 	}
 }

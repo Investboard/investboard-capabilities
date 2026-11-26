@@ -29,6 +29,8 @@ The example also checks a [partial schedule](#partial-schedules): adding a goal 
 
 ## Use it in your project
 
+Install a versioned tarball from [GitHub Releases](https://github.com/Investboard/investboard-capabilities/releases), or build an archive from this checkout.
+
 Build and pack from this checkout:
 
 ```sh
@@ -43,7 +45,7 @@ Install the generated archive in your project:
 npm install /path/to/investboard-capabilities/packages/goal-planning/investboard-goal-planning-0.2.0.tgz
 ```
 
-This is a source distribution with a package build configuration. It is not published to npm, and its snapshot is independent of Investboard's hosted API and saved plans.
+Goal cash snapshots use their own versioned contract, independent of Investboard's hosted API and saved plans.
 
 ```ts
 import {

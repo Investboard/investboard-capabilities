@@ -1,18 +1,12 @@
 /** Replaying saved analyses from their original inputs. */
 import { analyzePortfolio, METHODOLOGY_VERSION } from "./analyze.js";
 import type { PortfolioResult, PortfolioSnapshot } from "./types.js";
-import { PortfolioInputError } from "./validation.js";
+import { snapshotRequest } from "./input-data.js";
 
 export function replayPortfolioAnalysis(
 	snapshot: PortfolioSnapshot,
 ): PortfolioResult {
-	if (
-		typeof snapshot !== "object" ||
-		snapshot === null ||
-		snapshot.methodologyVersion !== METHODOLOGY_VERSION
-	)
-		throw new PortfolioInputError(
-			`This snapshot was saved with methodology ${String(snapshot?.methodologyVersion)}; this version replays ${METHODOLOGY_VERSION}. Use the original package for historical replay, or explicitly call analyzePortfolio(snapshot.request) for a new evaluation; do not relabel the saved snapshot`,
-		);
-	return analyzePortfolio(snapshot.request);
+	return analyzePortfolio(
+		snapshotRequest(snapshot, METHODOLOGY_VERSION, "analyzePortfolio"),
+	);
 }

@@ -16,7 +16,8 @@
 		"format": "biome format --write .",
 		"format:check": "biome format .",
 		"example:research": "pnpm --filter @investboard/instrument-research build && node packages/instrument-research/examples/research.mjs",
-		"example:intelligence": "pnpm --filter @investboard/portfolio-intelligence build && node packages/portfolio-intelligence/examples/look-through.mjs"
+		"example:intelligence": "pnpm --filter @investboard/portfolio-intelligence build && node packages/portfolio-intelligence/examples/look-through.mjs",
+		"release:check": "node scripts/check-release.mjs"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.13",
