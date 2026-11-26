@@ -31,7 +31,6 @@
 			"package": "@investboard/portfolio-intelligence",
 			"version": "0.6.0",
 			"tag": "portfolio-intelligence-v0.6.0",
-			"status": "planned",
 			"methodologies": [
 				"portfolio-intelligence-v6",
 				"weekly-common-sample-correlation-v4"

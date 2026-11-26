@@ -13,7 +13,7 @@ Start with **[portfolio look-through](packages/portfolio-intelligence)**, **[por
 In a project using Node 22 or newer, install the released Portfolio Intelligence package and analyze a synthetic holding:
 
 ```sh
-npm install https://github.com/Investboard/investboard-capabilities/releases/download/capabilities-2026-11-26/investboard-portfolio-intelligence-0.5.0.tgz
+npm install https://github.com/Investboard/investboard-capabilities/releases/download/portfolio-intelligence-v0.6.0/investboard-portfolio-intelligence-0.6.0.tgz
 
 node --input-type=module <<'JS'
 import { analyzePortfolio } from "@investboard/portfolio-intelligence";

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.0 (unreleased)
+## 0.6.0 (2026-11-27)
 
 - Group duplicate disclosures of one constituent ISIN before choosing its listing symbol. Conflicting symbols leave the listing unresolved, and the combined weight still contributes to exposure and overlap.
 - Use the same validated fund identity for folding, residuals, and overlap. Malformed fund ISINs fall back to ticker identity.
