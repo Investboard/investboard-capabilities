@@ -55,7 +55,9 @@ export interface CurrencyQualification {
 	basis:
 		| "caller_supplied_listing_denomination"
 		| "country_proxy_with_name_hedge_assumption";
-	methodologyVersion: "listing-denomination-v1" | "country-name-currency-proxy-v1";
+	methodologyVersion:
+		| "listing-denomination-v1"
+		| "country-name-currency-proxy-v1";
 	independentlyVerified: false;
 	hedgePolicy: "not_verified";
 	stressUse: "ineligible";
@@ -71,7 +73,10 @@ export interface ReportedCurrencyHolding {
 	weight: number;
 	/** Exact caller evidence, including explicitly reported zero exposures. */
 	evidence: HoldingCurrencyEvidence | null;
-	method: "source_backed_unhedged" | "source_backed_full_hedge_model" | "unknown";
+	method:
+		| "source_backed_unhedged"
+		| "source_backed_full_hedge_model"
+		| "unknown";
 	reasonCodes: string[];
 	buckets: Bucket[];
 	/** Source-backed is not independently verified by this module. No stress input is emitted. */
@@ -267,9 +272,14 @@ export interface PortfolioResult {
 			nameInferredHedgeWeight: number;
 			/** Name hints only. Unknown source date and hedge ratio stay null. */
 			nameInferredHedges: Array<{
-				id: string; name: string; isin: string | null;
-				targetCurrency: string | null; weight: number;
-				basis: "fund_name_inference"; sourceAsOf: null; hedgeRatio: null;
+				id: string;
+				name: string;
+				isin: string | null;
+				targetCurrency: string | null;
+				weight: number;
+				basis: "fund_name_inference";
+				sourceAsOf: null;
+				hedgeRatio: null;
 			}>;
 		};
 		/** Separate source-backed model; never filled from countries, names or listing currency. */

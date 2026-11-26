@@ -20,9 +20,13 @@ describe("parseCsv", () => {
 
 describe("buildRequestFromCsv", () => {
 	it("refuses unknown listing denomination instead of declaring the portfolio base", () => {
-		expect(() => buildRequestFromCsv(
-			"as_of,base_currency,holding_id,holding_type,portfolio_weight_pct,asset_class\n2026-10-30,EUR,a,stock,100,equities\n", null, null,
-		)).toThrow(/listing_currency.*valuation unit/);
+		expect(() =>
+			buildRequestFromCsv(
+				"as_of,base_currency,holding_id,holding_type,portfolio_weight_pct,asset_class\n2026-10-30,EUR,a,stock,100,equities\n",
+				null,
+				null,
+			),
+		).toThrow(/listing_currency.*valuation unit/);
 	});
 	it("builds the example request", () => {
 		const request = buildRequestFromCsv(

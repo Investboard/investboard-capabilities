@@ -53,25 +53,41 @@ console.log(
 );
 assert.equal(pair.overlap.toFixed(2), "0.76");
 
-console.log("Currency estimate qualification:", result.dimensions.economicCurrency.qualification);
-console.log("Source-backed currency status:", result.dimensions.reportedEconomicCurrency.status);
-assert.equal(result.dimensions.economicCurrency.qualification.stressUse, "ineligible");
+console.log(
+	"Currency estimate qualification:",
+	result.dimensions.economicCurrency.qualification,
+);
+console.log(
+	"Source-backed currency status:",
+	result.dimensions.reportedEconomicCurrency.status,
+);
+assert.equal(
+	result.dimensions.economicCurrency.qualification.stressUse,
+	"ineligible",
+);
 assert.equal(result.dimensions.reportedEconomicCurrency.status, "unavailable");
 
 // Synthetic caller-source evidence is separate from the country/name estimate.
 const sourced = structuredClone(world.request);
 sourced.holdings[0].currencyEvidence = {
-  exposure: {
-    basis: "reported_economic_exposure",
-    source: { reference: "synthetic:exposure", asOf: "2026-09-30" },
-    buckets: [{ key: "EUR", weight: 0 }, { key: "JPY", weight: 0.75 }],
-  },
-  hedge: {
-    basis: "reported_hedge_policy", status: "unhedged",
-    source: { reference: "synthetic:policy", asOf: "2026-09-30" },
-  },
+	exposure: {
+		basis: "reported_economic_exposure",
+		source: { reference: "synthetic:exposure", asOf: "2026-09-30" },
+		buckets: [
+			{ key: "EUR", weight: 0 },
+			{ key: "JPY", weight: 0.75 },
+		],
+	},
+	hedge: {
+		basis: "reported_hedge_policy",
+		status: "unhedged",
+		source: { reference: "synthetic:policy", asOf: "2026-09-30" },
+	},
 };
-console.log("Source-backed model (not independently verified):", analyzePortfolio(sourced).dimensions.reportedEconomicCurrency);
+console.log(
+	"Source-backed model (not independently verified):",
+	analyzePortfolio(sourced).dimensions.reportedEconomicCurrency,
+);
 
 const { hhi, effectiveIssuers, attributedCoverage } = result.concentration;
 console.log(

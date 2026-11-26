@@ -3,8 +3,14 @@
  * with direct holdings, and the exposures, overlap, concentration and coverage
  * measured on it. The order of work follows Investboard's X-Ray.
  */
-import { currencyQualification, reportedCurrencyDimension } from "./currency-evidence.js";
-import { isEquityAxisDirect, isEquityAxisEtf } from "./internal/xray/equity-axis.js";
+import {
+	currencyQualification,
+	reportedCurrencyDimension,
+} from "./currency-evidence.js";
+import {
+	isEquityAxisDirect,
+	isEquityAxisEtf,
+} from "./internal/xray/equity-axis.js";
 import { measureConcentration } from "./internal/concentration/measure.js";
 import { classificationGate } from "./internal/coverage/classification-gate.js";
 import {
@@ -133,7 +139,11 @@ function emptyResult(
 				nameInferredHedgeWeight: 0,
 				nameInferredHedges: [],
 			},
-			reportedEconomicCurrency: reportedCurrencyDimension(request, new Set<string>(), 0),
+			reportedEconomicCurrency: reportedCurrencyDimension(
+				request,
+				new Set<string>(),
+				0,
+			),
 		},
 		overlap: [],
 		concentration: {
@@ -192,7 +202,8 @@ export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 		resolveFundInput(h, fundInputs.get(h.id), overrides),
 	);
 	const etfInputs = applyProfilesToFunds(
-		mergeEtfInputsByFund(resolvedFunds), profiles,
+		mergeEtfInputsByFund(resolvedFunds),
+		profiles,
 	);
 	const direct = toEngineDirectHoldings(directHoldings, profiles);
 	const { exposures, dissolutions } = dissolveEtfs(etfInputs);
@@ -250,10 +261,18 @@ export function analyzePortfolio(input: PortfolioRequest): PortfolioResult {
 		})),
 		dimensions: {
 			...dimensions,
-			reportedEconomicCurrency: reportedCurrencyDimension(request, new Set([
-				...fundHoldings.filter((_, i) => isEquityAxisEtf(resolvedFunds[i]!)).map((h) => h.id),
-				...directHoldings.filter((h) => isEquityAxisDirect(h)).map((h) => h.id),
-			]), valuedTotal),
+			reportedEconomicCurrency: reportedCurrencyDimension(
+				request,
+				new Set([
+					...fundHoldings
+						.filter((_, i) => isEquityAxisEtf(resolvedFunds[i]!))
+						.map((h) => h.id),
+					...directHoldings
+						.filter((h) => isEquityAxisDirect(h))
+						.map((h) => h.id),
+				]),
+				valuedTotal,
+			),
 		},
 		overlap: pairs.map((p) => toOverlap(p, holdingOf)),
 		concentration,
