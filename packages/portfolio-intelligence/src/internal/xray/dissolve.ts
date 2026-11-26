@@ -4,7 +4,8 @@ import {
 	isNeverLookedThroughClass,
 	normalizeAssetClass,
 } from "./asset-class.js";
-import { positionIdentity, RESIDUAL_ID_PREFIX } from "./identity.js";
+import { fundIdentity } from "./fund-key.js";
+import { RESIDUAL_ID_PREFIX } from "./identity.js";
 import type {
 	DissolvedExposure,
 	EngineEtfInput,
@@ -85,7 +86,7 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 	const ambiguousTickers = new Set<string>();
 	for (const etf of etfs) {
 		const ticker = etf.ticker.trim().toUpperCase();
-		const id = positionIdentity(etf.isin, ticker) ?? ticker;
+		const id = fundIdentity(etf) ?? ticker;
 		if (fundByTicker.has(ticker) && fundByTicker.get(ticker) !== id)
 			ambiguousTickers.add(ticker);
 		fundByTicker.set(ticker, id);
@@ -93,6 +94,8 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 	for (const etf of holdNeverLookedThroughFundsWhole(etfs)) {
 		const constituentClass = fundAssetClass(etf);
 		const { entries, covered } = constituentWeights(etf.constituents);
+		const ticker = etf.ticker.trim().toUpperCase();
+		const fundId = fundIdentity(etf) ?? undefined;
 		for (const v of entries.values()) {
 			const w = v.weight;
 			exposures.push({
@@ -102,7 +105,7 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 				name: v.name,
 				value: etf.value * w,
 				assetClass: constituentClass,
-				fundId: positionIdentity(etf.isin, etf.ticker) ?? undefined,
+				fundId,
 				etf: etf.ticker,
 				fundName: etf.name,
 				shareInEtf: w,
@@ -117,9 +120,8 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 					: "partial";
 		const uncoveredValue = etf.value * (1 - covered);
 		if (uncoveredValue > 0) {
-			const ticker = etf.ticker.trim().toUpperCase();
 			const residualKey = ambiguousTickers.has(ticker)
-				? positionIdentity(etf.isin, ticker)
+				? (fundId ?? ticker)
 				: ticker;
 			exposures.push({
 				id: `${RESIDUAL_ID_PREFIX}${residualKey}`,
@@ -128,7 +130,7 @@ export function dissolveEtfs(etfs: EngineEtfInput[]): {
 				name: etf.name,
 				value: uncoveredValue,
 				assetClass: constituentClass,
-				fundId: positionIdentity(etf.isin, etf.ticker) ?? undefined,
+				fundId,
 				etf: etf.ticker,
 				fundName: etf.name,
 				shareInEtf: 1 - covered,

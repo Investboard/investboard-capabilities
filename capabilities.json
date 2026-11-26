@@ -59,19 +59,26 @@
 		{
 			"id": "portfolio-intelligence",
 			"name": "Portfolio look-through and diversification",
-			"version": "0.5.0",
+			"version": "0.6.0",
 			"package": "@investboard/portfolio-intelligence",
 			"path": "packages/portfolio-intelligence",
 			"license": "Apache-2.0",
-			"methodologyVersion": "portfolio-intelligence-v5",
+			"methodologyVersion": "portfolio-intelligence-v6",
 			"description": "See what a portfolio really owns: look through equity funds, qualify currency proxies separately from source-backed evidence, measure exposures, fund overlap, company concentration and coverage, read historical correlations, and replay saved analyses.",
 			"documentation": "packages/portfolio-intelligence/README.md",
 			"appParity": {
-				"scope": "Historical v2 numeric corpus only",
+				"scope": "Local standalone comparison with the app’s X-Ray and EUR Diversification calculations on synthetic inputs. All 12 cases passed for the 0.6.0 candidate.",
 				"app": "investboard",
-				"commit": "6c48b02978b712a45b9b79481666c8f7e3b31ef0"
+				"commit": "cfc3f136c9c96e23440c03e2ab1b4032d2201d46",
+				"previous": [
+					{
+						"scope": "Historical v2 numeric corpus only",
+						"app": "investboard",
+						"commit": "6c48b02978b712a45b9b79481666c8f7e3b31ef0"
+					}
+				]
 			},
-			"correlationMethodologyVersion": "weekly-common-sample-correlation-v3"
+			"correlationMethodologyVersion": "weekly-common-sample-correlation-v4"
 		}
 	]
 }

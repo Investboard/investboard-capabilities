@@ -32,7 +32,11 @@ describe("readDiversification", () => {
 			readDiversification(oneYearBook(), ANCHOR).windows.find(
 				(w) => w.window === "3y",
 			),
-		).toEqual({ window: "3y", status: "insufficient_history" });
+		).toEqual({
+			window: "3y",
+			status: "insufficient_history",
+			reason: "short_history",
+		});
 	});
 	it("counts H into the block over one year and outside it over five", () => {
 		const one = byWindow.get("1y")!;

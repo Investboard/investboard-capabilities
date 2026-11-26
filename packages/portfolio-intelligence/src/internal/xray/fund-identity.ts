@@ -1,13 +1,10 @@
 /** One fund per ISIN: folding the same fund held at several accounts into one input. */
-import { isIsinShape } from "../isin.js";
+import { constituentWeights } from "./constituent-weights.js";
+import { normalisedIsin } from "./fund-key.js";
 import { holdNeverLookedThroughFundsWhole } from "./dissolve.js";
 import { positionIdentity } from "./identity.js";
 import type { EngineEtfInput } from "./types.js";
-export function fundIdentity(
-	etf: Pick<EngineEtfInput, "isin" | "ticker">,
-): string | null {
-	return positionIdentity(normalisedIsin(etf.isin), etf.ticker);
-}
+export { fundIdentity } from "./fund-key.js";
 function isinKeyOf(etf: Pick<EngineEtfInput, "isin">): string | null {
 	return positionIdentity(normalisedIsin(etf.isin), null);
 }
@@ -67,9 +64,7 @@ function looksThrough(etf: EngineEtfInput): boolean {
 	return !etf.degraded && etf.constituents.length > 0;
 }
 function coverageOf(etf: EngineEtfInput): number {
-	let sum = 0;
-	for (const c of etf.constituents) if (c.weight > 0) sum += c.weight;
-	return Math.min(sum, 1);
+	return constituentWeights(etf.constituents).covered;
 }
 function bySpelling(a: EngineEtfInput, b: EngineEtfInput): number {
 	if (a.ticker.length !== b.ticker.length)
@@ -112,10 +107,6 @@ function firstPresent<T>(
 		if (present(value)) return value;
 	}
 	return null;
-}
-function normalisedIsin(isin: string | null | undefined): string | null {
-	const value = isin?.trim().toUpperCase();
-	return value && isIsinShape(value) ? value : null;
 }
 export function mergeEtfInputsByFund(
 	etfs: readonly EngineEtfInput[],
