@@ -32,9 +32,9 @@ describe("parity corpus", () => {
 	});
 
 	for (const book of books) {
-		it(`${book.name}: analyzes with conserved weights and no NaN`, () => {
+		it(`${book.name}: analyzes with conserved weights and finite figures`, () => {
 			const result = analyzePortfolio(book.request);
-			expect(JSON.stringify(result)).not.toContain("NaN");
+			expect(JSON.parse(JSON.stringify(result))).toStrictEqual(result);
 			const positions = result.positions.reduce((s, p) => s + p.weight, 0);
 			const basis = result.basis.reduce((s, b) => s + b.weight, 0);
 			expect(positions).toBeCloseTo(1, 6);

@@ -8,6 +8,34 @@ Start with **[portfolio look-through](packages/portfolio-intelligence)**, **[por
 
 **[Run the examples](#try-it-with-your-own-code)** · **[Explore the modules](#available-modules)**
 
+## Quick start
+
+In a project using Node 22 or newer, install the released Portfolio Intelligence package and analyze a synthetic holding:
+
+```sh
+npm install https://github.com/Investboard/investboard-capabilities/releases/download/capabilities-2026-11-26/investboard-portfolio-intelligence-0.5.0.tgz
+
+node --input-type=module <<'JS'
+import { analyzePortfolio } from "@investboard/portfolio-intelligence";
+
+const result = analyzePortfolio({
+  asOf: "2026-01-02",
+  baseCurrency: "EUR",
+  holdings: [{
+    id: "cash",
+    kind: "cash",
+    name: "Synthetic cash",
+    value: 100,
+    listingCurrency: "EUR",
+    assetClass: "cash"
+  }]
+});
+console.log(result.basis); // [{ key: "cash", value: 100, weight: 1 }]
+JS
+```
+
+[Download the other packages](https://github.com/Investboard/investboard-capabilities/releases/tag/capabilities-2026-11-26) · [Replay a saved calculation](#replay-a-saved-calculation)
+
 ## Methodology and evidence
 
 Read [how Investboard measures portfolios](https://investboard.com/knowledge/methodology): valuation scope, returns, concentration, risk, mandate scores, costs, German tax assumptions, projections, stress scenarios and the boundary between calculations and AI explanations. The reference includes formulas, labeled examples, data limitations and primary sources.
@@ -73,9 +101,9 @@ Run the synthetic GBP/CHF example with `pnpm example:research`. See the [API, ev
 
 ## See what your portfolio really owns
 
-The [portfolio look-through module](packages/portfolio-intelligence) is the calculation behind Investboard's X-Ray and Diversification view. Supply your holdings and the constituent lists of your funds to see each company's share of your whole portfolio, held directly and through each fund. Measure exposures by asset class, sector, country, region and currency, the overlap between funds, and concentration in single companies with explicit bounds. Supply price history to read how your holdings moved together over 1, 3, 5 and 10 years.
+The [portfolio look-through module](packages/portfolio-intelligence) is adapted from Investboard's X-Ray and Diversification engines. Supply your holdings and the constituent lists of your funds to see each company's share of your whole portfolio, held directly and through each fund. Measure exposures by asset class, sector, country, region and currency, the overlap between funds, and concentration in single companies with explicit bounds. Supply price history to read how your holdings moved together over 1, 3, 5 and 10 years.
 
-Only equity funds are looked through: cash, bond, gold and crypto funds stay whole in their class. Funds without a list, unvalued holdings and unclassified companies remain visible as missing data. A parity check holds the module's figures equal to Investboard's own engine on seven synthetic portfolios.
+Only equity funds are looked through: cash, bond, gold and crypto funds stay whole in their class. Funds without a list, unvalued holdings and unclassified companies remain visible as missing data. The recorded app parity check covers the v2 numeric corpus of seven synthetic portfolios. The catalogue pins the Investboard app commit used for that check.
 
 Run the synthetic example with `pnpm example:intelligence`. See the [API, look-through rules and replay](packages/portfolio-intelligence/README.md), or let an AI agent run it with the [Portfolio Intelligence engine skill](skills/portfolio-intelligence-engine).
 
@@ -92,7 +120,11 @@ pnpm example
 
 The examples use synthetic data. Stress testing shows why two quote currencies do not automatically imply two economic exposures. Rebalancing shows how new cash can reach a target allocation, how per-depot tax changes funding, and why contributions below a trade minimum remain cash. Performance separates historical price and quote-FX effects. Goal scheduling shows how payment timing changes the required cash buffer and contribution funding. Instrument research retains exact listing identity and reported currency while comparing supplied price and FX histories. Portfolio look-through shows one company held directly and through two overlapping funds, and keeps a fund without a list visible as missing data. All six examples replay their original inputs.
 
-Ready to add a capability to your own engine? **[Build the stress-testing module](packages/stress-test/README.md#use-it-in-your-project)**, **[build the rebalancing module](packages/rebalancing/README.md#use-it-in-your-project)**, **[build the performance module](packages/performance/README.md#use-it-in-your-project)**, **[build the goal-planning module](packages/goal-planning/README.md#use-it-in-your-project)** **[build the research module](packages/instrument-research/README.md#use-it-in-your-project)** or **[build the look-through module](packages/portfolio-intelligence/README.md#use-it-in-your-project)**, then supply the data and assumptions that fit your workflow.
+Ready to add a capability to your own engine? **[Build the stress-testing module](packages/stress-test/README.md#use-it-in-your-project)**, **[build the rebalancing module](packages/rebalancing/README.md#use-it-in-your-project)**, **[build the performance module](packages/performance/README.md#use-it-in-your-project)**, **[build the goal-planning module](packages/goal-planning/README.md#use-it-in-your-project)**, **[build the research module](packages/instrument-research/README.md#use-it-in-your-project)** or **[build the look-through module](packages/portfolio-intelligence/README.md#use-it-in-your-project)**, then supply the data and assumptions that fit your workflow.
+
+## Replay a saved calculation
+
+Find the saved snapshot's exact `methodologyVersion` in the [release index](releases.json). The entry gives the package version, GitHub release tag and source commit for archived packages. Download the matching `.tgz` from [GitHub Releases](https://github.com/Investboard/investboard-capabilities/releases), install it with `npm install ./<archive>.tgz`, then call the package's replay function with the saved snapshot. Use a separate project when you need an older package version alongside the current one.
 
 ## Available modules
 

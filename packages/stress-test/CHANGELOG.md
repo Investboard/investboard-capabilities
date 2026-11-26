@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 (unreleased)
+## 0.3.0 (2026-11-26)
 
 - The wealth bound is per reporting currency: `maxSupportedWealth(baseCurrency)` returns 1 billion units, and 100 billion for JPY, whose unit is worth about a hundredth of the others; a billion yen (about EUR 6 million) would otherwise refuse ordinary portfolios. `MAX_SUPPORTED_WEALTH` keeps the 1 billion bound. v5 replay is unchanged (it reports in EUR or USD only).
 - Crypto takes the scenario's shares figure where a scenario names no crypto figure. Nine built-in scenarios (`gfc_2008`, `dotcom_2000`, `black_monday_1987`, `gulf_war_1990`, `bond_massacre_1994`, `asian_crisis_1997`, `russia_ltcm_1998`, `september_2001`, `euro_crisis_2011`) carried a crypto figure of 0 that was not a measured move (crypto did not exist in eight of those windows); they now name none and say so in their methodology. In `gfc_2008`, EUR 10,000 of crypto now ends at EUR 4,300 (the -0.57 shares figure) instead of staying at EUR 10,000. The stand-in is reported as `asset_class_default`, a scenario assumption, never direct history. The six scenarios with their own crypto move keep it, and a crypto figure a scenario names is always read first.

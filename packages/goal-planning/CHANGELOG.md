@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0 (unreleased)
+## 0.2.0 (2026-11-26)
 
 - Schedule the goals that have what the ledger needs and leave out the rest, instead of withholding the whole ledger. A goal with an unknown deadline or monthly contribution, a passed deadline, a deadline before the first monthly savings date, or requests beyond the supported range is left out. The result lists each one in the new optional `leftOutGoals` field with its reasons; the field is absent when every goal is scheduled.
 - A schedule that leaves a goal out returns `status: "incomplete"` with the first reason code `partial_schedule_goals_left_out`, and keeps the exact-cent ledger for the scheduled goals. `partial_schedule_constrained` marks an underfunded request, late payment or breached reserve within that ledger. A missing declaration still withholds the whole ledger, and `leftOutGoals` still names the goals it would have left out.

@@ -1,11 +1,23 @@
-import { readFileSync } from "node:fs";
+import {
+	existsSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	statSync,
+	symlinkSync,
+} from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { analyzePortfolio } from "../../../packages/portfolio-intelligence/src/index.js";
-import { mkdtempSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { pathToFileURL } from "node:url";
-import { buildRequestFromCsv, isEntry, parseCsv, summarize } from "./run.mjs";
+import {
+	buildRequestFromCsv,
+	isEntry,
+	parseCsv,
+	saveAnalysis,
+	summarize,
+} from "./run.mjs";
 
 const examples = join(import.meta.dirname, "..", "examples");
 const read = (name: string) => readFileSync(join(examples, name), "utf8");
@@ -92,7 +104,7 @@ describe("buildRequestFromCsv", () => {
 				null,
 				null,
 			),
-		).toThrow(/base currency/i);
+		).toThrow(/base_currency/i);
 	});
 
 	it("runs the example end to end and summarizes the engine's figures", () => {
@@ -266,4 +278,50 @@ describe("isEntry", () => {
 		expect(isEntry(link, pathToFileURL(real).href)).toBe(true);
 		expect(isEntry(undefined, pathToFileURL(real).href)).toBe(false);
 	});
+});
+
+it.each([
+	["", /one as_of/],
+	["2026-09-30", /one as_of/],
+	["2026-11-30", /after the portfolio/],
+	["2026-02-30", /valid YYYY-MM-DD/],
+])("requires a consistent, explicit fund date (%s)", (date, message) => {
+	const header = "as_of,fund_id,company_id,company_name,fund_weight_pct\n";
+	const first = date === "2026-09-30" ? "2026-09-29" : date;
+	const data = header + first + ",world,A,A,50\n" + date + ",world,B,B,50\n";
+	expect(() => buildRequestFromCsv(read("portfolio.csv"), data, null)).toThrow(
+		message,
+	);
+});
+
+it("keeps the replay request out of result.json and writes private exports on request", () => {
+	const request = buildRequestFromCsv(
+		read("portfolio.csv"),
+		read("fund-holdings.csv"),
+		null,
+	);
+	const result = analyzePortfolio(request);
+	const temp = mkdtempSync(join(tmpdir(), "portfolio-private-export-"));
+	try {
+		const summary = join(temp, "result-only");
+		saveAnalysis(summary, result, false);
+		expect(existsSync(join(summary, "snapshot.json"))).toBe(false);
+		expect(
+			JSON.parse(readFileSync(join(summary, "result.json"), "utf8")),
+		).not.toHaveProperty("snapshot");
+		expect(() => saveAnalysis(summary, result, true)).toThrow(/EEXIST/);
+		expect(existsSync(join(summary, "snapshot.json"))).toBe(false);
+
+		const replay = join(temp, "with-replay");
+		const files = saveAnalysis(replay, result, true);
+		expect(
+			JSON.parse(readFileSync(join(replay, "snapshot.json"), "utf8")),
+		).toEqual(result.snapshot);
+		if (process.platform !== "win32") {
+			expect(statSync(replay).mode & 0o777).toBe(0o700);
+			for (const file of files) expect(statSync(file).mode & 0o777).toBe(0o600);
+		}
+	} finally {
+		rmSync(temp, { recursive: true, force: true });
+	}
 });

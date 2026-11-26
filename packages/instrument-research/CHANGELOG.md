@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 (unreleased)
+## 0.3.0 (2026-11-26)
 
 - Use the measured Pearson coefficient for Fisher intervals, including the limits at −1 and 1. New calculations pin `instrument-research-v3`. Replay of v1 and v2 snapshots preserves their historical interval calculation.
 

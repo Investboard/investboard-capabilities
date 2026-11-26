@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.5.0 (unreleased)
+## 0.5.0 (2026-11-26)
 
 - Choose the holding that receives a class purchase by rank: a usable price first, then a fund or ETF before a single share, then the larger value, then the smaller holding ID. Holdings gain optional `fund` and `priced` booleans; a holding without them ranks with unpriced single shares, so requests without declarations keep buying the largest holding.
 - Consolidate generated contribution amounts that fall below the smallest order a class's accounts admit into the fewest orders that move the book toward target, instead of leaving them as cash. An order may no longer cost what it buys: an account whose known buy fee is at least the order amount does not admit it.

@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.4.0 (unreleased)
+## 0.5.0 (2026-11-26)
+
+- Portfolio intelligence v5 rejects future-dated fund and index disclosures. The CSV runner requires one real disclosure date per fund and keeps replay input export opt-in.
+- Portfolio intelligence v5 and weekly correlation v3 retain only documented, bounded JSON inputs. Correlation rejects out-of-range prices and FX. Successful results preserve finite numbers through JSON serialization.
+- Use the [release index](../../releases.json) to replay older snapshots with a versioned package archive.
+
+## 0.4.0 (replay archive)
 
 - Use effective fund weights consistently for holdings, classification and overlap. Keep the residuals of distinct same-ticker funds separate. Honor caller-supplied issuer identities and include every contributing row in issuer exposures.
 - Retain the measured coefficient inside Fisher intervals for near-perfect and perfect pairs.
@@ -8,7 +14,7 @@
 - Weekly correlation v2 measures two or more eligible holdings. An unknown holding value withholds weighted book figures while dated observed pairs remain available. The near-zero correlation band is named `low_linear`.
 - Replay older snapshots with the original methodology version.
 
-## 0.3.0 (unreleased)
+## 0.3.0 (replay archive)
 
 Methodology `portfolio-intelligence-v3`. Currency interpretation is now part of the machine-readable contract.
 
@@ -20,7 +26,7 @@ Methodology `portfolio-intelligence-v3`. Currency interpretation is now part of 
 - New regressions, updated parity assertions, examples, types and formatting checks are UNRUN under the founder’s no-run instruction. Prior v2 receipts do not validate this version.
 
 
-## 0.2.0 (unreleased)
+## 0.2.0 (replay archive)
 
 Follows Investboard's X-Ray after its asset-class line was aligned with the dashboard. Methodology `portfolio-intelligence-v2`; a `v1` snapshot is refused rather than replayed to different figures.
 
@@ -29,6 +35,6 @@ Follows Investboard's X-Ray after its asset-class line was aligned with the dash
 - A fund whose reported class is `real_estate` counts as equities: an ETF of real-estate companies is a stock fund, and the class real estate is kept for holdings that own buildings.
 - Security profiles are matched per position, not per ISIN, so the two class parts of one company are classified independently.
 
-## 0.1.0 (unreleased)
+## 0.1.0 (replay archive)
 
 Initial standalone source package: equity look-through of funds with the equities-only rule, merged positions with provenance, basis by holding, sector, country, region, listing and economic currency dimensions, fund-pair overlap, issuer concentration with bounds, coverage and fund treatment, the weekly correlation matrix over 1, 3, 5 and 10 years, seven synthetic parity portfolios, and JSON replay.

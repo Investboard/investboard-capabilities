@@ -33,6 +33,8 @@ node skills/portfolio-intelligence-engine/scripts/run.mjs \
 
 Every portfolio CSV row must state its reported `listing_currency`; base currency is not a substitute. Currency estimates carry machine-readable proxy qualification. Use JSON for dated source-backed currency evidence; see the package README.
 
+Use one explicit disclosure date per fund across its constituent rows, on or before the portfolio date. The runner prints a summary by default. With `--out`, it saves `result.json` without the replay request in a new private directory. Add `--export-snapshot` to save `snapshot.json` with the original input. Choose a new output directory for each export.
+
 The example files are synthetic. One fund has no constituent list, so the result is partial and says so.
 
 ## Related

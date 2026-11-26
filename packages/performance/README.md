@@ -21,7 +21,9 @@ The example values one synthetic USD fund in GBP. USD100 to USD110 with GBP-per-
 
 ## Use it in your project
 
-This module is distributed as source in this repository. It is not published to the npm registry. Build and pack it:
+Install a versioned tarball from [GitHub Releases](https://github.com/Investboard/investboard-capabilities/releases), or build an archive from this checkout.
+
+Build and pack from the repository root:
 
 ```sh
 pnpm --filter @investboard/performance build

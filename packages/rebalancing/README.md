@@ -19,6 +19,8 @@ The synthetic example shows a contribution reaching a 60/40 target, a transfer c
 
 ## Use it in your project
 
+Install a versioned tarball from [GitHub Releases](https://github.com/Investboard/investboard-capabilities/releases), or build an archive from this checkout.
+
 ```sh
 pnpm build
 cd packages/rebalancing
@@ -31,7 +33,7 @@ Install the generated tarball in your project:
 npm install /path/to/investboard-capabilities/packages/rebalancing/investboard-rebalancing-0.5.0.tgz
 ```
 
-This is a source distribution and buildable package, not a published npm release or an Investboard hosted API. Normal `npm pack` rebuilds JavaScript and declarations from source.
+Normal `npm pack` rebuilds JavaScript and declarations from source.
 
 ## Declare your host policy
 
